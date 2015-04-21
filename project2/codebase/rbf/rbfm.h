@@ -1,4 +1,3 @@
-
 #ifndef _rbfm_h_
 #define _rbfm_h_
 
@@ -7,8 +6,27 @@
 
 #include "../rbf/pfm.h"
 
+#define INT_SIZE				4
+#define REAL_SIZE				4
+#define VARCHAR_LENGTH_SIZE		4
+
 using namespace std;
 
+// Slot directory structure.
+
+typedef struct
+{
+  unsigned freeSpaceOffset;
+  unsigned recordEntriesNumber;
+} SlotDirectoryHeader;
+
+typedef struct
+{
+  unsigned length;
+  int offset;	// TODO (project 2?) Offset = -1 means deleted record
+} SlotDirectoryRecordEntry;
+
+typedef SlotDirectoryRecordEntry* SlotDirectory;
 
 // Record ID
 typedef struct
@@ -131,6 +149,20 @@ protected:
 
 private:
   static RecordBasedFileManager *_rbf_manager;
+  static PagedFileManager *_pf_manager;
+
+  // Auxiliary methods.
+
+  void newRecordBasedPage(void * page);
+
+  SlotDirectoryHeader getSlotDirectoryHeader(void * page);
+  void setSlotDirectoryHeader(void * page, SlotDirectoryHeader slotHeader);
+
+  SlotDirectoryRecordEntry getSlotDirectoryRecordEntry(void * page, unsigned recordEntryNumber);
+  void setSlotDirectoryRecordEntry(void * page, unsigned recordEntryNumber, SlotDirectoryRecordEntry recordEntry);
+
+  unsigned getPageFreeSpaceSize(void * page);
+  unsigned getRecordSize(const vector<Attribute> &recordDescriptor, const void *data);
 };
 
 #endif

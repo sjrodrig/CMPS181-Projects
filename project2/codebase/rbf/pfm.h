@@ -1,13 +1,20 @@
+#include <string>
+
 #ifndef _pfm_h_
 #define _pfm_h_
+
+using namespace std;
 
 typedef int RC;
 typedef unsigned PageNum;
 
-#define PAGE_SIZE 4096
+#define PAGE_SIZE 							4096
+#define PAGED_FILE_HEADER_STRING			"PAGED_FILE__"
+#define PAGED_FILE_HEADER_STRING_LENGTH		12
+
+#define SUCCESS								0
 
 class FileHandle;
-
 
 class PagedFileManager
 {
@@ -25,6 +32,9 @@ protected:
 
 private:
     static PagedFileManager *_pf_manager;
+
+    // Auxiliary methods.
+    bool FileExists(string fileName);
 };
 
 
@@ -38,6 +48,13 @@ public:
     RC writePage(PageNum pageNum, const void *data);                    // Write a specific page
     RC appendPage(const void *data);                                    // Append a specific page
     unsigned getNumberOfPages();                                        // Get the number of pages in the file
- };
+
+    // Auxiliary methods.
+    void setFileDescriptor(FILE * fileDescriptor);
+    FILE * getFileDescriptor();
+
+private:
+    FILE * _fileDescriptor;
+};
 
  #endif
