@@ -8,6 +8,8 @@
 
 using namespace std;
 
+RelationManager *rm;
+
 void rbfTest() {
   PagedFileManager *pfm = PagedFileManager::instance();
   RecordBasedFileManager *rbfm = RecordBasedFileManager::instance();
@@ -18,6 +20,8 @@ void rbfTest() {
 
 int main() {
 	cout << "test..." << endl;
+
+	rm = new RelationManager();
 
 	rbfTest();
 	// other tests go here

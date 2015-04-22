@@ -13,11 +13,20 @@
  * 
  */
 
-// Delete all records in a file.
-//--Do we delete the file?
+/**
+ * @Completed
+ * Delete all records in a file.
+ * The file should have "DELETED" at the beginning.
+ */
 int
 RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
-	
+	unsigned meta;
+	unsigned blankThis;
+	meta = fileHandle.writePage(blankThis, "DELETED");
+
+	for(; meta == 0; blankThis++) {
+		meta = fileHandle.writePage(blankThis, 0);
+	}
 }
 
 // Delete a record identified by the given rid.

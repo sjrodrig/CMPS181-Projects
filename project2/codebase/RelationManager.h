@@ -21,13 +21,13 @@ public:
 
 class RelationManager {
 private:
-	
+	string tables_table_name;
+	string columns_table_name;
 
 protected:
+public:
 	RelationManager();
 	~RelationManager();
-
-public:
 	int createTable(const string &tableName, const vector<Attribute> &attrs);
 	int deleteTable(const string &tableName);
 	int getAttributes(const string &tableName, vector<Attribute> &attrs);

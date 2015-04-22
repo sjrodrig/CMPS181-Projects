@@ -1,4 +1,27 @@
 #include "RelationManager.h"
+#include <fstream>
+
+using namespace std;
+
+//constructor
+RelationManager::RelationManager() {
+	
+	ifstream checkStream("sys_tables.tab");
+
+    if (checkStream.good()) {
+        //Nothing TODO
+    } else {
+		//make "sys_tables.tab"
+		ofstream maker1("sys_tables.tab");
+		ofstream maker2("sys_columns.tab");
+		
+		maker1.close();
+		maker2.close();
+    }
+
+    checkStream.close();
+	
+}
 
 //This method creates a table called tableName with a vector of attributes (attrs).
 int

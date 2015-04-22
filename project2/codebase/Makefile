@@ -37,12 +37,14 @@ clear:
 
 #recompile from scratch
 remake:
-	make clear
+	make purge
 	make all
 	clear
 
 purge:
 	make clear
+	rm -f sys_columns.tab
+	rm -f sys_tables.tab
 	clear
 
 
