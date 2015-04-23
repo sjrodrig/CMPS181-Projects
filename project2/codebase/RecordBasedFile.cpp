@@ -8,8 +8,8 @@
 #include "RecordBasedFile.h"
 
 /**
- * @modifyer: Benjamin (Benjy) Strauss
- *
+ * @modifier: Benjamin (Benjy) Strauss
+ * @modifier: Paul Mini
  * 
  */
 
@@ -21,12 +21,14 @@
 int
 RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
 	unsigned meta;
-	unsigned blankThis;
-	meta = fileHandle.writePage(blankThis, "DELETED");
+	unsigned blankThis = fileHandle.getNumberOfPages();
+	meta = fileHandle.writePage(blankThis, 0);
 
-	for(; meta == 0; blankThis++) {
+	for(; meta == 0 && blankThis != 0; blankThis--) {
 		meta = fileHandle.writePage(blankThis, 0);
 	}
+	// Write that zero entries are on the page, and then put the word "DELETED"
+	fileHandle.writePage(0, "\0\0\0\0DELETED");
 }
 
 // Delete a record identified by the given rid.
@@ -36,10 +38,51 @@ RecordBasedFileManager::deleteRecord(FileHandle &fileHandle, const vector<Attrib
 
 }
 
-// Update a record identified by the given rid.
+/**
+ * @Completed
+ * Update a record identified by the given rid.
+ * Return Values
+ * X where X > 0: insert failed
+ * -1 = can't read the page
+ * 
+ * -3 = can't write to the page
+ *
+ */
 int 
 RecordBasedFileManager::updateRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, const RID &rid) {
+	// Assume the rid does not change after update
+	void* newPage = malloc(PAGE_SIZE);
+	
+	deleteRecord(fileHandle, recordDescriptor, rid);
+	RID newRID;
+	int insertVal = insertRecord(fileHandle, recordDescriptor, data, newRID);
 
+	//insert failed
+	if(insertVal != SUCCESS) {
+		return insertVal;
+	}
+
+	if(newRID != rid) {
+		if(fileHandle.readPage(rid.pageNum, newPage) != SUCCESS) {
+			return -1;
+		}
+
+		//get the info from the file
+		SlotDirectoryRecordEntry mySDRE;
+		
+		mySDRE.recordEntryType = Tombstone;
+		mySDRE.tombStoneRID = newRID;
+
+		//set the lot SlotDirectoryRecordEntry to the new
+		setSlotDirectoryRecordEntry(newPage, rid.slotNum, mySDRE);
+
+		if(fileHandle.writePage(rid.pageNum, newPage) != SUCCESS) {
+			return -3;
+		}
+	}
+	
+	free(newPage);
+	return SUCCESS;
 }
 
 // Read an attribute given its name and the rid.
@@ -48,25 +91,28 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 
 }
 
-// Push the free space towards the end of the page.
-int
-RecordBasedFileManager::reorganizePage(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const unsigned pageNumber) {
 
-}
 
 // scan returns an iterator to allow the caller to go through the results one by one. 
 int
 RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RBFM_ScanIterator &rbfm_ScanIterator) {
 
 
-
-
 }
 
+// optional
+// Push the free space towards the end of the page.
+int
+RecordBasedFileManager::reorganizePage(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const unsigned pageNumber) {
+
+	return -1;
+}
+
+// optional
 // Reorganize the records in the file such that the records are collected towards the beginning of the file.
 int
 RecordBasedFileManager::reorganizeFile(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor) {
-
+	return -1;
 }
 
 
@@ -239,6 +285,7 @@ RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attrib
 
 	// Adding the new record reference in the slot directory.
 	SlotDirectoryRecordEntry newRecordEntry;
+	newRecordEntry.recordEntryType = alive;
 	newRecordEntry.length = recordSize;
 	newRecordEntry.offset = slotHeader.freeSpaceOffset - recordSize;
 	setSlotDirectoryRecordEntry(pageData, rid.slotNum, newRecordEntry);

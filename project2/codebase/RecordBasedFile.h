@@ -18,9 +18,13 @@ typedef unsigned AttrLength;
 using namespace std;
 
 // Record ID
-typedef struct {
+typedef struct R {
 	unsigned pageNum;
 	unsigned slotNum;
+
+	bool operator != (R r) {
+		return (pageNum != r.pageNum) || (slotNum != r.slotNum);
+	}
 } RID;
 
 typedef struct {
@@ -28,9 +32,17 @@ typedef struct {
   unsigned recordEntriesNumber;
 } SlotDirectoryHeader;
 
-typedef struct {
-  unsigned length;
-  int offset;	// TODO (project 2?) Offset = -1 means deleted record
+enum RecordEntryType {Alive, Dead, Tombstone};
+
+typedef struct SDRE {
+  enum RecordEntryType recordEntryType;
+  // A slot directory record entry can either contain:
+  // 1. Length and offset of the actual record, or
+  // 2. RID where the record was moved, in case of tombstone
+  union {
+	  struct {unsigned length; unsigned offset;};
+	  RID tombStoneRID;
+  };
 } SlotDirectoryRecordEntry;
 
 // Attribute
@@ -67,6 +79,7 @@ typedef enum {
  *  }
  *  rbfmScanIterator.close();*/
 
+//going to need to be fixed, wait to do
 class RBFM_ScanIterator {
 public:
 	RBFM_ScanIterator() {};

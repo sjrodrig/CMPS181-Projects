@@ -3,7 +3,11 @@
 
 using namespace std;
 
-//constructor
+/**
+ * constructor
+ *
+ * 
+ */
 RelationManager::RelationManager() {
 	
 	ifstream checkStream("sys_tables.tab");
@@ -20,8 +24,8 @@ RelationManager::RelationManager() {
     }
 
     checkStream.close();
-	
 }
+
 
 //This method creates a table called tableName with a vector of attributes (attrs).
 int
