@@ -21,7 +21,7 @@
 int
 RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
 	unsigned meta;
-	unsigned blankThis;
+	unsigned blankThis = 0;
 	meta = fileHandle.writePage(blankThis, "DELETED");
 
 	for(; meta == 0; blankThis++) {
@@ -34,6 +34,30 @@ int
 RecordBasedFileManager::deleteRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid) {
 	// Assume the rid does not change after update
 
+	// Allocate space for a new page and fetch data
+	void* newPage = malloc(PAGE_SIZE);
+	if(fileHandle.readPage(rid.pageNum, newPage) != SUCCESS){
+		return -1;
+	}
+
+	// Fetch Slot Directory Header 
+	SlotDirectoryHeader slot_header = getSlotDirectoryHeader(newPage);
+
+	// Make sure the desired slot is reachable
+	if (rid.slotNum > slot_header.recordEntriesNumber){
+		return -2;
+	}
+
+	// Create Dead Entry and Insert it
+	SlotDirectoryRecordEntry dead_entry;
+	dead_entry.recordEntryType = Dead;
+	setSlotDirectoryRecordEntry(newPage, rid.slotNum, dead_entry);
+
+	// Write to the page and free memory allocated
+	if (fileHandle.writePage(rid.pageNum, newPage) != SUCCESS){
+		return -3;
+	}
+	free(newPage);
 }
 
 // Update a record identified by the given rid.
