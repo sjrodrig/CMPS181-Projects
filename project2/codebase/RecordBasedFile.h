@@ -21,6 +21,10 @@ using namespace std;
 typedef struct {
 	unsigned pageNum;
 	unsigned slotNum;
+
+	bool operator != (R r) {
+		return (pageNum != r.pageNum) || (slotNum != r.slotNum);
+	}
 } RID;
 
 typedef struct {
