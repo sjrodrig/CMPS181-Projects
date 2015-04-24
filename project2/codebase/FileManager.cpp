@@ -134,6 +134,9 @@ PagedFileManager::FileExists(string fileName) {
     else { return false; }
 }
 
+/******************************************************************************
+ *								FileHandle Methods							  *
+ ******************************************************************************/
 
 FileHandle::FileHandle() {
 	_fileDescriptor = NULL;

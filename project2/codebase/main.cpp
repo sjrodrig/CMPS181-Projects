@@ -22,8 +22,23 @@ int main() {
 	cout << "test..." << endl;
 
 	rm = new RelationManager();
+	vector<Attribute> nullVec;
+
+	Attribute foo;
+	foo.name = "foo";
+	foo.length = 5;
+	foo.type = TypeVarChar;
+	nullVec.push_back(foo);
+
+	Attribute bar;
+	bar.name = "barq";
+	bar.length = 127;
+	bar.type = TypeVarChar;
+	nullVec.push_back(bar);
 
 	rbfTest();
+
+	rm->createTable("foo", nullVec);
 	// other tests go here
 
 	cout << "OK" << endl;

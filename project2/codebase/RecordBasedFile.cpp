@@ -297,35 +297,38 @@ unsigned RecordBasedFileManager::getRecordSize(const vector<Attribute> &recordDe
 	unsigned size = 0;
 	unsigned varcharSize = 0;
 
-	for (unsigned i = 0; i < (unsigned) recordDescriptor.size(); i++)
-		switch (recordDescriptor[i].type)
-		{
-			case TypeInt:
+	for (unsigned i = 0; i < (unsigned) recordDescriptor.size(); i++) {;
+		switch (recordDescriptor[i].type) {
+			case TypeInt: {
 				size += INT_SIZE;
-			break;
-			case TypeReal:
+			break; }
+			case TypeReal: {
 				size += REAL_SIZE;
-			break;
-			case TypeVarChar:
+			break; }
+			case TypeVarChar: {
 				// We have to get the size of the VarChar field by reading the integer that precedes the string value itself.
 				memcpy(&varcharSize, (char*) data + size, VARCHAR_LENGTH_SIZE);
 				// We also have to account for the overhead given by that integer.
 				size += INT_SIZE + varcharSize;
-			break;
+			break; }
 		}
+	}
 
 	return size;
 }
 
 int
 RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid) {
+
     // Gets the size of the record.
 	unsigned recordSize = getRecordSize(recordDescriptor, data);
 
 	// Cycles through pages looking for enough free space for the new entry.
 	void * pageData = malloc(PAGE_SIZE);
+
 	bool pageFound = false;
 	unsigned i;
+
 	for (i = 0; i < fileHandle.getNumberOfPages(); i++) {
 		if (fileHandle.readPage(i, pageData) != SUCCESS) {
 			return 1;

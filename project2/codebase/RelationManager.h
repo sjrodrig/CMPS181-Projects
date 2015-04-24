@@ -21,8 +21,10 @@ public:
 
 class RelationManager {
 private:
+	RecordBasedFileManager sysTableHandler;
 	string tables_table_name;
 	string columns_table_name;
+	int tableIDs;
 
 protected:
 public:

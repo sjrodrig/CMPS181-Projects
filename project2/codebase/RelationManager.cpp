@@ -1,5 +1,18 @@
 #include "RelationManager.h"
 #include <fstream>
+#include <iostream>
+
+#define flag0 "flag #0"
+#define flag1 "flag #1"
+#define flag2 "flag #2"
+#define flag3 "flag #3"
+#define flag4 "flag #4"
+#define flag5 "flag #5"
+#define flag6 "flag #6"
+#define flag7 "flag #7"
+#define flag8 "flag #8"
+#define flag9 "flag #9"
+#define flagA "flag #A"
 
 using namespace std;
 
@@ -9,38 +22,215 @@ using namespace std;
  * 
  */
 RelationManager::RelationManager() {
-	RecordBasedFileManager sysTableHandler;
+	tables_table_name = "sys_tables.tab";
+	columns_table_name = "sys_columns.tab";
+	tableIDs = 0;
 
-	ifstream checkStream("sys_tables.tab");
+	ifstream checkStream(tables_table_name.c_str());
 
     if (checkStream.good()) {
         //Nothing TODO
     } else {
 		//make "sys_tables.tab"
-		sysTableHandler.createFile("sys_tables.tab");
-		sysTableHandler.createFile("sys_columns.tab");
+		sysTableHandler.createFile(tables_table_name.c_str());
+		sysTableHandler.createFile(columns_table_name.c_str());
     }
 
     checkStream.close();
 }
 
-
-//This method creates a table called tableName with a vector of attributes (attrs).
+/**
+ * @COMPLETED
+ * This method creates a table called tableName with a vector of attributes (attrs).
+ * 
+ *
+ *
+ */
 int
 RelationManager::createTable(const string &tableName, const vector<Attribute> &attrs) {
-	//how we add the entries to the files
-	RecordBasedFileManager manager;
+	//A dummy RID to be returned
+	RID dummyRID;
 
+	//handle for the tables table
+	FileHandle tableTable_handle;
 
+	FILE * ttable = fopen(tables_table_name.c_str(), "a");
+	tableTable_handle.setFileDescriptor(ttable);
 
-//int insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid);
+	//the meta-data for the table
+	vector<Attribute> table_meta_data;
+	
+	Attribute TableID;
+	TableID.name = "TableID";
+	TableID.type = TypeInt;
+	TableID.length = 4;
 
+	Attribute TableName;
+	TableName.name = "TableName";
+	TableName.type = TypeVarChar;
+	TableName.length = tableName.size();
 
+	Attribute FileName;
+	FileName.name = "FileName";
+	FileName.type = TypeVarChar;
+	FileName.length = (tableName.size() + 8);
 
+	//assemble the vector
+	table_meta_data.push_back(TableID);
+	table_meta_data.push_back(TableName);
+	table_meta_data.push_back(FileName);
 
+	//assemble the data
+	int data_len = ((tableName.size() * 2) + 20);
+	unsigned char* tableEntryData = new unsigned char[data_len];
+	for(int init = 0; init < data_len; init++) { tableEntryData[init] = 127; }
 
+	const char* tname = tableName.c_str();
+	//cout << "tname is: " << tname << endl;
 
+	tableIDs++;
+	int new_table_id = tableIDs;
+	int aa;
 
+	for(aa = 3; aa > -1; aa--) {
+		tableEntryData[aa] = (new_table_id % 256);
+		new_table_id /= 256;
+	}
+
+	aa += 5;
+	int meta = tableName.size();
+	for(; aa < 8; aa++) {
+		tableEntryData[aa] = (meta % 256);
+		meta /= 256;
+	}
+
+	for(int bb = 0; tname[bb] != '\0'; aa++, bb++) {
+		tableEntryData[aa] = tname[bb];
+	}
+
+	int cc = aa + 4;
+
+	meta = (tableName.size() + 8);
+
+	for(; aa < cc; aa++) {
+		tableEntryData[aa] = (meta % 256);
+		meta /= 256;
+	}
+
+	tableEntryData[aa] = 'u';
+	aa++;
+	tableEntryData[aa] = 's';
+	aa++;
+	tableEntryData[aa] = 'r';
+	aa++;
+	tableEntryData[aa] = '_';
+	aa++;
+
+	for(int bb = 0; tname[bb] != '\0'; aa++, bb++) {
+		tableEntryData[aa] = tname[bb];
+	}
+
+	tableEntryData[aa] = '.';
+	aa++;
+	tableEntryData[aa] = 't';
+	aa++;
+	tableEntryData[aa] = 'a';
+	aa++;
+	tableEntryData[aa] = 'b';
+	aa++;
+
+	//allocate the size of the data
+	void* _tableEntryData = tableEntryData;
+
+cout << flag0 << endl;
+
+	sysTableHandler.insertRecord(tableTable_handle, table_meta_data, _tableEntryData, dummyRID);
+
+cout << flag1 << endl;
+
+	//handle for the columns table
+	FileHandle columnTable_handle;
+
+	FILE * ctable = fopen(columns_table_name.c_str(), "a");
+	columnTable_handle.setFileDescriptor(ctable);
+
+	//for loop to add all the columns to the columns table
+	for(int index = 0; index < attrs.size(); index++) {
+		cout << "looping: " << index << endl;
+
+		string colName = attrs.at(index).name;
+		cout << "colName is: " << colName << endl;
+
+		//set up the attributes for each column
+		Attribute TableID;
+		TableID.name = "TableID";
+		TableID.type = TypeInt;
+		TableID.length = 4;
+
+		Attribute ColumnName;
+		ColumnName.name = "ColumnName";
+		ColumnName.type = TypeVarChar;
+		ColumnName.length = colName.size();		//get the size of the name
+
+		Attribute ColumnType;
+		ColumnType.name = "ColumnType";
+		ColumnType.type = TypeInt;
+		ColumnType.length = 4;
+
+		Attribute ColumnLength;
+		ColumnLength.name = "ColumnLength";
+		ColumnLength.type = TypeInt;
+		ColumnLength.length = 4;
+
+		//set up the attribute vector
+		vector<Attribute> column_meta_data;
+		column_meta_data.push_back(TableID);
+		column_meta_data.push_back(ColumnName);
+		column_meta_data.push_back(ColumnType);
+		column_meta_data.push_back(ColumnLength);
+
+		unsigned char* columnEntryData = new unsigned char[ColumnName.length+16];
+		int ee;
+
+		//enter the tableID
+		for(ee = 0; ee < 4; ee++) {
+			columnEntryData[ee] = tableEntryData[ee];
+		}
+
+		//enter the number preceeding the columnName
+		int temp = colName.size();
+
+		for(; ee < 8; ee++) {
+			cout << "temp is: " << temp << endl;
+			columnEntryData[ee] = (temp % 256);
+			temp /= 256;
+		}
+
+		//enter the column's name
+		const char* cName = colName.c_str();
+		for(; cName[ee-8] != 0; ee++) {
+			columnEntryData[ee] = cName[ee-8];
+		}
+
+		//enter the column's type
+		int dd;
+		int meta2 = attrs.at(index).type;
+		for(dd = 0; dd < 4; dd++) {
+			columnEntryData[ee+dd] = (meta2 % 256);
+			meta2 /= 256;
+		}
+
+		//enter the column's length
+		int meta3 = attrs.at(index).length;
+		for(; dd < 8; dd++) {
+			columnEntryData[ee+dd] = (meta3 % 256);
+			meta3 /= 256;
+		}
+
+		void* _columnEntryData = columnEntryData;
+		sysTableHandler.insertRecord(columnTable_handle, column_meta_data, columnEntryData, dummyRID);
+	}
+	return SUCCESS;
 }
 
 //This method deletes a table called tableName. 
