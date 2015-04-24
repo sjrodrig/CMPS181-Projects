@@ -20,14 +20,8 @@
  */
 int
 RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
-<<<<<<< HEAD
 	unsigned meta = 0;
-
-=======
-	unsigned meta;
->>>>>>> origin/master
 	unsigned blankThis = fileHandle.getNumberOfPages();
-	meta = fileHandle.writePage(blankThis, 0);
 
 	for(; meta == 0 && blankThis != 0; blankThis--) {
 		meta = fileHandle.writePage(blankThis, 0);
@@ -99,7 +93,6 @@ RecordBasedFileManager::updateRecord(FileHandle &fileHandle, const vector<Attrib
 	if(insertVal != SUCCESS) {
 		return insertVal;
 	}
-<<<<<<< HEAD
 
 	if(newRID != rid) {
 		if(fileHandle.readPage(rid.pageNum, newPage) != SUCCESS) {
@@ -112,20 +105,6 @@ RecordBasedFileManager::updateRecord(FileHandle &fileHandle, const vector<Attrib
 		mySDRE.recordEntryType = Tombstone;
 		mySDRE.tombStoneRID = newRID;
 
-=======
-
-	if(newRID != rid) {
-		if(fileHandle.readPage(rid.pageNum, newPage) != SUCCESS) {
-			return -1;
-		}
-
-		//get the info from the file
-		SlotDirectoryRecordEntry mySDRE;
-		
-		mySDRE.recordEntryType = Tombstone;
-		mySDRE.tombStoneRID = newRID;
-
->>>>>>> origin/master
 		//set the lot SlotDirectoryRecordEntry to the new
 		setSlotDirectoryRecordEntry(newPage, rid.slotNum, mySDRE);
 
