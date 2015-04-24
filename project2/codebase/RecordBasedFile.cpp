@@ -20,7 +20,8 @@
  */
 int
 RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
-	unsigned meta;
+	unsigned meta = 0;
+
 	unsigned blankThis = fileHandle.getNumberOfPages();
 	meta = fileHandle.writePage(blankThis, 0);
 
@@ -36,6 +37,30 @@ int
 RecordBasedFileManager::deleteRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid) {
 	// Assume the rid does not change after update
 
+	// Allocate space for a new page and fetch data
+	void* newPage = malloc(PAGE_SIZE);
+	if(fileHandle.readPage(rid.pageNum, newPage) != SUCCESS){
+		return -1;
+	}
+
+	// Fetch Slot Directory Header 
+	SlotDirectoryHeader slot_header = getSlotDirectoryHeader(newPage);
+
+	// Make sure the desired slot is reachable
+	if (rid.slotNum > slot_header.recordEntriesNumber){
+		return -2;
+	}
+
+	// Create Dead Entry and Insert it
+	SlotDirectoryRecordEntry dead_entry;
+	dead_entry.recordEntryType = Dead;
+	setSlotDirectoryRecordEntry(newPage, rid.slotNum, dead_entry);
+
+	// Write to the page and free memory allocated
+	if (fileHandle.writePage(rid.pageNum, newPage) != SUCCESS){
+		return -3;
+	}
+	free(newPage);
 }
 
 /**
@@ -88,7 +113,43 @@ RecordBasedFileManager::updateRecord(FileHandle &fileHandle, const vector<Attrib
 // Read an attribute given its name and the rid.
 int
 RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid, const string attributeName, void *data) {
+	void* cur_record = malloc(PAGE_SIZE);
+	if (readRecord(fileHandle, recordDescriptor, rid, cur_record) != SUCCESS){
+		return -1;
+	}
 
+	int size_string = 0;
+	bool attr_found = false;
+	unsigned offset = 0;
+	for (int i = 0; i < recordDescriptor.size() && !attr_found; i++){
+		Attribute cur_attribute = recordDescriptor[i];
+		if (cur_attribute.name == attributeName) attr_found = true;
+		switch(cur_attribute.type){
+			case TypeInt:
+				if (attr_found){
+					memcpy(data, (char*)cur_record + offset, INT_SIZE);
+				} else {
+					offset += INT_SIZE;
+				}
+				break;
+			case TypeReal:
+				if (attr_found){
+					memcpy(data, (char*)cur_record + offset, REAL_SIZE);
+				} else {
+					offset += REAL_SIZE;
+				}
+				break;
+			case TypeVarChar:
+				memcpy(&size_string, (char*)cur_record + offset, VARCHAR_LENGTH_SIZE);
+				if (attr_found){
+					memcpy(data, (char*)cur_record + offset, size_string);
+				} else {
+					offset += size_string;
+				}
+				break;
+		}
+	}
+	free(cur_record);
 }
 
 
@@ -287,6 +348,7 @@ RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attrib
 	SlotDirectoryRecordEntry newRecordEntry;
 	newRecordEntry.recordEntryType = alive;
 	newRecordEntry.length = recordSize;
+	newRecordEntry.recordEntryType = Alive;
 	newRecordEntry.offset = slotHeader.freeSpaceOffset - recordSize;
 	setSlotDirectoryRecordEntry(pageData, rid.slotNum, newRecordEntry);
 
