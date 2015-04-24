@@ -9,18 +9,16 @@ using namespace std;
  * 
  */
 RelationManager::RelationManager() {
-	
+	RecordBasedFileManager sysTableHandler;
+
 	ifstream checkStream("sys_tables.tab");
 
     if (checkStream.good()) {
         //Nothing TODO
     } else {
 		//make "sys_tables.tab"
-		ofstream maker1("sys_tables.tab");
-		ofstream maker2("sys_columns.tab");
-		
-		maker1.close();
-		maker2.close();
+		sysTableHandler.createFile("sys_tables.tab");
+		sysTableHandler.createFile("sys_columns.tab");
     }
 
     checkStream.close();
@@ -30,6 +28,18 @@ RelationManager::RelationManager() {
 //This method creates a table called tableName with a vector of attributes (attrs).
 int
 RelationManager::createTable(const string &tableName, const vector<Attribute> &attrs) {
+	//how we add the entries to the files
+	RecordBasedFileManager manager;
+
+
+
+//int insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid);
+
+
+
+
+
+
 
 }
 

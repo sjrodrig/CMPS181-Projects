@@ -34,12 +34,8 @@ typedef struct {
 
 enum RecordEntryType {Alive, Dead, Tombstone};
 
-<<<<<<< HEAD
+
 typedef struct SDRE {
-=======
-typedef struct SDRE
-{
->>>>>>> origin/master
   enum RecordEntryType recordEntryType;
   // A slot directory record entry can either contain:
   // 1. Length and offset of the actual record, or
@@ -109,9 +105,9 @@ private:
 	unsigned getPageFreeSpaceSize(void * page);
 	unsigned getRecordSize(const vector<Attribute> &recordDescriptor, const void *data);
 protected:
+public:
 	RecordBasedFileManager();
 	~RecordBasedFileManager();
-public:
 	static RecordBasedFileManager* instance();
 	int createFile(const string &fileName);
 	int destroyFile(const string &fileName);

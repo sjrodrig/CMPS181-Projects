@@ -353,7 +353,7 @@ RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attrib
 
 	// Adding the new record reference in the slot directory.
 	SlotDirectoryRecordEntry newRecordEntry;
-	newRecordEntry.recordEntryType = alive;
+	newRecordEntry.recordEntryType = Alive;
 	newRecordEntry.length = recordSize;
 	newRecordEntry.recordEntryType = Alive;
 	newRecordEntry.offset = slotHeader.freeSpaceOffset - recordSize;
