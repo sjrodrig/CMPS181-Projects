@@ -1,7 +1,7 @@
 #Benjy's Magic Makefile
 
 #Author: Benjamin Strauss
-#Author: ???
+#Author: Paul Mini
 #CMPS_181 makefile
 
 GCC	= g++ -g -O0 -Wall -Wextra -std=gnu++11
@@ -28,11 +28,7 @@ RelationManager.o: RelationManager.cpp
 
 #delete the executable
 clear:
-	rm -f tools.o
-	rm -f RecordBasedFile.o
-	rm -f RelationManager.o
-	rm -f FileManager.o
-	rm -f main.o
+	rm -f *.o
 	rm -f db181
 
 #recompile from scratch
@@ -43,8 +39,7 @@ remake:
 
 purge:
 	make clear
-	rm -f sys_columns.tab
-	rm -f sys_tables.tab
+	rm -f *.tab
 	clear
 
 
