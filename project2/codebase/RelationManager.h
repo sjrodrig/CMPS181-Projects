@@ -25,6 +25,8 @@ private:
 	string tables_table_name;
 	string columns_table_name;
 	int tableIDs;
+	//every table has this attribute exactly the same
+	Attribute TableID;
 
 protected:
 public:

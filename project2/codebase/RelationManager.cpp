@@ -26,6 +26,10 @@ RelationManager::RelationManager() {
 	columns_table_name = "sys_columns.tab";
 	tableIDs = 0;
 
+	TableID.name = "TableID";
+	TableID.type = TypeInt;
+	TableID.length = 4;
+
 	ifstream checkStream(tables_table_name.c_str());
 
     if (checkStream.good()) {
@@ -43,11 +47,20 @@ RelationManager::RelationManager() {
  * @COMPLETED
  * This method creates a table called tableName with a vector of attributes (attrs).
  * 
- *
+ * returns 0 on success and 1 on failure
  *
  */
 int
 RelationManager::createTable(const string &tableName, const vector<Attribute> &attrs) {
+	string tableFileName = user + tableName + ".tab";
+
+	int go = sysTableHandler.createFile(tableFileName);
+	//couldn't make the file...
+	if(go != SUCCESS) { 
+		cout << "Couldn't make file for table: \"" << tableName << "\"" << endl;
+		return 1;
+	}
+
 	//A dummy RID to be returned
 	RID dummyRID;
 
@@ -60,11 +73,6 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	//the meta-data for the table
 	vector<Attribute> table_meta_data;
 	
-	Attribute TableID;
-	TableID.name = "TableID";
-	TableID.type = TypeInt;
-	TableID.length = 4;
-
 	Attribute TableName;
 	TableName.name = "TableName";
 	TableName.type = TypeVarChar;
@@ -142,11 +150,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	//allocate the size of the data
 	void* _tableEntryData = tableEntryData;
 
-cout << flag0 << endl;
-
 	sysTableHandler.insertRecord(tableTable_handle, table_meta_data, _tableEntryData, dummyRID);
-
-cout << flag1 << endl;
 
 	//handle for the columns table
 	FileHandle columnTable_handle;
@@ -156,17 +160,12 @@ cout << flag1 << endl;
 
 	//for loop to add all the columns to the columns table
 	for(int index = 0; index < attrs.size(); index++) {
-		cout << "looping: " << index << endl;
+		//cout << "looping: " << index << endl;
 
 		string colName = attrs.at(index).name;
-		cout << "colName is: " << colName << endl;
+		//cout << "colName is: " << colName << endl;
 
 		//set up the attributes for each column
-		Attribute TableID;
-		TableID.name = "TableID";
-		TableID.type = TypeInt;
-		TableID.length = 4;
-
 		Attribute ColumnName;
 		ColumnName.name = "ColumnName";
 		ColumnName.type = TypeVarChar;
@@ -201,7 +200,6 @@ cout << flag1 << endl;
 		int temp = colName.size();
 
 		for(; ee < 8; ee++) {
-			cout << "temp is: " << temp << endl;
 			columnEntryData[ee] = (temp % 256);
 			temp /= 256;
 		}
@@ -233,10 +231,58 @@ cout << flag1 << endl;
 	return SUCCESS;
 }
 
-//This method deletes a table called tableName. 
+/**
+ * @INCOMPLETE
+ * This method deletes a table called tableName. 
+ */
 int
 RelationManager::deleteTable(const string &tableName) {
+	//a table ID which will be used for finding the columns to delete
+	int delete_this_ID;
 
+	//delete the file
+	string tableFileName = user + tableName + ".tab";
+	sysTableHandler.destroyFile(tableFileName);
+
+	//the handle for the tables table to delete the table
+	FileHandle tTable_handle;
+	FILE * ttable = fopen(tables_table_name.c_str(), "a");
+	tTable_handle.setFileDescriptor(ttable);
+
+	//the handle for the columns table
+	FileHandle cTable_handle;
+	FILE * ctable = fopen(columns_table_name.c_str(), "a");
+	cTable_handle.setFileDescriptor(ctable);
+
+	//the attribute vector that will be used to erase the table
+	vector<Attribute> tableEraser;
+
+	Attribute TableName;
+	TableName.name = "TableName";
+	TableName.type = TypeVarChar;
+	TableName.length = tableName.size();
+
+	Attribute FileName;
+	FileName.name = "FileName";
+	FileName.type = TypeVarChar;
+	FileName.length = (tableName.size() + 8);
+
+	//assemble the vector
+	tableEraser.push_back(TableID);
+	tableEraser.push_back(TableName);
+	tableEraser.push_back(FileName);
+
+	/** @PSUEDO-CODE
+	 * Going to have to get the (table's) RID someway (scan)?
+	 * Read the table's ID
+	 * Scan the columns for all columns with the table's ID
+	 * delete those columns
+	 * call the following method on the table
+	 * call the following method on each column with the table's ID
+	 * sysTableHandler.deleteRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid)
+	 */
+
+	return SUCCESS;
 }
 
 //This method gets the attributes (attrs) of a table called tableName. 
