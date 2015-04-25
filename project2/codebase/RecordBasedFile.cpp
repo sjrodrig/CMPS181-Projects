@@ -27,7 +27,10 @@ RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
 		meta = fileHandle.writePage(blankThis, 0);
 	}
 	// Write that zero entries are on the page, and then put the word "DELETED"
-	fileHandle.writePage(0, "\0\0\0\0DELETED");
+	if (fileHandle.writePage(0, "\0\0\0\0DELETED") != SUCCESS){
+		return -1;
+	}
+	return SUCCESS;
 }
 
 /**
@@ -68,6 +71,7 @@ RecordBasedFileManager::deleteRecord(FileHandle &fileHandle, const vector<Attrib
 		return -3;
 	}
 	free(newPage);
+	return SUCCESS;
 }
 
 /**
@@ -128,7 +132,7 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 	int size_string = 0;
 	bool attr_found = false;
 	unsigned offset = 0;
-	for (int i = 0; i < recordDescriptor.size() && !attr_found; i++){
+	for (unsigned int i = 0; i < recordDescriptor.size() && !attr_found; i++){
 		Attribute cur_attribute = recordDescriptor[i];
 		if (cur_attribute.name == attributeName) attr_found = true;
 		switch(cur_attribute.type){
@@ -157,6 +161,8 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 		}
 	}
 	free(cur_record);
+	if (!attr_found) return -2;
+	return SUCCESS;
 }
 
 
@@ -165,7 +171,7 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 int
 RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RBFM_ScanIterator &rbfm_ScanIterator) {
 
-
+	return -1;
 }
 
 // optional
