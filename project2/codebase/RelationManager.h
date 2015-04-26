@@ -1,8 +1,8 @@
 #include "RecordBasedFile.h"
 
 /**
- * @modifyer: Benjamin (Benjy) Strauss
- *
+ * @modifier: Benjamin (Benjy) Strauss
+ * @modifier: Paul Mini
  * 
  */
 
@@ -10,24 +10,22 @@
 #define system "sys_"
 
 class RM_ScanIterator {
-public:
-  RM_ScanIterator() {};
-  RM_ScanIterator(RBFM_ScanIterator &r) {this->rbfm_SI = r;};
-  ~RM_ScanIterator() {};
-
-  // "data" follows the same format as RelationManager::insertTuple()
-  RC setVectors(vector<RID> rids, vector<void*> dataVector) {
-  	return rbfm_SI.setVectors(rids, dataVector);
-  };
-  RC getNextTuple(RID &rid, void *data) {
-	return rbfm_SI.getNextRecord(rid, data);
-  };
-  RC close() {
-	return rbfm_SI.close();
-  };
-
 private:
   RBFM_ScanIterator rbfm_SI;
+
+public:
+	RM_ScanIterator() {}
+	RM_ScanIterator(RBFM_ScanIterator &r) { this->rbfm_SI = r; }
+	~RM_ScanIterator() {}
+
+	// "data" follows the same format as RelationManager::insertTuple()
+	int setVectors(vector<RID> rids, vector<void*> dataVector) {
+  		return rbfm_SI.setVectors(rids, dataVector);
+	}
+	int getNextTuple(RID &rid, void *data) {
+		return rbfm_SI.getNextRecord(rid, data);
+	}
+	int close() { return rbfm_SI.close(); }
 };
 
 class RelationManager {
