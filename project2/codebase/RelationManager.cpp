@@ -381,20 +381,4 @@ RelationManager::scan(const string &tableName, const string &conditionAttribute,
 	return -1;
 }
 
-/*********************************************************************************
- *										Iterator								 *
- *********************************************************************************/
-
-//This method is used to get the next tuple from the scanned table. It returns RM_EOF when all tuples are scanned. 
-int
-RM_ScanIterator::getNextTuple(RID &rid, void *data) {
-	return -1;
-}
-
-//This method is used to close the iterator. 
-int
-RM_ScanIterator::close() {
-	return -1;
-}
-
 

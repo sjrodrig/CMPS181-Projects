@@ -16,11 +16,14 @@ public:
   ~RM_ScanIterator() {};
 
   // "data" follows the same format as RelationManager::insertTuple()
+  RC setVectors(vector<RID> rids, vector<void*> dataVector) {
+  	return rbfm_SI.setVectors(rids, dataVector);
+  };
   RC getNextTuple(RID &rid, void *data) {
-	  return rbfm_SI.getNextRecord(rid, data);
+	return rbfm_SI.getNextRecord(rid, data);
   };
   RC close() {
-	  return rbfm_SI.close();
+	return rbfm_SI.close();
   };
 
 private:

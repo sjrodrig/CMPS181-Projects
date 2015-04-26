@@ -189,6 +189,28 @@ RecordBasedFileManager::reorganizeFile(FileHandle &fileHandle, const vector<Attr
 	return -1;
 }
 
+int
+RBFM_ScanIterator::setVectors(vector<RID> rids, vector<void*> dataVector){
+	if (rids.size() != dataVector.size()) return -1;
+	this->currentSize = rids.size();
+	this->rids = rids;
+	this->dataVector = dataVector;
+	return SUCCESS;
+}
+
+int
+RBFM_ScanIterator::getNextRecord(RID &rid, void *data) {
+	if (currentPosition >= currentSize) return -1;
+	rid = this->rids.at(currentPosition);
+	data = this->dataVector.at(currentPosition);
+	this->currentPosition++;
+	return SUCCESS;
+}
+
+int
+RBFM_ScanIterator::close() {
+	return -1;
+}
 
 /*********************************************************************************
  *									From Project 1								 *

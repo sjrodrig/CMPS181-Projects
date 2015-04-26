@@ -84,25 +84,21 @@ typedef enum {
 //going to need to be fixed, wait to do
 class RBFM_ScanIterator {
 private:
-	std::vector<tuple<RID,void*>> values;
-	std::vector<int>::iterator it;
+	unsigned currentPosition;
+	unsigned currentSize;
+    vector<RID> rids;
+    vector<void*> dataVector;
 public:
 	RBFM_ScanIterator() {
-		//it = values.begin();
-	}
-	~RBFM_ScanIterator() {}
+		currentPosition = 0;
+		currentSize = 0;
+	};
+	~RBFM_ScanIterator() {};
 
+	int setVectors(vector<RID> rids, vector<void*> dataVector);
 	// "data" follows the same format as RecordBasedFileManager::insertRecord()
-	int getNextRecord(RID &rid, void *data) { 
-		//if (it == values.end()) { return RBFM_EOF; }
-		std::tuple<RID,void*> current;
-		//current = *it;
-		rid = std::get<0>(current);
-		data = std::get<1>(current);
-		++it;
-		return SUCCESS; 
-	}
-	int close() { return -1; }
+	int getNextRecord(RID &rid, void *data);
+	int close();
 };
 
 class RecordBasedFileManager {
