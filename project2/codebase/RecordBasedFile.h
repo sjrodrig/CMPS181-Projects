@@ -88,20 +88,21 @@ private:
 	std::vector<int>::iterator it;
 public:
 	RBFM_ScanIterator() {
-		it = values.begin();
-	};
-	~RBFM_ScanIterator() {};
+		//it = values.begin();
+	}
+	~RBFM_ScanIterator() {}
 
 	// "data" follows the same format as RecordBasedFileManager::insertRecord()
 	int getNextRecord(RID &rid, void *data) { 
-		if (it == values.end()) return RBFM_EOF;
-		std::tuple<RID,void*> current = *it;
+		//if (it == values.end()) { return RBFM_EOF; }
+		std::tuple<RID,void*> current;
+		//current = *it;
 		rid = std::get<0>(current);
 		data = std::get<1>(current);
 		++it;
 		return SUCCESS; 
-	};
-	int close() { return -1; };
+	}
+	int close() { return -1; }
 };
 
 class RecordBasedFileManager {

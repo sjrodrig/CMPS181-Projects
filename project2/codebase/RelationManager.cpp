@@ -297,16 +297,58 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	return -1;
 }
 
-//This method deletes all tuples in a table called tableName. This command should result in an empty table. 
+/**
+ * COMPLETE BUT UNTESTED!!!
+ *
+ * This method deletes all tuples in a table called tableName.
+ * This command should result in an empty table.
+ */ 
 int
 RelationManager::deleteTuples(const string &tableName) {
-	return -1;
+	string tableFileName = user + tableName + ".tab";
+	//the return value
+	int retVal = -1;
+
+	FileHandle clearMe;
+	FILE * _clearMe = fopen(tableFileName.c_str(), "a");
+	clearMe.setFileDescriptor(_clearMe);
+
+	retVal = sysTableHandler.deleteRecords(clearMe);
+
+	return retVal;
 }
 
-//This method deletes a tuple with a given rid. 
+/**
+ * UNDER CONSTRUCTION!!!
+ * Do NOT call this method!!!
+ * 
+ * descriptor does not have any attributes; it needs some way of getting the appropriate values.
+ * 
+ * 
+ * 
+ * This method deletes a tuple with a given rid. 
+ */
 int
 RelationManager::deleteTuple(const string &tableName, const RID &rid) {
-	return -1;
+	string tableFileName = user + tableName + ".tab";
+	//the return value
+	int retVal = -1;
+
+	FileHandle clearMe;
+	FILE * _clearMe = fopen(tableFileName.c_str(), "a");
+	clearMe.setFileDescriptor(_clearMe);
+
+	//the Record Descriptor
+	const vector<Attribute> descriptor;
+
+	/**
+	 * Need code here to assign attributes to "descriptor"
+	 * 
+	 */
+
+	retVal = sysTableHandler.deleteRecord(clearMe, descriptor, rid);
+
+	return retVal;
 }
 
 //This method updates a tuple identified by a given rid. Note: if the tuple grows (i.e., the size of tuple increases) and there is no space in the page to store the tuple (after the update), then, the tuple is migrated to a new page with enough free space. Since you will implement an index structure (e.g., B-tree) in project 3, you can assume that tuples are identified by their rids and when they migrate, they leave a tombstone behind pointing to the new location of the tuple.
