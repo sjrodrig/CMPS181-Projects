@@ -2,6 +2,7 @@
 #define _RecordBasedFile_h_
 #include <string>
 #include <vector>
+#include <tuple>
 #include "FileManager.h"
 
 #define INT_SIZE 4
@@ -82,12 +83,24 @@ typedef enum {
 
 //going to need to be fixed, wait to do
 class RBFM_ScanIterator {
+private:
+	std::vector<tuple<RID,void*>> values;
+	std::vector<int>::iterator it;
 public:
-	RBFM_ScanIterator() {};
+	RBFM_ScanIterator() {
+		it = values.begin();
+	};
 	~RBFM_ScanIterator() {};
 
 	// "data" follows the same format as RecordBasedFileManager::insertRecord()
-	int getNextRecord(RID &rid, void *data) { return RBFM_EOF; };
+	int getNextRecord(RID &rid, void *data) { 
+		if (it == values.end()) return RBFM_EOF;
+		std::tuple<RID,void*> current = *it;
+		rid = std::get<0>(current);
+		data = std::get<1>(current);
+		++it;
+		return SUCCESS; 
+	};
 	int close() { return -1; };
 };
 
