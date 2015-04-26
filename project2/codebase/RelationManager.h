@@ -11,12 +11,20 @@
 
 class RM_ScanIterator {
 public:
-	RM_ScanIterator();
-	~RM_ScanIterator();
+  RM_ScanIterator() {};
+  RM_ScanIterator(RBFM_ScanIterator &r) {this->rbfm_SI = r;};
+  ~RM_ScanIterator() {};
 
-	// "data" follows the same format as RelationManager::insertTuple()
-	int getNextTuple(RID &rid, void *data);
-	int close();
+  // "data" follows the same format as RelationManager::insertTuple()
+  RC getNextTuple(RID &rid, void *data) {
+	  return rbfm_SI.getNextRecord(rid, data);
+  };
+  RC close() {
+	  return rbfm_SI.close();
+  };
+
+private:
+  RBFM_ScanIterator rbfm_SI;
 };
 
 class RelationManager {
