@@ -10,7 +10,7 @@
 #define VARCHAR_LENGTH_SIZE 4
 
 /**
- * @modifyer: Benjamin (Benjy) Strauss
+ * @modifier: Benjamin (Benjy) Strauss
  *
  * 
  */
@@ -34,7 +34,6 @@ typedef struct {
 } SlotDirectoryHeader;
 
 enum RecordEntryType {Alive, Dead, Tombstone};
-
 
 typedef struct SDRE {
   enum RecordEntryType recordEntryType;

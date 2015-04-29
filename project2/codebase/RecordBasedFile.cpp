@@ -132,9 +132,9 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 	int size_string = 0;
 	bool attr_found = false;
 	unsigned offset = 0;
-	for (unsigned int i = 0; i < recordDescriptor.size() && !attr_found; i++){
+	for (unsigned int i = 0; i < recordDescriptor.size() && !attr_found; i++) {
 		Attribute cur_attribute = recordDescriptor[i];
-		if (cur_attribute.name == attributeName) attr_found = true;
+		if (cur_attribute.name == attributeName) { attr_found = true; }
 		switch(cur_attribute.type){
 			case TypeInt:
 				if (attr_found){
@@ -161,7 +161,7 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 		}
 	}
 	free(cur_record);
-	if (!attr_found) return -2;
+	if (!attr_found) { return -2; }
 	return SUCCESS;
 }
 
@@ -173,6 +173,7 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 
 	return -1;
 }
+
 
 // optional
 // Push the free space towards the end of the page.
@@ -198,6 +199,11 @@ RBFM_ScanIterator::setVectors(vector<RID> rids, vector<void*> dataVector){
 	return SUCCESS;
 }
 
+/**
+ * Return:
+ * 0: more in list
+ * -1: end of list
+ */
 int
 RBFM_ScanIterator::getNextRecord(RID &rid, void *data) {
 	if (currentPosition >= currentSize) return -1;

@@ -351,10 +351,29 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 	return retVal;
 }
 
-//This method updates a tuple identified by a given rid. Note: if the tuple grows (i.e., the size of tuple increases) and there is no space in the page to store the tuple (after the update), then, the tuple is migrated to a new page with enough free space. Since you will implement an index structure (e.g., B-tree) in project 3, you can assume that tuples are identified by their rids and when they migrate, they leave a tombstone behind pointing to the new location of the tuple.
+/**
+ * Simple delete + insert
+ *
+ * This method updates a tuple identified by a given rid. Note: if the tuple grows (i.e., the size of tuple increases) and there is no space in the page to store the tuple (after the update), then, the tuple is migrated to a new page with enough free space. Since you will implement an index structure (e.g., B-tree) in project 3, you can assume that tuples are identified by their rids and when they migrate, they leave a tombstone behind pointing to the new location of the tuple.
+ */
 int
 RelationManager::updateTuple(const string &tableName, const void *data, const RID &rid) {
-	return -1;
+	int retVal;
+	retVal = deleteTuple(tableName, rid);
+
+	if(retVal != SUCCESS) { //delete failed
+		cout << "Delete Error" << endl;
+		return retVal;
+	}
+
+	const void* insert_this = data;
+	RID ins;
+	ins.slotNum = rid.slotNum;
+	ins.pageNum = rid.pageNum;
+
+	retVal = insertTuple(tableName, insert_this, ins);
+
+	return retVal;
 }
 
 //This method reads a tuple identified by a given rid. 
@@ -378,6 +397,21 @@ RelationManager::reorganizePage(const string &tableName, const unsigned pageNumb
 //This method scans a table called tableName. That is, it sequentially reads all the entries in the table. This method returns an iterator called rm_ScanIterator to allow the caller to go through the records in the table one by one. A scan has a filter condition associated with it, e.g., it consists of a list of attributes to project out as well as a predicate on an attribute (“Sal > 40000”). Note: the RBFM_ScanIterator should not cache the entire scan result in memory. In fact, you need to be looking at one (or a few) page(s) of data at a time, ever. In this project, let the OS do the memory-management work for you. 
 int
 RelationManager::scan(const string &tableName, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RM_ScanIterator &rm_ScanIterator) {
+
+
+
+	//call this >>
+	/*int scan(FileHandle &fileHandle,
+		const vector<Attribute> &recordDescriptor,
+		const string &conditionAttribute,
+		const CompOp compOp,                  // comparision type such as "<" and "="
+		const void *value,                    // used in the comparison
+		const vector<string> &attributeNames, // a list of projected attributes
+		RBFM_ScanIterator &rbfm_ScanIterator);*/
+
+
+
+
 	return -1;
 }
 
