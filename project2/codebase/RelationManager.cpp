@@ -130,13 +130,12 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	int new_table_id = tableIDs;
 	int aa;
 
-	for(aa = 3; aa > -1; aa--) {
+	for(aa = 0; aa < 4; aa++) {
 		unsigned char meta = (new_table_id % 256);
 		tableEntryData[aa] = meta;
 		new_table_id /= 256;
 	}
 
-	aa += 5;
 	int meta = tableName.size();
 	for(; aa < 8; aa++) {
 		tableEntryData[aa] = (meta % 256);
@@ -263,7 +262,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		sysTableHandler.insertRecord(columnTable_handle, column_meta_data, columnEntryData, dummyRID);
 	}
 
-	//cout << "ins-ret: " << retVal << endl;
+	cout << "ins-ret: " << retVal << endl;
 	return retVal;
 }
 
@@ -367,6 +366,8 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	//copy the table's id.
 	memcpy(&tableID, data_value, 4);
 
+	cout << "tableID is: " << tableID << endl;
+
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
 
 	if( retVal != SUCCESS ) {
@@ -450,17 +451,17 @@ cout << "looping" << endl;
 		for(int aa = 0; aa < NAME_LEN; aa++) {
 			attrName[aa] = data[aa+4];
 		}
-		cout << "name is: " << attrName << endl;
+		//cout << "name is: " << attrName << endl;
 
 		//compact and set the name
 		for(int aa = 0; attrName[aa] != '\0'; aa++) {
 			pushMe.name += attrName[aa];
 		}
-		cout << "name is: " << pushMe.name << endl;
+		//cout << "name is: " << pushMe.name << endl;
 
 		//extract the type
 		unsigned char* typeData = new unsigned char[4];
-		for(int aa = (NAME_LEN + 4); aa < (NAME_LEN + 8); aa++) { typeData[aa] = data[aa]; }
+		for(int aa = (NAME_LEN + 4); aa < (NAME_LEN + 8); aa++) { typeData[aa] = data[aa+NAME_LEN+4]; }
 		
 		int power = 1;
 		int accu = 0;
@@ -481,12 +482,12 @@ cout << "looping" << endl;
 
 		//extract the length
 		unsigned char* lenData = new unsigned char[4];
-		for(int aa = (NAME_LEN + 8); aa < (NAME_LEN + 12); aa++) { typeData[aa] = data[aa]; }
+		for(int aa = (NAME_LEN + 8); aa < (NAME_LEN + 12); aa++) { lenData[aa] = data[aa+NAME_LEN+4]; }
 		
 		int _power = 1;
 		int _accu = 0;
 		for(int bb = 0; bb < 4; bb++) {
-			_accu += typeData[bb] * _power;
+			_accu += lenData[bb] * _power;
 			_power *= 256;
 		}
 
@@ -643,7 +644,7 @@ RelationManager::reorganizePage(const string &tableName, const unsigned pageNumb
 void
 RelationManager::printRawData(unsigned char* data, int len) {
 	for(int i = 0; i < len; i++) {
-		cout << "[" << i << "]";
+		cout << "{ [" << i << "] ";
 		if(data[i] > 32 && data[i] < 127) {
 			char c = data[i];
 			cout << c;
@@ -651,8 +652,10 @@ RelationManager::printRawData(unsigned char* data, int len) {
 			cout << "NULL";
 		} else {
 			int foo = data[i];
-			cout << " ! " << foo;
+			cout << "'" << foo << "'";
 		}
-		cout << endl;
+		cout << "} ";
+		if(i % 10 == 0) { cout << endl; }
 	}
+	cout << endl;
 }

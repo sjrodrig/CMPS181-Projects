@@ -30,11 +30,11 @@ int main() {
 	foo.type = TypeVarChar;
 	nullVec.push_back(foo);
 
-	Attribute bar;
+	/*Attribute bar;
 	bar.name = "barq";
 	bar.length = 127;
 	bar.type = TypeVarChar;
-	nullVec.push_back(bar);
+	nullVec.push_back(bar);*/
 
 	rbfTest();
 

@@ -376,7 +376,7 @@ RBFM_ScanIterator::setVectors(vector<RID> rids, vector<void*> dataVector){
  */
 int
 RBFM_ScanIterator::getNextRecord(RID &rid, void *data) {
-	if (currentPosition >= currentSize) return -1;
+	if (currentPosition >= currentSize) { return -1; }
 	rid = this->rids.at(currentPosition);
 	data = this->dataVector.at(currentPosition);
 	this->currentPosition++;
