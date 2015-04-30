@@ -91,8 +91,12 @@ public:
 	RBFM_ScanIterator() {
 		currentPosition = 0;
 		currentSize = 0;
-	};
-	~RBFM_ScanIterator() {};
+	}
+	~RBFM_ScanIterator() {
+		for (auto it = begin(dataVector); it != end(dataVector); ++it) {
+    		free(*it);
+		}
+	}
 
 	int setVectors(vector<RID> rids, vector<void*> dataVector);
 	// "data" follows the same format as RecordBasedFileManager::insertRecord()

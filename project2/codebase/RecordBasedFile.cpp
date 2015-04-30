@@ -139,26 +139,24 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 			case TypeInt:
 				if (attr_found){
 					memcpy(data, (char*)cur_record + offset, INT_SIZE);
-				} else {
-					offset += INT_SIZE;
-				}
+				} 
+				offset += INT_SIZE;
 				break;
 			case TypeReal:
 				if (attr_found){
 					memcpy(data, (char*)cur_record + offset, REAL_SIZE);
-				} else {
-					offset += REAL_SIZE;
-				}
+				} 
+				offset += REAL_SIZE;
 				break;
 			case TypeVarChar:
 				memcpy(&size_string, (char*)cur_record + offset, VARCHAR_LENGTH_SIZE);
 				if (attr_found){
-					memcpy(data, (char*)cur_record + offset, size_string);
-				} else {
-					offset += size_string;
-				}
+					memcpy(data, (char*)cur_record + offset, size_string + VARCHAR_LENGTH_SIZE);
+				} 
+				offset += size_string + VARCHAR_LENGTH_SIZE;
 				break;
 		}
+		if (attr_found) break;
 	}
 	free(cur_record);
 	if (!attr_found) { return -2; }
@@ -170,8 +168,175 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 // scan returns an iterator to allow the caller to go through the results one by one. 
 int
 RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RBFM_ScanIterator &rbfm_ScanIterator) {
+	if (rbfm_ScanIterator == NULL) rbfm_ScanIterator = new RBFM_ScanIterator();
+	void *cur_page = malloc(PAGE_SIZE);
+	SlotDirectoryHeader header = NULL;
+	SlotDirectoryRecordEntry record_entry = NULL;
+	vector<RID> rids;
+	vector<void*> dataVector;
 
-	return -1;
+	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++){
+		if (fileHandle.readPage(i, cur_page) != SUCCESS){
+			return -1;
+		}
+		header = getSlotDirectoryHeader(cur_page);
+		for (unsigned j = 0; j < header.recordEntriesNumber; j++){
+			record_entry = getSlotDirectoryRecordEntry(cur_page, j);
+			if (record_entry.recordEntryType == Alive){
+				void *cur_record = malloc(PAGE_SIZE);
+				RID cur_RID;
+				cur_RID.pageNum = i;
+				cur_RID.slotNum = j;
+				if (readRecord(fileHandle, recordDescriptor, cur_RID, cur_record) != SUCCESS){
+					return -2;
+				} else {
+					void *result_record = malloc(PAGE_SIZE);
+					int size_string = 0;
+					unsigned read_offset = 0;
+					unsigned write_offset = 0;
+					bool data_found = false;
+					for (unsigned int i = 0; i < recordDescriptor.size() && !attr_found; i++){
+						Attribute cur_attribute = recordDescriptor[i];
+						bool attr_found = false;
+						if (cur_attribute.name IS IN attributeNames) attr_found = true;
+						switch(cur_attribute.type){
+							case TypeInt:
+								if (attr_found){
+									memcpy((char*)result_record + write_offset, (char*)cur_record + read_offset, INT_SIZE);
+									write_offset += INT_SIZE;
+									data_found = true;
+								}
+								read_offset += INT_SIZE;
+								break;
+							case TypeReal:
+								if (attr_found){
+									memcpy((char*)result_record + write_offset, (char*)cur_record + read_offset, REAL_SIZE);
+									write_offset += REAL_SIZE;
+									data_found = true; 
+								} 
+								read_offset += REAL_SIZE;
+								break;
+							case TypeVarChar:
+								memcpy(&size_string, (char*)cur_record + read_offset, VARCHAR_LENGTH_SIZE);
+								if (attr_found){
+									memcpy((char*)result_record + write_offset, (char*)cur_record + read_offset, size_string + VARCHAR_LENGTH_SIZE);
+									write_offset += size_string + VARCHAR_LENGTH_SIZE;
+									data_found = true;
+								} 
+								read_offset += size_string + VARCHAR_LENGTH_SIZE;
+								break;
+						}
+					}
+					if (data_found){
+						rids.push_back(cur_RID);
+						dataVector.push_back(result_record);
+					}
+				}
+				free(cur_record);
+			}
+		}
+	}
+	free(cur_page);
+	return rbfm_ScanIterator.setVectors(rids, dataVector);
+}
+
+bool RecordBasedFileManager::checkScanCondition(int dataInt, CompOp compOp, const void * value)
+{
+	int valueInt;
+	memcpy (&valueInt, value, REAL_SIZE);
+
+	switch (compOp)
+	{
+		case EQ_OP:  // =
+			return dataInt == valueInt;
+		break;
+		case LT_OP:  // <
+			return dataInt < valueInt;
+		break;
+		case GT_OP:  // >
+			return dataInt > valueInt;
+		break;
+		case LE_OP:  // <=
+			return dataInt <= valueInt;
+		break;
+		case GE_OP:  // >=
+			return dataInt >= valueInt;
+		break;
+		case NE_OP:  // !=
+			return dataInt != valueInt;
+		break;
+		case NO_OP:  // no condition
+			return true;
+		break;
+	}
+	// We should never get here.
+	return false;
+}
+
+bool RecordBasedFileManager::checkScanCondition(float dataFloat, CompOp compOp, const void * value)
+{
+	float valueFloat;
+	memcpy (&valueFloat, value, REAL_SIZE);
+
+	switch (compOp)
+	{
+		case EQ_OP:  // =
+			return dataFloat == valueFloat;
+		break;
+		case LT_OP:  // <
+			return dataFloat < valueFloat;
+		break;
+		case GT_OP:  // >
+			return dataFloat > valueFloat;
+		break;
+		case LE_OP:  // <=
+			return dataFloat <= valueFloat;
+		break;
+		case GE_OP:  // >=
+			return dataFloat >= valueFloat;
+		break;
+		case NE_OP:  // !=
+			return dataFloat != valueFloat;
+		break;
+		case NO_OP:  // no condition
+			return true;
+		break;
+	}
+	// We should never get here.
+	return false;
+}
+
+bool RecordBasedFileManager::checkScanCondition(char* dataString, CompOp compOp, const void * value)
+{
+	char* valueString;
+	memcpy (&valueString, value, REAL_SIZE);
+
+	switch (compOp)
+	{
+		case EQ_OP:  // =
+			return strcmp(dataString, valueString) == 0;
+		break;
+		case LT_OP:  // <
+			return strcmp(dataString, valueString) < 0;
+		break;
+		case GT_OP:  // >
+			return strcmp(dataString, valueString) > 0;
+		break;
+		case LE_OP:  // <=
+			return (strcmp(dataString, valueString) < 0) || (strcmp(dataString, valueString) == 0);
+		break;
+		case GE_OP:  // >=
+			return (strcmp(dataString, valueString) > 0) || (strcmp(dataString, valueString) == 0);
+		break;
+		case NE_OP:  // !=
+			return strcmp(dataString, valueString) != 0;
+		break;
+		case NO_OP:  // no condition
+			return true;
+		break;
+	}
+	// We should never get here.
+	return false;
 }
 
 
@@ -215,7 +380,12 @@ RBFM_ScanIterator::getNextRecord(RID &rid, void *data) {
 
 int
 RBFM_ScanIterator::close() {
-	return -1;
+	for (auto it = begin(this->dataVector); it != end(this->dataVector); ++it) {
+    	free(*it);
+	}
+	this->currentPosition = 0;
+	this->currentSize = 0;
+	return SUCCESS;
 }
 
 /*********************************************************************************

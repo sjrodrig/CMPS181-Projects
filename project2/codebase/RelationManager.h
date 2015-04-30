@@ -14,7 +14,6 @@ private:
   RBFM_ScanIterator rbfm_SI;
 
 public:
-	RM_ScanIterator() {}
 	RM_ScanIterator(RBFM_ScanIterator &r) { this->rbfm_SI = r; }
 	~RM_ScanIterator() {}
 
