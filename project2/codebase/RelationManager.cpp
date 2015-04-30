@@ -97,7 +97,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	//handle for the tables table
 	FileHandle tableTable_handle;
 
-	FILE * ttable = fopen(tables_table_name.c_str(), "a");
+	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tableTable_handle.setFileDescriptor(ttable);
 
 	//the meta-data for the table
@@ -188,18 +188,23 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		tableEntryData[aa] = 0;
 	}
 
-	printRawData(tableEntryData, 100);
-	sysTableHandler.insertRecord(tableTable_handle, table_meta_data, tableEntryData, dummyRID);
+	if(DEBUG) { printRawData(tableEntryData, data_len); }
+	int retVal;
+	retVal = sysTableHandler.insertRecord(tableTable_handle, table_meta_data, tableEntryData, dummyRID);
+	if( retVal != SUCCESS ) {
+		cout << "failing with: " << retVal << endl;
+		return retVal;
+	}
 
 	//handle for the columns table
 	FileHandle columnTable_handle;
 
-	FILE * ctable = fopen(columns_table_name.c_str(), "a");
+	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	columnTable_handle.setFileDescriptor(ctable);
 
 	//for loop to add all the columns to the columns table
 	for(unsigned int index = 0; index < attrs.size(); index++) {
-		cout << "looping: " << index << endl;
+		//cout << "looping: " << index << endl;
 
 		string colName = attrs.at(index).name;
 		//cout << "colName is: " << colName << endl;
@@ -257,7 +262,9 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		void* _columnEntryData = columnEntryData;
 		sysTableHandler.insertRecord(columnTable_handle, column_meta_data, columnEntryData, dummyRID);
 	}
-	return SUCCESS;
+
+	//cout << "ins-ret: " << retVal << endl;
+	return retVal;
 }
 
 /**
@@ -275,12 +282,12 @@ RelationManager::deleteTable(const string &tableName) {
 
 	//the handle for the tables table to delete the table
 	FileHandle tTable_handle;
-	FILE * ttable = fopen(tables_table_name.c_str(), "a");
+	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tTable_handle.setFileDescriptor(ttable);
 
 	//the handle for the columns table
 	FileHandle cTable_handle;
-	FILE * ctable = fopen(columns_table_name.c_str(), "a");
+	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	cTable_handle.setFileDescriptor(ctable);
 
 	//the attribute vector that will be used to erase the table
@@ -325,7 +332,8 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	//make the filehandle and set it to the columns table
 	FileHandle tab_handle;
-	FILE * ttable = fopen(tables_table_name.c_str(), "a");
+	//cout << "output " << tables_table_name.c_str() << endl;
+	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tab_handle.setFileDescriptor(ttable);
 
 	//the table's table attribute vector:
@@ -371,7 +379,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	//make the filehandle and set it to the columns table
 	FileHandle col_handle;
-	FILE * ctable = fopen(columns_table_name.c_str(), "a");
+	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	col_handle.setFileDescriptor(ctable);
 
 	//set up the attributes for each column
@@ -425,18 +433,24 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	int control = 0;
 
 	while(control == 0) {
+cout << "looping" << endl;
 		RID metaRID;
-		unsigned char* data;
+		unsigned char* data = new unsigned char[NAME_LEN+20];
 		control = colRecordIter.getNextRecord(metaRID, data);
-		
+		if(data == NULL) { 
+			cout << "ERROR: NULL DATA!" << endl;
+		}
+
+		printRawData(data,60);
+
 		Attribute pushMe;
 
 		//extract the name
 		char* attrName = new char[NAME_LEN];
-		int endOff = NAME_LEN + 4;
-		for(int aa = 4; aa < endOff; aa++) {
-			attrName[aa] = data[aa];
+		for(int aa = 0; aa < NAME_LEN; aa++) {
+			attrName[aa] = data[aa+4];
 		}
+		cout << "name is: " << attrName << endl;
 
 		//compact and set the name
 		for(int aa = 0; attrName[aa] != '\0'; aa++) {
@@ -462,7 +476,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		} else if (accu == 2) {
 			pushMe.type = TypeVarChar;
 		} else {
-			cout << "ERROR READING ATTRIBUTE TYPE!" << endl;
+			cout << "ERROR READING ATTRIBUTE TYPE { " << pushMe.type << " }" << endl;
 		}
 
 		//extract the length
@@ -504,7 +518,7 @@ RelationManager::deleteTuples(const string &tableName) {
 	int retVal = -1;
 
 	FileHandle clearMe;
-	FILE * _clearMe = fopen(tableFileName.c_str(), "a");
+	FILE * _clearMe = fopen(tableFileName.c_str(), "r+");
 	clearMe.setFileDescriptor(_clearMe);
 
 	retVal = sysTableHandler.deleteRecords(clearMe);
@@ -525,7 +539,7 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 	int retVal = -1;
 
 	FileHandle clearMe;
-	FILE * _clearMe = fopen(tableFileName.c_str(), "a");
+	FILE * _clearMe = fopen(tableFileName.c_str(), "r+");
 	clearMe.setFileDescriptor(_clearMe);
 
 	//the Record Descriptor
@@ -575,7 +589,8 @@ int
 RelationManager::readAttribute(const string &tableName, const RID &rid, const string &attributeName, void *data) {
 	// Open table file
 	FileHandle fileHandle;
-	FILE *table_file ;//= fopen(user + tableName.c_str() + ".tab", "a");
+	string filename = user + tableName + ".tab";
+	FILE *table_file = fopen(filename.c_str(), "r+");
 	if (table_file == NULL) return -1;
 	fileHandle.setFileDescriptor(table_file);
 
@@ -597,7 +612,8 @@ int
 RelationManager::scan(const string &tableName, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RM_ScanIterator &rm_ScanIterator) {
 	// Open table file
 	FileHandle fileHandle;
-	FILE *table_file ;//= fopen(user + tableName + ".tab", "a");
+	string filename = user + tableName + ".tab";
+	FILE *table_file = fopen(filename.c_str(), "r+");
 	if (table_file == NULL) { return -1; }
 	fileHandle.setFileDescriptor(table_file);
 
@@ -634,7 +650,8 @@ RelationManager::printRawData(unsigned char* data, int len) {
 		} else if(data[i] == 0) {
 			cout << "NULL";
 		} else {
-			cout << " ** " << data[i];
+			int foo = data[i];
+			cout << " ! " << foo;
 		}
 		cout << endl;
 	}

@@ -176,7 +176,12 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 	vector<void*> dataVector;
 
 	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++){
-		if (fileHandle.readPage(i, cur_page) != SUCCESS){
+
+		int success_val = fileHandle.readPage(i, cur_page);
+		cout << "success_val: " << success_val << endl;
+
+		if (success_val != SUCCESS){
+			cout << "i = " << i << endl;
 			cout << "fileHandle.getNumberOfPages() = " << fileHandle.getNumberOfPages() << endl;
 			return -1;
 		}
@@ -534,7 +539,9 @@ RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attrib
 	unsigned i;
 
 	for (i = 0; i < fileHandle.getNumberOfPages(); i++) {
-		if (fileHandle.readPage(i, pageData) != SUCCESS) {
+		int temp0 = fileHandle.readPage(i, pageData);
+		if (temp0 != SUCCESS) {
+			cout << "temp0 is: " << temp0 << endl;
 			return 1;
 		}
 

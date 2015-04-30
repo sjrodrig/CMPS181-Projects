@@ -9,6 +9,7 @@
 #define user "usr_"
 #define system "sys_"
 #define NAME_LEN 40
+#define DEBUG 0
 
 class RM_ScanIterator {
 private:
