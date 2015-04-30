@@ -8,12 +8,14 @@
 
 #define user "usr_"
 #define system "sys_"
+#define NAME_LEN 40
 
 class RM_ScanIterator {
 private:
   RBFM_ScanIterator rbfm_SI;
 
 public:
+	RM_ScanIterator() {}
 	RM_ScanIterator(RBFM_ScanIterator &r) { this->rbfm_SI = r; }
 	~RM_ScanIterator() {}
 
@@ -33,8 +35,12 @@ private:
 	string tables_table_name;
 	string columns_table_name;
 	int tableIDs;
-	//every table has this attribute exactly the same
+	//every table has these attribute exactly the same
 	Attribute TableID;
+	Attribute ColumnType;
+	Attribute ColumnLength;
+
+	void printRawData(unsigned char* data, int len);
 
 protected:
 public:

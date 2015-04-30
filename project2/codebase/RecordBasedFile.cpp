@@ -177,6 +177,7 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 
 	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++){
 		if (fileHandle.readPage(i, cur_page) != SUCCESS){
+			cout << "fileHandle.getNumberOfPages() = " << fileHandle.getNumberOfPages() << endl;
 			return -1;
 		}
 		header = getSlotDirectoryHeader(cur_page);

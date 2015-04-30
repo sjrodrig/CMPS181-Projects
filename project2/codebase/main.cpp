@@ -41,6 +41,11 @@ int main() {
 	rm->createTable("foo", nullVec);
 	// other tests go here
 
+	const string tableName = "foo";
+	vector<Attribute> attrs;
+
+	rm->getAttributes(tableName, attrs);
+
 	cout << "OK" << endl;
 	
 	exit(0);
