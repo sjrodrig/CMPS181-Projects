@@ -155,6 +155,9 @@ public:
 		const void *value,                    // used in the comparison
 		const vector<string> &attributeNames, // a list of projected attributes
 		RBFM_ScanIterator &rbfm_ScanIterator);
+	bool checkScanCondition(int dataInt, CompOp compOp, const void * value);
+	bool checkScanCondition(float dataFloat, CompOp compOp, const void * value);
+	bool checkScanCondition(char* dataString, CompOp compOp, const void * value);
 
 // Extra credit for part 2 of the project, please ignore for part 1 of the project
 	int reorganizeFile(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor);

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdexcept>
 #include <stdio.h>
+#include <algorithm>
 #include "RecordBasedFile.h"
 
 /**
@@ -168,10 +169,9 @@ RecordBasedFileManager::readAttribute(FileHandle &fileHandle, const vector<Attri
 // scan returns an iterator to allow the caller to go through the results one by one. 
 int
 RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RBFM_ScanIterator &rbfm_ScanIterator) {
-	if (rbfm_ScanIterator == NULL) rbfm_ScanIterator = new RBFM_ScanIterator();
 	void *cur_page = malloc(PAGE_SIZE);
-	SlotDirectoryHeader header = NULL;
-	SlotDirectoryRecordEntry record_entry = NULL;
+	SlotDirectoryHeader header;
+	SlotDirectoryRecordEntry record_entry;
 	vector<RID> rids;
 	vector<void*> dataVector;
 
@@ -195,10 +195,9 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 					unsigned read_offset = 0;
 					unsigned write_offset = 0;
 					bool data_found = false;
-					for (unsigned int i = 0; i < recordDescriptor.size() && !attr_found; i++){
+					for (unsigned int i = 0; i < recordDescriptor.size(); i++){
 						Attribute cur_attribute = recordDescriptor[i];
-						bool attr_found = false;
-						if (cur_attribute.name IS IN attributeNames) attr_found = true;
+						bool attr_found = (find(attributeNames.begin(), attributeNames.end(), recordDescriptor[i].name) != attributeNames.end());
 						switch(cur_attribute.type){
 							case TypeInt:
 								if (attr_found){

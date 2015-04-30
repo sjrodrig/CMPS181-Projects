@@ -385,7 +385,49 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 //This method reads a specific attribute of a tuple identified by a given rid. 
 int
 RelationManager::readAttribute(const string &tableName, const RID &rid, const string &attributeName, void *data) {
-	return -1;
+	// Open table file
+	FileHandle fileHandle;
+	FILE *table_file ;//= fopen(user + tableName.c_str() + ".tab", "a");
+	if (table_file == NULL) return -1;
+	fileHandle.setFileDescriptor(table_file);
+
+	// Fetch table attributes
+	vector<Attribute> recordDescriptor;
+	if (getAttributes(tableName, recordDescriptor) != SUCCESS){
+		return -2;
+	}
+
+	// Read the attribute in the table
+	if (sysTableHandler.readAttribute(fileHandle, recordDescriptor, rid, attributeName, data) != SUCCESS){
+		return -2;
+	}
+	return SUCCESS;
+}
+
+//This method scans a table called tableName. That is, it sequentially reads all the entries in the table. This method returns an iterator called rm_ScanIterator to allow the caller to go through the records in the table one by one. A scan has a filter condition associated with it, e.g., it consists of a list of attributes to project out as well as a predicate on an attribute (“Sal > 40000”). Note: the RBFM_ScanIterator should not cache the entire scan result in memory. In fact, you need to be looking at one (or a few) page(s) of data at a time, ever. In this project, let the OS do the memory-management work for you. 
+int
+RelationManager::scan(const string &tableName, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RM_ScanIterator &rm_ScanIterator) {
+	// Open table file
+	FileHandle fileHandle;
+	FILE *table_file ;//= fopen(user + tableName + ".tab", "a");
+	if (table_file == NULL) return -1;
+	fileHandle.setFileDescriptor(table_file);
+
+	// Fetch table attributes
+	vector<Attribute> recordDescriptor;
+	if (getAttributes(tableName, recordDescriptor) != SUCCESS){
+		return -2;
+	}
+
+	// Initialize iterator for record scan
+	RBFM_ScanIterator record_iterator = RBFM_ScanIterator();
+	if (sysTableHandler.scan(fileHandle, recordDescriptor, conditionAttribute, compOp, value, attributeNames, record_iterator) != SUCCESS){
+		return -3;
+	}
+
+	// Set the result iterator & return
+	rm_ScanIterator = RM_ScanIterator(record_iterator); 
+	return SUCCESS;
 }
 
 //This method reorganizes the tuples in a page. That is, it pushes the free space towards the end of the page. Note: In this method you are NOT allowed to change the rids, since they might be used by other external index structures, and it's too expensive to modify those structures for each such a function call. It's OK to keep those deleted tuples and their slots. 
@@ -393,26 +435,3 @@ int
 RelationManager::reorganizePage(const string &tableName, const unsigned pageNumber) {
 	return -1;
 }
-
-//This method scans a table called tableName. That is, it sequentially reads all the entries in the table. This method returns an iterator called rm_ScanIterator to allow the caller to go through the records in the table one by one. A scan has a filter condition associated with it, e.g., it consists of a list of attributes to project out as well as a predicate on an attribute (“Sal > 40000”). Note: the RBFM_ScanIterator should not cache the entire scan result in memory. In fact, you need to be looking at one (or a few) page(s) of data at a time, ever. In this project, let the OS do the memory-management work for you. 
-int
-RelationManager::scan(const string &tableName, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RM_ScanIterator &rm_ScanIterator) {
-
-
-
-	//call this >>
-	/*int scan(FileHandle &fileHandle,
-		const vector<Attribute> &recordDescriptor,
-		const string &conditionAttribute,
-		const CompOp compOp,                  // comparision type such as "<" and "="
-		const void *value,                    // used in the comparison
-		const vector<string> &attributeNames, // a list of projected attributes
-		RBFM_ScanIterator &rbfm_ScanIterator);*/
-
-
-
-
-	return -1;
-}
-
-
