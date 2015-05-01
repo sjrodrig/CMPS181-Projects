@@ -142,6 +142,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	//assemble the data
 	int data_len = ((NAME_LEN * 2) + 20);
+	cout << "data_len is: " << data_len << endl;
 	unsigned char* tableEntryData = new unsigned char[data_len];
 	for(int init = 0; init < data_len; init++) { tableEntryData[init] = 127; }
 
@@ -152,13 +153,15 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	int new_table_id = tableIDs;
 	int aa;
 
+	//This is an integer--set it's value
 	for(aa = 0; aa < 4; aa++) {
 		unsigned char meta = (new_table_id % 256);
 		tableEntryData[aa] = meta;
 		new_table_id /= 256;
 	}
 
-	int meta = tableName.size();
+	int meta = NAME_LEN;
+	cout << "meta: " << meta << endl; 
 	for(; aa < 8; aa++) {
 		tableEntryData[aa] = (meta % 256);
 		meta /= 256;
@@ -176,7 +179,8 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	int cc = aa + 4;
 
-	meta = (tableName.size() + 8);
+	meta = (NAME_LEN + 8);
+	cout << "meta: " << meta << endl; 
 
 	for(; aa < cc; aa++) {
 		tableEntryData[aa] = (meta % 256);
@@ -209,7 +213,10 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		tableEntryData[aa] = 0;
 	}
 
-	if(DEBUG) { printRawData(tableEntryData, data_len); }
+	if(DEBUG) {
+		cout << "inserting data:" << endl;
+		printRawData(tableEntryData, data_len);
+	}
 	int retVal;
 	retVal = sysTableHandler.insertRecord(tableTable_handle, tabAttrs, tableEntryData, dummyRID);
 	if( retVal != SUCCESS ) {
@@ -239,7 +246,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		}
 
 		//enter the number preceeding the columnName
-		int temp = colName.size();
+		int temp = NAME_LEN;
 
 		for(; ee < 8; ee++) {
 			columnEntryData[ee] = (temp % 256);
@@ -267,6 +274,9 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 			meta3 /= 256;
 		}
 
+		//cout << "inserting col data:" << endl;
+		//printRawData(columnEntryData,60);
+
 		void* _columnEntryData = columnEntryData;
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 	}
@@ -276,7 +286,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 }
 
 /**
- * @INCOMPLETE
+ * @COMPLETE
  * This method deletes a table called tableName. 
  */
 int
@@ -348,7 +358,7 @@ printRawData(tableRecord, 100);
 }
 
 /**
- * COMPLETED
+ * BROKEN
  * This method gets the attributes (attrs) of a table called tableName. 
  */
 int
@@ -368,10 +378,17 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	//the iterator
 	RBFM_ScanIterator tableRecordIter;
 	RID metaRID;															//a return value
-	unsigned char* data_value = new unsigned char[NAME_LEN*2+20];			//raw data
+	unsigned char* data_value = new unsigned char[PAGE_SIZE];				//the page
 	tableRecordIter.getNextRecord(metaRID, data_value);
 
-printRawData(data_value, 100);
+cout << "table data:" << endl;
+printRawToFile(data_value, PAGE_SIZE, true);
+
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*
+need to get the table's id from the page!
+PAGE DATA APPEARS SCRAMBLED
+*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
 	//copy the table's id.
 	memcpy(&tableID, data_value, 4);
@@ -417,7 +434,7 @@ printRawData(data_value, 100);
 	int control = 0;
 
 	while(control == 0) {
-cout << "looping" << endl;
+cout << "Reading Column Data" << endl;
 		RID metaRID;
 		unsigned char* data = new unsigned char[NAME_LEN+20];
 		control = colRecordIter.getNextRecord(metaRID, data);
@@ -425,7 +442,8 @@ cout << "looping" << endl;
 			cout << "ERROR: NULL DATA!" << endl;
 		}
 
-		printRawData(data,60);
+		//cout << "col data:" << endl;
+		//printRawData(data,60);
 
 		Attribute pushMe;
 
@@ -616,7 +634,7 @@ RelationManager::readAttribute(const string &tableName, const RID &rid, const st
 
 	// Read the attribute in the table
 	if (sysTableHandler.readAttribute(fileHandle, recordDescriptor, rid, attributeName, data) != SUCCESS){
-		return -2;
+		return -3;
 	}
 	return SUCCESS;
 }
@@ -676,4 +694,26 @@ RelationManager::printRawData(unsigned char* data, int len) {
 		if((i+1) % 8 == 0) { cout << endl; }
 	}
 	cout << endl;
+}
+
+void
+RelationManager::printRawToFile(unsigned char* data, int len, bool all) {
+	ofstream outfile;
+	outfile.open("dumpfile.dump");
+
+	for(int i = 0; i < len; i++) {
+		unsigned char meta = data[i];
+		if(all || meta != 0) {
+			outfile << "[";
+			if (i < 10) { outfile << "0"; }
+			if (i < 100) { outfile << "0"; }
+			if (i < 1000) { outfile << "0"; }
+			outfile << i << "] ";
+			unsigned char meta = data[i];
+			outfile << (bitset<8>) meta;
+		}
+		if(all && ((i+1) % 8 == 0)) { outfile << endl; }
+		if(!all && meta != 0) { outfile << endl; }
+	}
+	outfile << endl;
 }

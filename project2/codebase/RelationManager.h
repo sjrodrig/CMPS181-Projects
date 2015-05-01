@@ -44,6 +44,7 @@ private:
 
 	int tableIDs;
 	void printRawData(unsigned char* data, int len);
+	void printRawToFile(unsigned char* data, int len, bool all);
 
 protected:
 public:

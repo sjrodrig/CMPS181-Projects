@@ -40,6 +40,7 @@ remake:
 purge:
 	make clear
 	rm -f *.tab
+	rm -f *.dump
 	clear
 
 
