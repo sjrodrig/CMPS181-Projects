@@ -44,7 +44,7 @@ int main() {
 	const string tableName = "foo";
 	vector<Attribute> attrs;
 
-	rm->getAttributes(tableName, attrs);
+	rm->deleteTable(tableName);
 
 	cout << "OK" << endl;
 	

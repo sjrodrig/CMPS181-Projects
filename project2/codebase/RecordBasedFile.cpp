@@ -518,7 +518,7 @@ unsigned RecordBasedFileManager::getRecordSize(const vector<Attribute> &recordDe
 				// We have to get the size of the VarChar field by reading the integer that precedes the string value itself.
 				memcpy(&varcharSize, (char*) data + size, VARCHAR_LENGTH_SIZE);
 				// We also have to account for the overhead given by that integer.
-				cout << "varcharSize: " << varcharSize << endl;
+				//cout << "varcharSize: " << varcharSize << endl;
 				size += INT_SIZE + varcharSize;
 			break; }
 		}
@@ -532,7 +532,7 @@ RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attrib
 
     // Gets the size of the record.
 	unsigned recordSize = getRecordSize(recordDescriptor, data);
-	cout << "recordSize auto-determined to be: " << recordSize << endl;
+	//cout << "recordSize auto-determined to be: " << recordSize << endl;
 
 	// Cycles through pages looking for enough free space for the new entry.
 	void * pageData = malloc(PAGE_SIZE);
