@@ -26,7 +26,7 @@
  * deleteTuples() 		Complete
  * deleteTuple() 		Complete
  * updateTuple() 		Complete
- * readTuple() 			*Unstarted
+ * readTuple() 			Complete
  * readAttribute() 		Complete
  * reorganizePage() 	>>Unstarted
  * scan()				Complete
@@ -564,7 +564,20 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 //This method reads a tuple identified by a given rid. 
 int
 RelationManager::readTuple(const string &tableName, const RID &rid, void *data) {
-	return -1;
+	int retVal;
+
+	//the handle for the tables table to delete the table
+	FileHandle handle;
+	string s0 = user + tableName + ".tab";
+	FILE * tableFile = fopen(s0.c_str(), "r+");
+	handle.setFileDescriptor(tableFile);
+
+	vector<Attribute> tableAttrs;
+	getAttributes(tableName, tableAttrs);
+	const vector<Attribute> _tableAttrs = tableAttrs;
+
+	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
+	return retVal;
 }
 
 //This method reads a specific attribute of a tuple identified by a given rid. 
