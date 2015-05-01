@@ -20,7 +20,7 @@
  * Constructor() 		Complete
  * Destructior() 		Complete
  * createTable() 		Complete
- * deleteTable() 		*Incomplete
+ * deleteTable() 		Complete
  * getAttributes() 		Complete
  * insertTuple() 		*Unstarted
  * deleteTuples() 		Complete
@@ -282,7 +282,11 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 int
 RelationManager::deleteTable(const string &tableName) {
 	//a table ID which will be used for finding the columns to delete
-	int delete_this_ID, retVal;
+	int retVal;
+	RID tableRID, columnRID;
+	RBFM_ScanIterator tableRecordIter, colRecordIter;
+	int tableID = 0;
+	int control = 0;
 
 	//delete the file
 	string tableFileName = user + tableName + ".tab";
@@ -298,13 +302,14 @@ RelationManager::deleteTable(const string &tableName) {
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	cTable_handle.setFileDescriptor(ctable);
 
-	//the attribute vectors that will be used to erase the table
-	const vector<string> _table_attributeNames = tabNames;
-	const vector<Attribute> _table_recordDescriptor = tabAttrs;
+	//the attribute vectors that will be used to erase the table and it's columns
+	const vector<string> table_attrNames = tabNames;
+	const vector<Attribute> table_recordDescriptor = tabAttrs;
+	const vector<string> column_attrNames = colNames;
+	const vector<Attribute> column_recordDescriptor = colAttrs;
 
-	RBFM_ScanIterator tableRecordIter;
-
-	retVal = sysTableHandler.scan(tTable_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
+	//get the table's RID + data
+	retVal = sysTableHandler.scan(tTable_handle, table_recordDescriptor, "TableName", EQ_OP, &tableName, table_attrNames, tableRecordIter);
 
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::deleteTable) Couldn't find table " << tableName << " in table's table." << endl;
@@ -312,21 +317,34 @@ RelationManager::deleteTable(const string &tableName) {
 		return retVal;
 	}
 
-	unsigned char* data_value = new unsigned char[NAME_LEN*2+20];			//raw data
-	tableRecordIter.getNextRecord(metaRID, data_value);
+	unsigned char* tableRecord = new unsigned char[NAME_LEN*2+20];			//raw data
+	unsigned char* columnRecord = new unsigned char[NAME_LEN+20];
+	tableRecordIter.getNextRecord(tableRID, tableRecord);
 
-printRawData(data_value, 100);
+printRawData(tableRecord, 100);
 
-	/** @PSUEDO-CODE
-	 * Read the table's ID
-	 * Scan the columns for all columns with the table's ID
-	 * delete those columns
-	 * call the following method on the table
-	 * call the following method on each column with the table's ID
-	 * sysTableHandler.deleteRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid)
-	 */
+	memcpy(&tableID, tableRecord, 4);
 
-	return SUCCESS;
+	//delete the table from the table of tables
+	sysTableHandler.deleteRecord(tTable_handle, table_recordDescriptor, tableRID);
+
+	//get the columns's RID + data
+	retVal = sysTableHandler.scan(cTable_handle, column_recordDescriptor, "TableName", EQ_OP, &tableName, column_attrNames, colRecordIter);
+
+	if( retVal != SUCCESS ) {
+		//cout << "(RelationManager::deleteTable) Couldn't find table " << tableName << " in table's table." << endl;
+		cout << "Failing with: " << retVal << endl;
+		return retVal;
+	}
+
+	//delete the table's columns from the table of columns
+	while(control == 0) {
+		control = colRecordIter.getNextRecord(columnRID, columnRecord);
+		if(control != 0) { continue; }
+		sysTableHandler.deleteRecord(cTable_handle, column_recordDescriptor, columnRID);
+	}
+
+	return retVal;
 }
 
 /**
@@ -386,16 +404,6 @@ printRawData(data_value, 100);
 	void* t_ID = malloc(4);
 	//copy the table's id.
 	memcpy(t_ID, &tableID, 4);
-
-	/*
-	int scan(FileHandle &fileHandle,
-		const vector<Attribute> &recordDescriptor,
-		const string &conditionAttribute,
-		const CompOp compOp,                  // comparision type such as "<" and "="
-		const void *value,                    // used in the comparison
-		const vector<string> &attributeNames, // a list of projected attributes
-		RBFM_ScanIterator &rbfm_ScanIterator);
-	*/
 
 	retVal = sysTableHandler.scan(col_handle, _col_recordDescriptor, "TableID", EQ_OP, t_ID, _col_attributeNames, colRecordIter);
 
@@ -504,7 +512,6 @@ RelationManager::deleteTuples(const string &tableName) {
 
 /**
  * COMPLETE
- * descriptor does not have any attributes; it needs some way of getting the appropriate values.
  * 
  * This method deletes a tuple with a given rid. 
  */
@@ -521,7 +528,7 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 	//the Record Descriptor
 	vector<Attribute> descriptor;
 
-	//assign the table's attributes to "deriptor"
+	//assign the table's attributes to "descriptor"
 	getAttributes(tableFileName, descriptor);
 
 	retVal = sysTableHandler.deleteRecord(clearMe, descriptor, rid);
