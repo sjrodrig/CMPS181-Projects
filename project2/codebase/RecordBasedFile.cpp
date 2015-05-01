@@ -178,7 +178,7 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++){
 
 		int success_val = fileHandle.readPage(i, cur_page);
-		cout << "success_val: " << success_val << endl;
+		//cout << "success_val: " << success_val << endl;
 
 		if (success_val != SUCCESS){
 			cout << "i = " << i << endl;
@@ -547,7 +547,10 @@ RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attrib
 			return 1;
 		}
 
-		// When we find a page with enough space (accounting also for the size that will be added to the slot directory), we stop the loop.
+		/* When we find a page with enough space
+		 * (accounting also for the size that will be added to the slot directory),
+		 * we stop the loop.
+		 */
 		if (getPageFreeSpaceSize(pageData) >= sizeof(SlotDirectoryRecordEntry) + recordSize) {
 			pageFound = true;
 			break;

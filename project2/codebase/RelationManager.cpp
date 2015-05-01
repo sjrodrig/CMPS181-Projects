@@ -17,11 +17,11 @@
 #define flagA "flag #A"
 
 /** Progress:
- * Constructor() 		Complete
+ * Constructor() 		Complete + Tested
  * Destructior() 		Complete
- * createTable() 		Complete
+ * createTable() 		Complete + Tested
  * deleteTable() 		Complete
- * getAttributes() 		Complete
+ * getAttributes() 		Complete + Tested
  * insertTuple() 		Complete
  * deleteTuples() 		Complete
  * deleteTuple() 		Complete
@@ -232,10 +232,10 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	//for loop to add all the columns to the columns table
 	for(unsigned int index = 0; index < attrs.size(); index++) {
-		//cout << "looping: " << index << endl;
+		cout << "looping: " << index << endl;
 
 		string colName = attrs.at(index).name;
-		//cout << "colName is: " << colName << endl;
+		cout << "colName is: " << colName << endl;
 
 		unsigned char* columnEntryData = new unsigned char[NAME_LEN+16];
 		int ee;
@@ -259,6 +259,11 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 			columnEntryData[ee] = cName[ee-8];
 		}
 
+		//fill everything else with zeros
+		for(; ee < 48; ee++) {
+			columnEntryData[ee] = 0;
+		}
+
 		//enter the column's type
 		int dd;
 		int meta2 = attrs.at(index).type;
@@ -273,9 +278,6 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 			columnEntryData[ee+dd] = (meta3 % 256);
 			meta3 /= 256;
 		}
-
-		//cout << "inserting col data:" << endl;
-		//printRawData(columnEntryData,60);
 
 		void* _columnEntryData = columnEntryData;
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
@@ -358,7 +360,7 @@ printRawData(tableRecord, 100);
 }
 
 /**
- * BROKEN
+ * COMPLETE
  * This method gets the attributes (attrs) of a table called tableName. 
  */
 int
@@ -377,39 +379,41 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	//the iterator
 	RBFM_ScanIterator tableRecordIter;
-	RID metaRID;															//a return value
-	unsigned char* data_value = new unsigned char[PAGE_SIZE];				//the page
-	tableRecordIter.getNextRecord(metaRID, data_value);
 
-cout << "table data:" << endl;
-printRawToFile(data_value, PAGE_SIZE, true);
-
-
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*
-need to get the table's id from the page!
-PAGE DATA APPEARS SCRAMBLED
-*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-
-	//copy the table's id.
-	memcpy(&tableID, data_value, 4);
-
-	cout << "tableID is: " << tableID << endl;
-
+	//now scan
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
 
+	//check if scan was successful
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
 		cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
 
-	//--------------------------------------------------------------------------------------------
+	RID metaRID;															//a return value
+	unsigned char* data_value = new unsigned char[PAGE_SIZE];				//the page
+	tableRecordIter.getNextRecord(metaRID, data_value);
+
+	unsigned char* dataTuple = new unsigned char[(NAME_LEN * 2) + 20];
+	retVal = sysTableHandler.readRecord(tab_handle,  _table_recordDescriptor, metaRID, dataTuple);
+
+//printRawData(dataTuple, ((NAME_LEN * 2) + 20));
+//cout << "----------------------------------------------------------------------------------------------" << endl;
+
+	if( retVal != SUCCESS ) {
+		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
+		cout << "Failing with: " << retVal << endl;
+		return retVal;
+	}
+	//copy the table's id.
+	memcpy(&tableID, dataTuple, 4);
+
+//cout << "tableID is: " << tableID << endl;
 
 	//make the filehandle and set it to the columns table
 	FileHandle col_handle;
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	col_handle.setFileDescriptor(ctable);
-
 
 	//the vectors:
 	const vector<Attribute> _col_recordDescriptor = colAttrs;
@@ -434,35 +438,38 @@ PAGE DATA APPEARS SCRAMBLED
 	int control = 0;
 
 	while(control == 0) {
-cout << "Reading Column Data" << endl;
-		RID metaRID;
+//cout << "Reading Column Data" << endl;
+		RID metaRID2;
+		unsigned char* dataPage = new unsigned char[PAGE_SIZE];
 		unsigned char* data = new unsigned char[NAME_LEN+20];
-		control = colRecordIter.getNextRecord(metaRID, data);
+		control = colRecordIter.getNextRecord(metaRID2, data);
+
+		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
+
+//cout << "reading col data:" << endl;
+//printRawData(data,56);
+
 		if(data == NULL) { 
 			cout << "ERROR: NULL DATA!" << endl;
 		}
-
-		//cout << "col data:" << endl;
-		//printRawData(data,60);
 
 		Attribute pushMe;
 
 		//extract the name
 		char* attrName = new char[NAME_LEN];
-		for(int aa = 0; aa < NAME_LEN; aa++) {
-			attrName[aa] = data[aa+4];
+		for(int aa = 8; aa < NAME_LEN+8; aa++) {
+			attrName[aa-8] = data[aa];
 		}
-		//cout << "name is: " << attrName << endl;
 
 		//compact and set the name
 		for(int aa = 0; attrName[aa] != '\0'; aa++) {
 			pushMe.name += attrName[aa];
 		}
-		//cout << "name is: " << pushMe.name << endl;
+		cout << "name is: " << pushMe.name << endl;
 
 		//extract the type
 		unsigned char* typeData = new unsigned char[4];
-		for(int aa = (NAME_LEN + 4); aa < (NAME_LEN + 8); aa++) { typeData[aa] = data[aa+NAME_LEN+4]; }
+		for(int aa = (NAME_LEN + 8); aa < (NAME_LEN + 12); aa++) { typeData[aa-(NAME_LEN+8)] = data[aa]; }
 		
 		int power = 1;
 		int accu = 0;
@@ -483,8 +490,8 @@ cout << "Reading Column Data" << endl;
 
 		//extract the length
 		unsigned char* lenData = new unsigned char[4];
-		for(int aa = (NAME_LEN + 8); aa < (NAME_LEN + 12); aa++) { lenData[aa] = data[aa+NAME_LEN+4]; }
-		
+		for(int aa = (NAME_LEN + 12); aa < (NAME_LEN + 16); aa++) { lenData[aa-(NAME_LEN+12)] = data[aa]; }
+
 		int _power = 1;
 		int _accu = 0;
 		for(int bb = 0; bb < 4; bb++) {
@@ -691,7 +698,7 @@ RelationManager::printRawData(unsigned char* data, int len) {
 			cout << "'" << foo << "'";
 		}
 		cout << "} ";*/
-		if((i+1) % 8 == 0) { cout << endl; }
+		if((i+1) % 4 == 0) { cout << endl; }
 	}
 	cout << endl;
 }
@@ -712,7 +719,7 @@ RelationManager::printRawToFile(unsigned char* data, int len, bool all) {
 			unsigned char meta = data[i];
 			outfile << (bitset<8>) meta;
 		}
-		if(all && ((i+1) % 8 == 0)) { outfile << endl; }
+		if(all && ((i+1) % 4 == 0)) { outfile << endl; }
 		if(!all && meta != 0) { outfile << endl; }
 	}
 	outfile << endl;

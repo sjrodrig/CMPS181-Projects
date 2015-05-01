@@ -26,7 +26,7 @@ int main() {
 
 	Attribute foo;
 	foo.name = "foo";
-	foo.length = 5;
+	foo.length = 566534;
 	foo.type = TypeVarChar;
 	nullVec.push_back(foo);
 
