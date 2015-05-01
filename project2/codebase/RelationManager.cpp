@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <bitset>
 
 #define flag0 "flag #0"
 #define flag1 "flag #1"
@@ -43,17 +44,56 @@ RelationManager::RelationManager() {
 	columns_table_name = "sys_columns.tab";
 	tableIDs = 0;
 
+	//Table Attributes
+	Attribute TableID;
 	TableID.name = "TableID";
 	TableID.type = TypeInt;
 	TableID.length = 4;
 
+	Attribute TableName;
+	TableName.name = "TableName";
+	TableName.type = TypeVarChar;
+	TableName.length = NAME_LEN;
+
+	Attribute FileName;
+	FileName.name = "FileName";
+	FileName.type = TypeVarChar;
+	FileName.length = (NAME_LEN + 8);
+
+	//Column Attributes
+	Attribute ColumnName;
+	ColumnName.name = "ColumnName";
+	ColumnName.type = TypeVarChar;
+	ColumnName.length = NAME_LEN;		//get the size of the name
+
+	Attribute ColumnType;
 	ColumnType.name = "ColumnType";
 	ColumnType.type = TypeInt;
 	ColumnType.length = 4;
 
+	Attribute ColumnLength;
 	ColumnLength.name = "ColumnLength";
 	ColumnLength.type = TypeInt;
 	ColumnLength.length = 4;
+
+	tabAttrs.push_back(TableID);
+	tabAttrs.push_back(TableName);
+	tabAttrs.push_back(FileName);
+
+	colAttrs.push_back(TableID);
+	colAttrs.push_back(ColumnName);
+	colAttrs.push_back(ColumnType);
+	colAttrs.push_back(ColumnLength);
+
+	//table names
+	tabNames.push_back("TableID");
+	tabNames.push_back("TableName");
+	tabNames.push_back("FileName");
+
+	colNames.push_back("TableID");
+	colNames.push_back("ColumnName");
+	colNames.push_back("ColumnType");
+	colNames.push_back("ColumnLength");
 
 	ifstream checkStream(tables_table_name.c_str());
 
@@ -99,24 +139,6 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tableTable_handle.setFileDescriptor(ttable);
-
-	//the meta-data for the table
-	vector<Attribute> table_meta_data;
-	
-	Attribute TableName;
-	TableName.name = "TableName";
-	TableName.type = TypeVarChar;
-	TableName.length = NAME_LEN;
-
-	Attribute FileName;
-	FileName.name = "FileName";
-	FileName.type = TypeVarChar;
-	FileName.length = (NAME_LEN + 8);
-
-	//assemble the vector
-	table_meta_data.push_back(TableID);
-	table_meta_data.push_back(TableName);
-	table_meta_data.push_back(FileName);
 
 	//assemble the data
 	int data_len = ((NAME_LEN * 2) + 20);
@@ -189,7 +211,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	if(DEBUG) { printRawData(tableEntryData, data_len); }
 	int retVal;
-	retVal = sysTableHandler.insertRecord(tableTable_handle, table_meta_data, tableEntryData, dummyRID);
+	retVal = sysTableHandler.insertRecord(tableTable_handle, tabAttrs, tableEntryData, dummyRID);
 	if( retVal != SUCCESS ) {
 		cout << "failing with: " << retVal << endl;
 		return retVal;
@@ -208,20 +230,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		string colName = attrs.at(index).name;
 		//cout << "colName is: " << colName << endl;
 
-		//set up the attributes for each column
-		Attribute ColumnName;
-		ColumnName.name = "ColumnName";
-		ColumnName.type = TypeVarChar;
-		ColumnName.length = NAME_LEN;		//get the size of the name
-
-		//set up the attribute vector
-		vector<Attribute> column_meta_data;
-		column_meta_data.push_back(TableID);
-		column_meta_data.push_back(ColumnName);
-		column_meta_data.push_back(ColumnType);
-		column_meta_data.push_back(ColumnLength);
-
-		unsigned char* columnEntryData = new unsigned char[ColumnName.length+16];
+		unsigned char* columnEntryData = new unsigned char[NAME_LEN+16];
 		int ee;
 
 		//enter the tableID
@@ -259,7 +268,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		}
 
 		void* _columnEntryData = columnEntryData;
-		sysTableHandler.insertRecord(columnTable_handle, column_meta_data, columnEntryData, dummyRID);
+		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 	}
 
 	cout << "ins-ret: " << retVal << endl;
@@ -273,7 +282,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 int
 RelationManager::deleteTable(const string &tableName) {
 	//a table ID which will be used for finding the columns to delete
-	int delete_this_ID;
+	int delete_this_ID, retVal;
 
 	//delete the file
 	string tableFileName = user + tableName + ".tab";
@@ -289,26 +298,26 @@ RelationManager::deleteTable(const string &tableName) {
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	cTable_handle.setFileDescriptor(ctable);
 
-	//the attribute vector that will be used to erase the table
-	vector<Attribute> tableEraser;
+	//the attribute vectors that will be used to erase the table
+	const vector<string> _table_attributeNames = tabNames;
+	const vector<Attribute> _table_recordDescriptor = tabAttrs;
 
-	Attribute TableName;
-	TableName.name = "TableName";
-	TableName.type = TypeVarChar;
-	TableName.length = tableName.size();
+	RBFM_ScanIterator tableRecordIter;
 
-	Attribute FileName;
-	FileName.name = "FileName";
-	FileName.type = TypeVarChar;
-	FileName.length = (tableName.size() + 8);
+	retVal = sysTableHandler.scan(tTable_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
 
-	//assemble the vector
-	tableEraser.push_back(TableID);
-	tableEraser.push_back(TableName);
-	tableEraser.push_back(FileName);
+	if( retVal != SUCCESS ) {
+		cout << "(RelationManager::deleteTable) Couldn't find table " << tableName << " in table's table." << endl;
+		cout << "Failing with: " << retVal << endl;
+		return retVal;
+	}
+
+	unsigned char* data_value = new unsigned char[NAME_LEN*2+20];			//raw data
+	tableRecordIter.getNextRecord(metaRID, data_value);
+
+printRawData(data_value, 100);
 
 	/** @PSUEDO-CODE
-	 * Going to have to get the (table's) RID someway (scan)?
 	 * Read the table's ID
 	 * Scan the columns for all columns with the table's ID
 	 * delete those columns
@@ -335,33 +344,16 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tab_handle.setFileDescriptor(ttable);
 
-	//the table's table attribute vector:
-	vector<Attribute> table_recordDescriptor;
-	Attribute TableName;
-	TableName.name = "TableName";
-	TableName.type = TypeVarChar;
-	TableName.length = NAME_LEN;
-	Attribute FileName;
-	FileName.name = "FileName";
-	FileName.type = TypeVarChar;
-	FileName.length = (NAME_LEN + 8);
-	table_recordDescriptor.push_back(TableID);
-	table_recordDescriptor.push_back(TableName);
-	table_recordDescriptor.push_back(FileName);
-	const vector<Attribute> _table_recordDescriptor = table_recordDescriptor;
-
-	//the table's table attribute names:
-	vector<string> table_attributeNames;
-	table_attributeNames.push_back("TableID");
-	table_attributeNames.push_back("TableName");
-	table_attributeNames.push_back("FileName");
-	const vector<string> _table_attributeNames = table_attributeNames;
+	const vector<Attribute> _table_recordDescriptor = tabAttrs;
+	const vector<string> _table_attributeNames = tabNames;
 
 	//the iterator
 	RBFM_ScanIterator tableRecordIter;
-	RID metaRID;										//a return value
-	void* data_value = malloc(PAGE_SIZE);				//raw data
+	RID metaRID;															//a return value
+	unsigned char* data_value = new unsigned char[NAME_LEN*2+20];			//raw data
 	tableRecordIter.getNextRecord(metaRID, data_value);
+
+printRawData(data_value, 100);
 
 	//copy the table's id.
 	memcpy(&tableID, data_value, 4);
@@ -383,27 +375,10 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	col_handle.setFileDescriptor(ctable);
 
-	//set up the attributes for each column
-	Attribute ColumnName;
-	ColumnName.name = "ColumnName";
-	ColumnName.type = TypeVarChar;
-	ColumnName.length = NAME_LEN;		//get the size of the name
-
-	vector<Attribute> col_recordDescriptor;
-	col_recordDescriptor.push_back(TableID);
-	col_recordDescriptor.push_back(ColumnName);
-	col_recordDescriptor.push_back(ColumnType);
-	col_recordDescriptor.push_back(ColumnLength);
-
-	vector<string> col_attributeNames;
-	col_attributeNames.push_back("TableID");
-	col_attributeNames.push_back("ColumnName");
-	col_attributeNames.push_back("ColumnType");
-	col_attributeNames.push_back("ColumnLength");
 
 	//the vectors:
-	const vector<Attribute> _col_recordDescriptor = col_recordDescriptor;
-	const vector<string> _col_attributeNames = col_attributeNames;
+	const vector<Attribute> _col_recordDescriptor = colAttrs;
+	const vector<string> _col_attributeNames = colNames;
 
 	//the iterator
 	RBFM_ScanIterator colRecordIter;
@@ -644,8 +619,13 @@ RelationManager::reorganizePage(const string &tableName, const unsigned pageNumb
 void
 RelationManager::printRawData(unsigned char* data, int len) {
 	for(int i = 0; i < len; i++) {
-		cout << "{ [" << i << "] ";
-		if(data[i] > 32 && data[i] < 127) {
+		cout << "[";
+		if (i < 10) { cout << "0"; }
+		cout << i << "] ";
+		unsigned char meta = data[i];
+		cout << (bitset<8>) meta;
+
+		/*if(data[i] > 32 && data[i] < 127) {
 			char c = data[i];
 			cout << c;
 		} else if(data[i] == 0) {
@@ -654,8 +634,8 @@ RelationManager::printRawData(unsigned char* data, int len) {
 			int foo = data[i];
 			cout << "'" << foo << "'";
 		}
-		cout << "} ";
-		if(i % 10 == 0) { cout << endl; }
+		cout << "} ";*/
+		if((i+1) % 8 == 0) { cout << endl; }
 	}
 	cout << endl;
 }

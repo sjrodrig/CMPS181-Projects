@@ -35,12 +35,14 @@ private:
 	RecordBasedFileManager sysTableHandler;
 	string tables_table_name;
 	string columns_table_name;
-	int tableIDs;
-	//every table has these attribute exactly the same
-	Attribute TableID;
-	Attribute ColumnType;
-	Attribute ColumnLength;
 
+	//attributes and their names for the system tables
+	vector<Attribute> tabAttrs;
+	vector<Attribute> colAttrs;
+	vector<string> tabNames;
+	vector<string> colNames;
+
+	int tableIDs;
 	void printRawData(unsigned char* data, int len);
 
 protected:
