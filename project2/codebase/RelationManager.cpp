@@ -22,7 +22,7 @@
  * createTable() 		Complete
  * deleteTable() 		Complete
  * getAttributes() 		Complete
- * insertTuple() 		*Unstarted
+ * insertTuple() 		Complete
  * deleteTuples() 		Complete
  * deleteTuple() 		Complete
  * updateTuple() 		Complete
@@ -483,10 +483,28 @@ cout << "looping" << endl;
 	return retVal;
 }
 
-//This method inserts a tuple into a table called tableName. You can assume that the input is always correct and free of error. That is, you do not need to check if the input tuple has the right number of attributes and if the attribute types match. 
+/**
+ * This method inserts a tuple into a table called tableName.
+ * You can assume that the input is always correct and free of error.
+ * That is, you do not need to check if the input tuple has the right number of attributes and if the attribute types match. 
+ */
 int
 RelationManager::insertTuple(const string &tableName, const void *data, RID &rid) {
-	return -1;
+	string tableFileName = user + tableName + ".tab";
+	//the return value
+	int retVal = -1;
+
+	FileHandle insertHandle;
+	FILE * tableFile = fopen(tableFileName.c_str(), "r+");
+	insertHandle.setFileDescriptor(tableFile);
+
+	vector<Attribute> insertVector;
+	getAttributes(tableName, insertVector);
+	const vector<Attribute> _insertVector = insertVector;
+
+	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
+
+	return retVal;
 }
 
 /**
