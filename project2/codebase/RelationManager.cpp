@@ -4,17 +4,17 @@
 #include <cstring>
 #include <bitset>
 
-#define flag0 "flag #0"
-#define flag1 "flag #1"
-#define flag2 "flag #2"
-#define flag3 "flag #3"
-#define flag4 "flag #4"
-#define flag5 "flag #5"
-#define flag6 "flag #6"
-#define flag7 "flag #7"
-#define flag8 "flag #8"
-#define flag9 "flag #9"
-#define flagA "flag #A"
+#define f0 "flag #0"
+#define f1 "flag #1"
+#define f2 "flag #2"
+#define f3 "flag #3"
+#define f4 "flag #4"
+#define f5 "flag #5"
+#define f6 "flag #6"
+#define f7 "flag #7"
+#define f8 "flag #8"
+#define f9 "flag #9"
+#define fA "flag #A"
 
 /** Progress:
  * Constructor() 		Complete + Tested
@@ -438,12 +438,11 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	//[TAB_ID-4][NAME-VAR][TYPE-4][LEN-4]
 	int control = 0;
 
-	while(control == 0) {
-//cout << "Reading Column Data" << endl;
-		RID metaRID2;
-		unsigned char* dataPage = new unsigned char[PAGE_SIZE];
-		unsigned char* data = new unsigned char[NAME_LEN+20];
-		control = colRecordIter.getNextRecord(metaRID2, data);
+	RID metaRID2;
+	unsigned char* dataPage = new unsigned char[PAGE_SIZE];
+	unsigned char* data = new unsigned char[NAME_LEN+20];
+
+	 for(control = colRecordIter.getNextRecord(metaRID2, data); control == 0; control = colRecordIter.getNextRecord(metaRID2, data)) {
 
 		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
 
@@ -466,7 +465,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		for(int aa = 0; attrName[aa] != '\0'; aa++) {
 			pushMe.name += attrName[aa];
 		}
-		cout << "name is: " << pushMe.name << endl;
+		//cout << "name is: " << pushMe.name << endl;
 
 		//extract the type
 		unsigned char* typeData = new unsigned char[4];
@@ -501,7 +500,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		}
 
 		pushMe.length = _accu;
-		cout << "length is: " << pushMe.length << endl;
+		//cout << "length is: " << pushMe.length << endl;
 
 		attrs.push_back(pushMe);
 	}
@@ -520,15 +519,26 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	//the return value
 	int retVal = -1;
 
+//unsigned char* ucdata;
+//ucdata = (unsigned char*) data;
+//printRawData(ucdata,16);
+
 	FileHandle insertHandle;
 	FILE * tableFile = fopen(tableFileName.c_str(), "r+");
 	insertHandle.setFileDescriptor(tableFile);
 
+//cout << f0 << endl;
+
 	vector<Attribute> insertVector;
 	getAttributes(tableName, insertVector);
+
+//cout << "attr_size is: " << insertVector.size() << endl;
+
 	const vector<Attribute> _insertVector = insertVector;
 
+//cout << f1 << endl;
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
+//cout << f2 << endl;
 
 	return retVal;
 }

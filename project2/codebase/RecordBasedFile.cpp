@@ -508,9 +508,11 @@ unsigned RecordBasedFileManager::getRecordSize(const vector<Attribute> &recordDe
 		switch (recordDescriptor[i].type) {
 			case TypeInt: {
 				size += INT_SIZE;
+//cout << "int+" << endl;
 			break; }
 			case TypeReal: {
 				size += REAL_SIZE;
+//cout << "rl+" << endl;
 			break; }
 			case TypeVarChar: {
 				// We have to get the size of the VarChar field by reading the integer that precedes the string value itself.
@@ -528,9 +530,13 @@ unsigned RecordBasedFileManager::getRecordSize(const vector<Attribute> &recordDe
 int
 RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid) {
 
+//cout << "f_" << endl;
+
     // Gets the size of the record.
 	unsigned recordSize = getRecordSize(recordDescriptor, data);
 	//cout << "recordSize auto-determined to be: " << recordSize << endl;
+
+//cout << "f*" << endl;
 
 	// Cycles through pages looking for enough free space for the new entry.
 	void * pageData = malloc(PAGE_SIZE);
