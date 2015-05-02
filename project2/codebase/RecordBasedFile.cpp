@@ -10,7 +10,7 @@
 
 /**
  * @modifier: Benjamin (Benjy) Strauss
- * @modifier: Paul Mini
+ * @modifier: Paul-Valentin Mini (pcamille)
  * 
  */
 
@@ -40,7 +40,7 @@ RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
  * Return Values
  * X where X > 0: insert failed
  * -1 = can't read the page
- * 
+ * -2 = invalid rid.slotNum
  * -3 = can't write to the page
  *
  */
@@ -80,44 +80,45 @@ RecordBasedFileManager::deleteRecord(FileHandle &fileHandle, const vector<Attrib
  * Update a record identified by the given rid.
  * Return Values
  * X where X > 0: insert failed
- * -1 = can't read the page
- * 
- * -3 = can't write to the page
- *
+ * -1 = can't delete the page
+ * -2 = can't insert the page
+ * -3 = can't read to the page
+ * -4 = can't write to the page
  */
 int 
 RecordBasedFileManager::updateRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, const RID &rid) {
 	// Assume the rid does not change after update
 	void* newPage = malloc(PAGE_SIZE);
-	
-	deleteRecord(fileHandle, recordDescriptor, rid);
-	RID newRID;
-	int insertVal = insertRecord(fileHandle, recordDescriptor, data, newRID);
 
-	//insert failed
-	if(insertVal != SUCCESS) {
-		return insertVal;
+	// Delete the old record
+	if (deleteRecord(fileHandle, recordDescriptor, rid) != SUCCESS){
+		return -1;
+	}
+
+	// Insert the updated record
+	RID newRID;
+	if (insertRecord(fileHandle, recordDescriptor, data, newRID) != SUCCESS){
+		return -2;
 	}
 
 	if(newRID != rid) {
 		if(fileHandle.readPage(rid.pageNum, newPage) != SUCCESS) {
-			return -1;
+			return -3;
 		}
 
-		//get the info from the file
+		// Get the info from the file
 		SlotDirectoryRecordEntry mySDRE;
 		
 		mySDRE.recordEntryType = Tombstone;
 		mySDRE.tombStoneRID = newRID;
 
-		//set the lot SlotDirectoryRecordEntry to the new
+		// Set the lot SlotDirectoryRecordEntry to the new
 		setSlotDirectoryRecordEntry(newPage, rid.slotNum, mySDRE);
 
 		if(fileHandle.writePage(rid.pageNum, newPage) != SUCCESS) {
-			return -3;
+			return -4;
 		}
 	}
-	
 	free(newPage);
 	return SUCCESS;
 }
@@ -176,15 +177,12 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 	vector<void*> dataVector;
 
 	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++){
-
-		int success_val = fileHandle.readPage(i, cur_page);
-		//cout << "success_val: " << success_val << endl;
-
-		if (success_val != SUCCESS){
+		if (fileHandle.readPage(i, cur_page) != SUCCESS){
 			cout << "i = " << i << endl;
 			cout << "fileHandle.getNumberOfPages() = " << fileHandle.getNumberOfPages() << endl;
 			return -1;
 		}
+		
 		header = getSlotDirectoryHeader(cur_page);
 		for (unsigned j = 0; j < header.recordEntriesNumber; j++){
 			record_entry = getSlotDirectoryRecordEntry(cur_page, j);
@@ -618,6 +616,23 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
 
 	// Gets the slot directory record entry data.
 	SlotDirectoryRecordEntry recordEntry = getSlotDirectoryRecordEntry(pageData, rid.slotNum);
+
+	// Cycle through any tombstones
+	RID old_rid = rid;
+	while(recordEntry.recordEntryType == Tombstone){
+		RID new_rid = recordEntry.tombStoneRID;
+		if (old_rid.pageNum != new_rid.pageNum){
+			if (fileHandle.readPage(new_rid.pageNum, pageData) != SUCCESS){
+				return 1;
+			}
+			slotHeader = getSlotDirectoryHeader(pageData);
+		}
+		if (slotHeader.recordEntriesNumber < new_rid.slotNum){
+			return 2;
+		}
+		recordEntry = getSlotDirectoryRecordEntry(pageData);
+		old_rid = new_rid;
+	}
 
 	// Retrieve the actual entry data.
 	memcpy	((char*) data, ((char*) pageData + recordEntry.offset), recordEntry.length);
