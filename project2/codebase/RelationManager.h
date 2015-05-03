@@ -32,6 +32,7 @@ public:
 
 class RelationManager {
 private:
+	static RelationManager *_rm_manager;
 	RecordBasedFileManager sysTableHandler;
 	string tables_table_name;
 	string columns_table_name;
@@ -50,6 +51,7 @@ protected:
 public:
 	RelationManager();
 	~RelationManager();
+	static RelationManager* instance();
 	int createTable(const string &tableName, const vector<Attribute> &attrs);
 	int deleteTable(const string &tableName);
 	int getAttributes(const string &tableName, vector<Attribute> &attrs);

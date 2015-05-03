@@ -34,6 +34,17 @@
 
 using namespace std;
 
+
+/**
+ * Relation Manager Instance Manager
+ */
+RelationManager* RelationManager::_rm_manager = 0;
+
+RelationManager* RelationManager::instance() {
+	if (!_rm_manager) { _rm_manager = new RelationManager(); }
+	return _rm_manager;
+}
+
 /**
  * constructor
  *
@@ -388,8 +399,8 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	//check if scan was successful
 	if( retVal != SUCCESS ) {
-		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
-		cout << "Failing with: " << retVal << endl;
+		// cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
+		// cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
 
@@ -565,6 +576,8 @@ RelationManager::deleteTuples(const string &tableName) {
 	FILE * _clearMe = fopen(tableFileName.c_str(), "r+");
 	clearMe.setFileDescriptor(_clearMe);
 
+	cout << "GOT HERE " << endl;
+
 	retVal = sysTableHandler.deleteRecords(clearMe);
 
 	return retVal;
@@ -599,7 +612,12 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 /**
  * Simple delete + insert
  *
- * This method updates a tuple identified by a given rid. Note: if the tuple grows (i.e., the size of tuple increases) and there is no space in the page to store the tuple (after the update), then, the tuple is migrated to a new page with enough free space. Since you will implement an index structure (e.g., B-tree) in project 3, you can assume that tuples are identified by their rids and when they migrate, they leave a tombstone behind pointing to the new location of the tuple.
+ * This method updates a tuple identified by a given rid. Note: if the tuple grows 
+ * (i.e., the size of tuple increases) and there is no space in the page to store the tuple 
+ * (after the update), then, the tuple is migrated to a new page with enough free space. 
+ * Since you will implement an index structure (e.g., B-tree) in project 3, you can assume 
+ * that tuples are identified by their rids and when they migrate, they leave a tombstone 
+ * behind pointing to the new location of the tuple.
  */
 int
 RelationManager::updateTuple(const string &tableName, const void *data, const RID &rid) {
@@ -607,7 +625,7 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 	retVal = deleteTuple(tableName, rid);
 
 	if(retVal != SUCCESS) { //delete failed
-		cout << "Delete Error" << endl;
+		cout << "ERROR: Failed to delete tuple targeted in update." << endl;
 		return retVal;
 	}
 
@@ -616,9 +634,7 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 	ins.slotNum = rid.slotNum;
 	ins.pageNum = rid.pageNum;
 
-	retVal = insertTuple(tableName, insert_this, ins);
-
-	return retVal;
+	return insertTuple(tableName, insert_this, ins);
 }
 
 //This method reads a tuple identified by a given rid. 
@@ -633,7 +649,9 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	handle.setFileDescriptor(tableFile);
 
 	vector<Attribute> tableAttrs;
-	getAttributes(tableName, tableAttrs);
+	if (getAttributes(tableName, tableAttrs) != SUCCESS){
+		return -1;
+	}
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
 	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
