@@ -124,26 +124,23 @@ int
 RelationManager::createTable(const string &tableName, const vector<Attribute> &attrs) {
 	string tableFileName = user + tableName + ".tab";
 
-	if (sysTableHandler.createFile(tableFileName) != SUCCESS){
-		// Couldn't make the file
+	int go = sysTableHandler.createFile(tableFileName);
+	//couldn't make the file...
+	if(go != SUCCESS) { 
 		cout << "Couldn't make file for table: \"" << tableName << "\"" << endl;
 		return 1;
 	}
 
-	// A dummy RID to be returned
+	//A dummy RID to be returned
 	RID dummyRID;
 
-	// Handle for the tables table
+	//handle for the tables table
 	FileHandle tableTable_handle;
 
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
-	if (ttable == NULL) {
-		cout << "Couldn't open tables table file for table: \"" << tableName << "\"" << endl;
-		return 1;
-	}
 	tableTable_handle.setFileDescriptor(ttable);
 
-	// Assemble the data
+	//assemble the data
 	int data_len = ((NAME_LEN * 2) + 20);
 	//cout << "data_len is: " << data_len << endl;
 	unsigned char* tableEntryData = new unsigned char[data_len];
@@ -220,13 +217,14 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		cout << "inserting data:" << endl;
 		printRawData(tableEntryData, data_len);
 	}
-	int retVal = sysTableHandler.insertRecord(tableTable_handle, tabAttrs, tableEntryData, dummyRID);
-	if (retVal != SUCCESS){
-		cout << "Failing with: " << retVal << endl;
+	int retVal;
+	retVal = sysTableHandler.insertRecord(tableTable_handle, tabAttrs, tableEntryData, dummyRID);
+	if( retVal != SUCCESS ) {
+		cout << "failing with: " << retVal << endl;
 		return retVal;
 	}
 
-	// Handle for the columns table
+	//handle for the columns table
 	FileHandle columnTable_handle;
 
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
@@ -282,12 +280,11 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		}
 
 		void* _columnEntryData = columnEntryData;
-		if (sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID) != SUCCESS){
-			cout << "Failed to insertRecord." << endl;
-			return 1;
-		}
+		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 	}
-	return SUCCESS;
+
+	//cout << "ins-ret: " << retVal << endl;
+	return retVal;
 }
 
 /**
@@ -438,17 +435,22 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	//[TAB_ID-4][NAME-VAR][TYPE-4][LEN-4]
 	int control = 0;
 
+
+//printRawToFile(unsigned char* data, int len, bool all)
+
 	RID metaRID2;
 	unsigned char* dataPage = new unsigned char[PAGE_SIZE];
 	unsigned char* data = new unsigned char[NAME_LEN+20];
 
-	 for(control = colRecordIter.getNextRecord(metaRID2, data); control == 0; control = colRecordIter.getNextRecord(metaRID2, data)) {
+	 for(control = colRecordIter.getNextRecord(metaRID2, dataPage); control == 0; control = colRecordIter.getNextRecord(metaRID2, dataPage)) {
 
 		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
 
-//cout << "reading col data:" << endl;
-//printRawData(data,56);
-
+		if(DEBUG) {
+			cout << "reading col data:" << endl;
+			printRawToFile(data, PAGE_SIZE, true);
+		}
+		
 		if(data == NULL) { 
 			cout << "ERROR: NULL DATA!" << endl;
 		}
@@ -478,6 +480,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 			power *= 256;
 		}
 
+//cout << "accu is: " << accu << endl;
 		if(accu == 0) {
 			pushMe.type = TypeInt;
 		} else if (accu == 1) {
@@ -485,7 +488,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		} else if (accu == 2) {
 			pushMe.type = TypeVarChar;
 		} else {
-			cout << "ERROR READING ATTRIBUTE TYPE { " << pushMe.type << " }" << endl;
+			cout << "ERROR READING ATTRIBUTE TYPE { " << accu << " }" << endl;
 		}
 
 		//extract the length
@@ -519,9 +522,12 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	//the return value
 	int retVal = -1;
 
-//unsigned char* ucdata;
-//ucdata = (unsigned char*) data;
-//printRawData(ucdata,16);
+	if (DEBUG) {
+		cout << "Inserting Data:" << endl;
+		unsigned char* ucdata;
+		ucdata = (unsigned char*) data;
+		printRawData(ucdata,14);
+	}
 
 	FileHandle insertHandle;
 	FILE * tableFile = fopen(tableFileName.c_str(), "r+");
@@ -631,6 +637,13 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
 	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
+
+	if(DEBUG) {
+		unsigned char* meta;
+		retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, meta);
+		printRawData(meta, 14);
+	}
+
 	return retVal;
 }
 
@@ -699,16 +712,6 @@ RelationManager::printRawData(unsigned char* data, int len) {
 		unsigned char meta = data[i];
 		cout << (bitset<8>) meta;
 
-		/*if(data[i] > 32 && data[i] < 127) {
-			char c = data[i];
-			cout << c;
-		} else if(data[i] == 0) {
-			cout << "NULL";
-		} else {
-			int foo = data[i];
-			cout << "'" << foo << "'";
-		}
-		cout << "} ";*/
 		if((i+1) % 4 == 0) { cout << endl; }
 	}
 	cout << endl;

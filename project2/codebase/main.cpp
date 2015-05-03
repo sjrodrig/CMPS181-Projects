@@ -30,19 +30,19 @@ int main() {
 	foo.type = TypeVarChar;
 	nullVec.push_back(foo);
 
+	Attribute bar;
+	bar.name = "bar";
+	bar.length = INT_SIZE;
+	bar.type = TypeInt;
+	nullVec.push_back(bar);
+
 	RID dummyID;
 	dummyID.pageNum = 0;
 	dummyID.slotNum = 0;
 
-	/*Attribute bar;
-	bar.name = "barq";
-	bar.length = 127;
-	bar.type = TypeVarChar;
-	nullVec.push_back(bar);*/
+	const string tableName = "foom";
 
-	rbfTest();
-
-	unsigned char* meta = new unsigned char[10];
+	unsigned char* meta = new unsigned char[14];
 	meta[0] = 6; //<--this is what is auto-determining the size
 	meta[1] = 0;
 	meta[2] = 0;
@@ -51,19 +51,25 @@ int main() {
 	meta[5] = 'e';
 	meta[6] = 's';
 	meta[7] = 't';
-	meta[8] = '*';
+	meta[8] = 0;
 	meta[9] = 0;
+	meta[10] = 0xDE;
+	meta[11] = 0xAD;
+	meta[12] = 0xD0;
+	meta[13] = 0x0D;
 
-	rm->createTable("foo", nullVec);
+	unsigned char* _meta = new unsigned char[14];
 
-	rm->insertTuple("foo", meta, dummyID);
+	rm->createTable(tableName, nullVec);
 
-	rm->createTable("bar", nullVec);
+	rm->insertTuple(tableName, meta, dummyID);
 
+	//rm->createTable("bar", nullVec);
+	rm->readTuple(tableName, dummyID, _meta);
 
 	// other tests go here
+	rbfTest();
 
-	const string tableName = "foo";
 	vector<Attribute> attrs;
 
 	rm->deleteTable(tableName);
