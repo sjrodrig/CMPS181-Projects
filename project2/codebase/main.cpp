@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 
+//#include "test_util.h"
 #include "FileManager.h"
 #include "RecordBasedFile.h"
 #include "RelationManager.h"
@@ -13,6 +14,8 @@ RelationManager *rm;
 void rbfTest() {
   PagedFileManager *pfm = PagedFileManager::instance();
   RecordBasedFileManager *rbfm = RecordBasedFileManager::instance();
+
+	rm->deleteTuples("foom");
 
   // write your own testing cases here
 }

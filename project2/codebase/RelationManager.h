@@ -1,8 +1,8 @@
 #include "RecordBasedFile.h"
 
 /**
- * @modifier: Benjamin (Benjy) Strauss
- * @modifier: Paul Mini
+ * @author: Benjamin (Benjy) Strauss
+ * @author: Paul Mini
  * 
  */
 

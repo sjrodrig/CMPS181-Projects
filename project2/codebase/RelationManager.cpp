@@ -576,7 +576,7 @@ RelationManager::deleteTuples(const string &tableName) {
 	FILE * _clearMe = fopen(tableFileName.c_str(), "r+");
 	clearMe.setFileDescriptor(_clearMe);
 
-	cout << "GOT HERE " << endl;
+	cout << "GOT HERE" << endl;
 
 	retVal = sysTableHandler.deleteRecords(clearMe);
 
@@ -611,6 +611,7 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 
 /**
  * Simple delete + insert
+ * Should work now
  *
  * This method updates a tuple identified by a given rid. Note: if the tuple grows 
  * (i.e., the size of tuple increases) and there is no space in the page to store the tuple 
@@ -622,6 +623,19 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 int
 RelationManager::updateTuple(const string &tableName, const void *data, const RID &rid) {
 	int retVal;
+	string tableFileName = user + tableName + ".tab";
+
+	FileHandle fixMe;
+	FILE * _fixMe = fopen(tableFileName.c_str(), "r+");
+	fixMe.setFileDescriptor(_fixMe);
+
+	vector<Attribute> tableAttrs;
+	getAttributes(tableName, tableAttrs);
+	const vector<Attribute> recordDescriptor = tableAttrs;
+
+	retVal = sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);
+
+	/** Old code
 	retVal = deleteTuple(tableName, rid);
 
 	if(retVal != SUCCESS) { //delete failed
@@ -629,12 +643,12 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 		return retVal;
 	}
 
-	const void* insert_this = data;
 	RID ins;
 	ins.slotNum = rid.slotNum;
 	ins.pageNum = rid.pageNum;
-
-	return insertTuple(tableName, insert_this, ins);
+	retVal = insertTuple(tableName, data, ins);
+	*/
+	return retVal;
 }
 
 //This method reads a tuple identified by a given rid. 
