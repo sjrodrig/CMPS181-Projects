@@ -2,14 +2,27 @@
 #include <iostream>
 #include <cassert>
 
-//#include "test_util.h"
+#include "test_util.h"
 #include "FileManager.h"
 #include "RecordBasedFile.h"
-#include "RelationManager.h"
+//#include "RelationManager.h"
+
+#define f0 "flag #0"
+#define f1 "flag #1"
+#define f2 "flag #2"
+#define f3 "flag #3"
+#define f4 "flag #4"
+#define f5 "flag #5"
+#define f6 "flag #6"
+#define f7 "flag #7"
+#define f8 "flag #8"
+#define f9 "flag #9"
+#define fA "flag #A"
+
 
 using namespace std;
 
-RelationManager *rm;
+//RelationManager *rm;
 
 void rbfTest() {
   PagedFileManager *pfm = PagedFileManager::instance();
@@ -20,62 +33,73 @@ void rbfTest() {
   // write your own testing cases here
 }
 
+void TEST_RM_5(const string &tableName, const int nameLength, const string &name, const int age, const float height, const int salary)
+{
+    // Functions Tested
+    // 0. Insert tuple;
+    // 1. Read Tuple
+    // 2. Delete Tuples **
+    // 3. Read Tuple
+    cout << "****In Test Case 5****" << endl;
+    
+    RID rid;
+    int tupleSize = 0;
+    void *tuple = malloc(100);
+    void *returnedData = malloc(100);
+    void *returnedData1 = malloc(100);
+   
+    // Test Insert Tuple 
+    prepareTuple(nameLength, name, age, height, salary, tuple, &tupleSize);
+    RC rc = rm->insertTuple(tableName, tuple, rid);
+    assert(rc == success);
+
+    // Test Read Tuple
+    rc = rm->readTuple(tableName, rid, returnedData);
+    assert(rc == success);
+    printTuple(returnedData, tupleSize);
+
+    cout << "Now Deleting..." << endl;
+
+    // Test Delete Tuples
+    rc = rm->deleteTuples(tableName);
+
+    assert(rc == success);
+    
+    // Test Read Tuple
+    memset((char*)returnedData1, 0, 100);
+cout << "GOT HERE" << endl;
+    rc = rm->readTuple(tableName, rid, returnedData1);
+cout << "DIDN'T GET HERE" << endl;
+    assert(rc != success);
+
+    printTuple(returnedData1, tupleSize);
+    
+    if(memcmp(tuple, returnedData1, tupleSize) != 0)
+    {
+        cout << "****Test case 5 passed****" << endl << endl;
+    }
+    else
+    {
+        cout << "****Test case 5 failed****" << endl << endl;
+    }
+       
+    free(tuple);
+    free(returnedData);
+    free(returnedData1);
+    return;
+}
 
 int main() {
 	cout << "test..." << endl;
 
 	rm = new RelationManager();
-	vector<Attribute> nullVec;
-
-	Attribute foo;
-	foo.name = "foo";
-	foo.length = 6;
-	foo.type = TypeVarChar;
-	nullVec.push_back(foo);
-
-	Attribute bar;
-	bar.name = "bar";
-	bar.length = INT_SIZE;
-	bar.type = TypeInt;
-	nullVec.push_back(bar);
-
-	RID dummyID;
-	dummyID.pageNum = 0;
-	dummyID.slotNum = 0;
-
-	const string tableName = "foom";
-
-	unsigned char* meta = new unsigned char[14];
-	meta[0] = 6; //<--this is what is auto-determining the size
-	meta[1] = 0;
-	meta[2] = 0;
-	meta[3] = 0;	
-	meta[4] = 't';
-	meta[5] = 'e';
-	meta[6] = 's';
-	meta[7] = 't';
-	meta[8] = 0;
-	meta[9] = 0;
-	meta[10] = 0xDE;
-	meta[11] = 0xAD;
-	meta[12] = 0xD0;
-	meta[13] = 0x0D;
-
-	unsigned char* _meta = new unsigned char[14];
-
-	rm->createTable(tableName, nullVec);
-
-	rm->insertTuple(tableName, meta, dummyID);
-
-	//rm->createTable("bar", nullVec);
-	rm->readTuple(tableName, dummyID, _meta);
+	
+	createTable("tbl_employee");
+    // Delete Tuples
+    TEST_RM_5("tbl_employee", 6, "Dillon", 29, 172.5, 7000);
 
 	// other tests go here
 	rbfTest();
-
-	vector<Attribute> attrs;
-
-	rm->deleteTable(tableName);
 
 	cout << "OK" << endl;
 	

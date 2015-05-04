@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <algorithm>
+#include <bitset>
 #include "RecordBasedFile.h"
 
 /**
@@ -617,8 +618,12 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
 		return 2;
 	}
 
+//cout << "-0-" << endl;
+
 	// Gets the slot directory record entry data.
 	SlotDirectoryRecordEntry recordEntry = getSlotDirectoryRecordEntry(pageData, rid.slotNum);
+
+//cout << "-1-" << endl;
 
 	// Cycle through any tombstones
 	RID old_rid = rid;
@@ -636,12 +641,29 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
 		recordEntry = getSlotDirectoryRecordEntry(pageData, new_rid.slotNum);
 		old_rid = new_rid;
 	}
-	if (recordEntry.recordEntryType == Dead){
+
+//cout << "-2-" << endl;
+
+	if (recordEntry.recordEntryType == Dead) {
 		return 5;
 	}
 
+
+cout << "-3-" << endl;
+cout << "Diagnostics" << endl;
+cout << "recordEntry.offset: " << recordEntry.offset << endl;
+cout << "recordEntry.length: " << recordEntry.length << endl;
+cout << "sizeof data: " << sizeof( data ) << endl;
+cout << "data: " << (unsigned char*) data << endl;
+cout << "sizeof pageData: " << sizeof( pageData ) << endl;
+cout << "pageData: " << (unsigned char*) pageData << endl;
+
+cout << "sizeof pageData + offset: " << sizeof((char*) pageData + recordEntry.offset) << endl;
+
 	// Retrieve the actual entry data.
 	memcpy	((char*) data, ((char*) pageData + recordEntry.offset), recordEntry.length);
+
+//cout << "-4-" << endl;
 
 	free(pageData);
 	return 0;

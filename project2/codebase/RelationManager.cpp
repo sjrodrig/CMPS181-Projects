@@ -549,7 +549,11 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	vector<Attribute> insertVector;
 	getAttributes(tableName, insertVector);
 
-//cout << "attr_size is: " << insertVector.size() << endl;
+	if (1) {
+		cout << "%^%^" << endl;
+		for(int i = 0; i < insertVector.size(); i++) { cout << "attr size: " << insertVector.at(i).length << endl; }
+		cout << "data size is: " << sizeof(data) << endl;
+	}
 
 	const vector<Attribute> _insertVector = insertVector;
 
@@ -561,7 +565,10 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 }
 
 /**
- * COMPLETE BUT UNTESTED!!!
+ * COMPLETE
+ *
+ * Test 5 segfaults
+ * segfault is NOT in this method.
  *
  * This method deletes all tuples in a table called tableName.
  * This command should result in an empty table.
@@ -575,8 +582,6 @@ RelationManager::deleteTuples(const string &tableName) {
 	FileHandle clearMe;
 	FILE * _clearMe = fopen(tableFileName.c_str(), "r+");
 	clearMe.setFileDescriptor(_clearMe);
-
-	cout << "GOT HERE" << endl;
 
 	retVal = sysTableHandler.deleteRecords(clearMe);
 
@@ -666,15 +671,17 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	if (getAttributes(tableName, tableAttrs) != SUCCESS){
 		return -1;
 	}
+
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
-	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
-
-	if(DEBUG) {
-		unsigned char* meta;
-		retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, meta);
-		printRawData(meta, 14);
+	if (DEBUG) {
+		for(int i = 0; i < _tableAttrs.size(); i++) { cout << "attr is: " << _tableAttrs.at(i).name << endl; }
+		cout << "data size is: " << sizeof(data) << endl;
 	}
+
+cout << f0 << endl;
+	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
+cout << f1 << endl;
 
 	return retVal;
 }
@@ -686,7 +693,7 @@ RelationManager::readAttribute(const string &tableName, const RID &rid, const st
 	FileHandle fileHandle;
 	string filename = user + tableName + ".tab";
 	FILE *table_file = fopen(filename.c_str(), "r+");
-	if (table_file == NULL) return -1;
+	if (table_file == NULL) { return -1; }
 	fileHandle.setFileDescriptor(table_file);
 
 	// Fetch table attributes
