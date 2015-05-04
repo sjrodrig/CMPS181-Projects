@@ -1,63 +1,62 @@
 #include "test_util.h"
 
-void TEST_RM_5(const string &tableName, const int nameLength, const string &name, const int age, const float height, const int salary)
+void TEST_RM_9(const string &tableName, vector<RID> &rids, vector<int> &sizes)
 {
-    // Functions Tested
-    // 0. Insert tuple;
-    // 1. Read Tuple
-    // 2. Delete Tuples **
-    // 3. Read Tuple
-    cout << "****In Test Case 5****" << endl;
-    
-    RID rid;
-    int tupleSize = 0;
-    void *tuple = malloc(100);
-    void *returnedData = malloc(100);
-    void *returnedData1 = malloc(100);
-   
-    // Test Insert Tuple 
-    prepareTuple(nameLength, name, age, height, salary, tuple, &tupleSize);
-    RC rc = rm->insertTuple(tableName, tuple, rid);
-    assert(rc == success);
+    // Functions Tested:
+    // 1. getAttributes
+    // 2. insert tuple
+    cout << "****In Test case 9****" << endl;
 
-    // Test Read Tuple
-    rc = rm->readTuple(tableName, rid, returnedData);
-    assert(rc == success);
-    printTuple(returnedData, tupleSize);
+    RID rid; 
+    void *tuple = malloc(1000);
+    int numTuples = 2000;
 
-    cout << "Now Deleting..." << endl;
-
-    // Test Delete Tuples
-    rc = rm->deleteTuples(tableName);
+    // GetAttributes
+    vector<Attribute> attrs;
+    RC rc = rm->getAttributes(tableName, attrs);
     assert(rc == success);
-    
-    // Test Read Tuple
-    memset((char*)returnedData1, 0, 100);
-    rc = rm->readTuple(tableName, rid, returnedData1);
-    assert(rc != success);
-    printTuple(returnedData1, tupleSize);
-    
-    if(memcmp(tuple, returnedData1, tupleSize) != 0)
-    {
-        cout << "****Test case 5 passed****" << endl << endl;
+	
+    for(unsigned i = 0; i < attrs.size(); i++) {
+        cout << "Attribute Name: " << attrs[i].name << endl;
+        cout << "Attribute Type: " << (AttrType)attrs[i].type << endl;
+        cout << "Attribute Length: " << attrs[i].length << endl << endl;
     }
-    else
-    {
-        cout << "****Test case 5 failed****" << endl << endl;
+
+    // Insert 2000 tuples into table
+    for(int i = 0; i < numTuples; i++) {
+		cout << "testing ith: " << i << endl;
+
+        // Test insert Tuple
+        int size = 0;
+        memset(tuple, 0, 1000);
+        prepareLargeTuple(i, tuple, &size);
+
+		if(i > 337) { cout << "time-: " << i << endl; }
+        rc = rm->insertTuple(tableName, tuple, rid);
+		if(i > 337) { cout << "time+: " << i << endl; }
+
+        assert(rc == success);
+
+        rids.push_back(rid);
+        sizes.push_back(size);        
     }
-       
+    cout << "****Test case 9 passed****" << endl << endl;
     free(tuple);
-    free(returnedData);
-    free(returnedData1);
-    return;
+    writeRIDsToDisk(rids);
+    writeSizesToDisk(sizes);
 }
 
 int main()
 {
-    cout << endl << "Test Delete Tuples .." << endl;
+    cout << endl << "Test Insert Tuple .." << endl;
+	createTable("tbl_employee4");
 
-    // Delete Tuples
-    TEST_RM_5("tbl_employee", 6, "Dillon", 29, 172.5, 7000);
+
+    vector<RID> rids;
+    vector<int> sizes;
+
+	// Insert Tuple
+    TEST_RM_9("tbl_employee4", rids, sizes);
 
     return 0;
 }

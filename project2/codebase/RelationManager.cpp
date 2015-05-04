@@ -290,7 +290,6 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 			meta3 /= 256;
 		}
 
-		void* _columnEntryData = columnEntryData;
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 	}
 
@@ -371,6 +370,10 @@ RelationManager::deleteTable(const string &tableName) {
 		control = colRecordIter.getNextRecord(columnRID, metaPage);
 	}
 
+	delete metaPage;
+	delete tableRecord;
+	delete columnRecord;
+
 	return retVal;
 }
 
@@ -383,20 +386,36 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	int tableID = 0;
 	int retVal = -1;
 
+if(CORE_DEBUG) { cout << f0 << endl; }
+
 	//make the filehandle and set it to the columns table
 	FileHandle tab_handle;
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tab_handle.setFileDescriptor(ttable);
+if(CORE_DEBUG) { cout << "ttable is: " << ttable << endl; }
 
+	if(ttable == 0) {
+		cout << "Couldn't open file--trying again." << endl;
+		ttable = fopen(tables_table_name.c_str(), "r+");
+		tab_handle.setFileDescriptor(ttable);
+	}
+	if(ttable == 0) {
+		cout << "ERROR: Can't open file!" << endl;
+		return retVal;
+	}
+
+
+if(CORE_DEBUG) { cout << f1 << endl; }
 	const vector<Attribute> _table_recordDescriptor = tabAttrs;
 	const vector<string> _table_attributeNames = tabNames;
 
 	//the iterator
 	RBFM_ScanIterator tableRecordIter;
 
+if(CORE_DEBUG) { cout << f2 << endl; }
 	//now scan
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
-
+if(CORE_DEBUG) { cout << f3 << endl; }
 	//check if scan was successful
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
@@ -457,7 +476,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
 
-		if(DEBUG) {
+		if(CORE_DEBUG) {
 			cout << "reading col data:" << endl;
 			printRawToFile(data, PAGE_SIZE, true);
 		}
@@ -516,8 +535,22 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		pushMe.length = _accu;
 		//cout << "length is: " << pushMe.length << endl;
 
+		//free the allocated pointers
+		delete attrName;
+		delete typeData;
+		delete lenData;
+
 		attrs.push_back(pushMe);
 	}
+
+	//now delete everything that isn't needed:
+	delete ttable;
+	delete ctable;
+	delete data_value;
+	delete dataTuple;
+	delete dataPage;
+	delete data;
+	free(t_ID);
 
 	return retVal;
 }
@@ -533,37 +566,36 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	//the return value
 	int retVal = -1;
 
-	if (DEBUG) {
+	if (CORE_DEBUG) {
 		cout << "Inserting Data:" << endl;
 		unsigned char* ucdata;
 		ucdata = (unsigned char*) data;
 		printRawData(ucdata,14);
+		delete ucdata;
 	}
 
 	FileHandle insertHandle;
 	FILE * tableFile = fopen(tableFileName.c_str(), "r+");
 	insertHandle.setFileDescriptor(tableFile);
 
-//cout << f0 << endl;
-
 	vector<Attribute> insertVector;
+	int testRetVal = getAttributes(tableName, insertVector);
 
-	if (getAttributes(tableName, insertVector) != SUCCESS){
+	if (testRetVal != SUCCESS){
+		free(tableFile);
 		return -1;
 	}
 
-	if (1) {
+	if (CORE_DEBUG) {
 		cout << "%^%^" << endl;
-		for(int i = 0; i < insertVector.size(); i++) { cout << "attr size: " << insertVector.at(i).length << endl; }
+		for(unsigned i = 0; i < insertVector.size(); i++) { cout << "attr size: " << insertVector.at(i).length << endl; }
 		cout << "data size is: " << sizeof(data) << endl;
 	}
 
 	const vector<Attribute> _insertVector = insertVector;
-
-//cout << f1 << endl;
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
-//cout << f2 << endl;
 
+	delete tableFile;
 	return retVal;
 }
 
@@ -681,8 +713,8 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
-	if (DEBUG) {
-		for(int i = 0; i < _tableAttrs.size(); i++) { cout << "attr is: " << _tableAttrs.at(i).name << endl; }
+	if (CORE_DEBUG) {
+		for(unsigned i = 0; i < _tableAttrs.size(); i++) { cout << "attr is: " << _tableAttrs.at(i).name << endl; }
 		cout << "data size is: " << sizeof(data) << endl;
 	}
 

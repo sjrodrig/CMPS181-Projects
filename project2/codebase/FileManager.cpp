@@ -212,7 +212,12 @@ FileHandle::appendPage(const void *data) {
 unsigned
 FileHandle::getNumberOfPages() {
     // Number of pages is given by: (file size - paged file header size) / page size
-	fseek(_fileDescriptor, 0, SEEK_END);
+	if(CORE_DEBUG) {
+		cout << "seeking" << endl;
+		cout << "_fileDescriptor is: " << _fileDescriptor << endl;
+	}
+
+	fseek(_fileDescriptor, 0, SEEK_END); //segfault here
 	return (ftell(_fileDescriptor) - PAGED_FILE_HEADER_STRING_LENGTH) / PAGE_SIZE;
 }
 

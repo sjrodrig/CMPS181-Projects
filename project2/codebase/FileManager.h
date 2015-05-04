@@ -18,6 +18,8 @@ using std::string;
 #define PAGED_FILE_HEADER_STRING "PAGED_FILE__"
 #define PAGED_FILE_HEADER_STRING_LENGTH 12
 #define SUCCESS 0
+#define CORE_DEBUG 0
+#define DEBUG 0
 
 class FileHandle {
 private:

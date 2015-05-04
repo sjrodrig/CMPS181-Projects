@@ -178,8 +178,11 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 	SlotDirectoryRecordEntry record_entry;
 	vector<RID> rids;
 	vector<void*> dataVector;
+if(CORE_DEBUG) { cout << "f0" << endl; }
+	unsigned filePages = fileHandle.getNumberOfPages();
+if(CORE_DEBUG) { cout << "filePages is: " << filePages << endl; }
 
-	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++){
+	for (unsigned i = 0; i < filePages; i++){
 
 		if (fileHandle.readPage(i, cur_page) != SUCCESS){
 			cout << "i = " << i << endl;
