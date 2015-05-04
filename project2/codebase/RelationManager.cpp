@@ -399,7 +399,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	//check if scan was successful
 	if( retVal != SUCCESS ) {
-		// cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
+		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
 		// cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
@@ -413,7 +413,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
-		cout << "Failing with: " << retVal << endl;
+		// cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
 	//copy the table's id.
@@ -547,7 +547,10 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 //cout << f0 << endl;
 
 	vector<Attribute> insertVector;
-	getAttributes(tableName, insertVector);
+
+	if (getAttributes(tableName, insertVector) != SUCCESS){
+		return -1;
+	}
 
 	if (1) {
 		cout << "%^%^" << endl;
@@ -607,7 +610,9 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 	vector<Attribute> descriptor;
 
 	//assign the table's attributes to "descriptor"
-	getAttributes(tableFileName, descriptor);
+	if (getAttributes(tableFileName, descriptor) != SUCCESS){
+		return -1;
+	}
 
 	retVal = sysTableHandler.deleteRecord(clearMe, descriptor, rid);
 
@@ -635,7 +640,9 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 	fixMe.setFileDescriptor(_fixMe);
 
 	vector<Attribute> tableAttrs;
-	getAttributes(tableName, tableAttrs);
+	if (getAttributes(tableName, tableAttrs) != SUCCESS){
+		return -1;
+	}
 	const vector<Attribute> recordDescriptor = tableAttrs;
 
 	retVal = sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);

@@ -93,9 +93,9 @@ public:
 		currentSize = 0;
 	}
 	~RBFM_ScanIterator() {
-		for (auto it = begin(dataVector); it != end(dataVector); ++it) {
-    		free(*it);
-		}
+		// for (auto it = begin(dataVector); it != end(dataVector); ++it) {
+		// 	free(*it);
+		// }
 	}
 
 	int setVectors(vector<RID> rids, vector<void*> dataVector);

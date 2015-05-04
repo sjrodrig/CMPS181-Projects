@@ -389,6 +389,7 @@ RBFM_ScanIterator::close() {
 	for (auto it = begin(this->dataVector); it != end(this->dataVector); ++it) {
     	free(*it);
 	}
+	
 	this->currentPosition = 0;
 	this->currentSize = 0;
 	return SUCCESS;
@@ -649,16 +650,16 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
 	}
 
 
-cout << "-3-" << endl;
-cout << "Diagnostics" << endl;
-cout << "recordEntry.offset: " << recordEntry.offset << endl;
-cout << "recordEntry.length: " << recordEntry.length << endl;
-cout << "sizeof data: " << sizeof( data ) << endl;
-cout << "data: " << (unsigned char*) data << endl;
-cout << "sizeof pageData: " << sizeof( pageData ) << endl;
-cout << "pageData: " << (unsigned char*) pageData << endl;
+// cout << "-3-" << endl;
+// cout << "Diagnostics" << endl;
+// cout << "recordEntry.offset: " << recordEntry.offset << endl;
+// cout << "recordEntry.length: " << recordEntry.length << endl;
+// cout << "sizeof data: " << sizeof( data ) << endl;
+// cout << "data: " << (unsigned char*) data << endl;
+// cout << "sizeof pageData: " << sizeof( pageData ) << endl;
+// cout << "pageData: " << (unsigned char*) pageData << endl;
 
-cout << "sizeof pageData + offset: " << sizeof((char*) pageData + recordEntry.offset) << endl;
+// cout << "sizeof pageData + offset: " << sizeof((char*) pageData + recordEntry.offset) << endl;
 
 	// Retrieve the actual entry data.
 	memcpy	((char*) data, ((char*) pageData + recordEntry.offset), recordEntry.length);
