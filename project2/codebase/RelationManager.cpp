@@ -753,8 +753,7 @@ int
 RelationManager::scan(const string &tableName, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RM_ScanIterator &rm_ScanIterator) {
 	// Open table file
 	FileHandle fileHandle;
-	string filename = user + tableName + ".tab";
-	FILE *table_file = fopen(filename.c_str(), "r+");
+	FILE *table_file = fopen(tableName.c_str(), "r+");
 	if (table_file == NULL) { return -1; }
 	fileHandle.setFileDescriptor(table_file);
 
