@@ -1,3 +1,13 @@
+/**
+ * RecordBasedFile.cpp
+ * CMPS181 - Spring 2015
+ * Project 2
+ *
+ * Benjamin (Benjy) Strauss
+ * Paul-Valentin Mini (pcamille)
+ */
+
+
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
@@ -9,11 +19,6 @@
 #include <bitset>
 #include "RecordBasedFile.h"
 
-/**
- * @modifier: Benjamin (Benjy) Strauss
- * @modifier: Paul Mini
- * 
- */
 
 /**
  * @Completed
@@ -41,7 +46,7 @@ RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
  * Return Values
  * X where X > 0: insert failed
  * -1 = can't read the page
- * 
+ * -2 = invalid slot number in RID
  * -3 = can't write to the page
  *
  */
@@ -178,9 +183,9 @@ RecordBasedFileManager::scan(FileHandle &fileHandle, const vector<Attribute> &re
 	SlotDirectoryRecordEntry record_entry;
 	vector<RID> rids;
 	vector<void*> dataVector;
-if(CORE_DEBUG) { cout << "f0" << endl; }
+	if(CORE_DEBUG) { cout << "f0" << endl; }
 	unsigned filePages = fileHandle.getNumberOfPages();
-if(CORE_DEBUG) { cout << "filePages is: " << filePages << endl; }
+	if(CORE_DEBUG) { cout << "filePages is: " << filePages << endl; }
 
 	for (unsigned i = 0; i < filePages; i++){
 
@@ -515,17 +520,14 @@ unsigned RecordBasedFileManager::getRecordSize(const vector<Attribute> &recordDe
 		switch (recordDescriptor[i].type) {
 			case TypeInt: {
 				size += INT_SIZE;
-//cout << "int+" << endl;
 			break; }
 			case TypeReal: {
 				size += REAL_SIZE;
-//cout << "rl+" << endl;
 			break; }
 			case TypeVarChar: {
 				// We have to get the size of the VarChar field by reading the integer that precedes the string value itself.
 				memcpy(&varcharSize, (char*) data + size, VARCHAR_LENGTH_SIZE);
 				// We also have to account for the overhead given by that integer.
-				//cout << "varcharSize: " << varcharSize << endl;
 				size += INT_SIZE + varcharSize;
 			break; }
 		}
@@ -622,12 +624,8 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
 		return 2;
 	}
 
-//cout << "-0-" << endl;
-
 	// Gets the slot directory record entry data.
 	SlotDirectoryRecordEntry recordEntry = getSlotDirectoryRecordEntry(pageData, rid.slotNum);
-
-//cout << "-1-" << endl;
 
 	// Cycle through any tombstones
 	RID old_rid = rid;
@@ -646,28 +644,12 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
 		old_rid = new_rid;
 	}
 
-//cout << "-2-" << endl;
-
 	if (recordEntry.recordEntryType == Dead) {
 		return 5;
 	}
 
-
-// cout << "-3-" << endl;
-// cout << "Diagnostics" << endl;
-// cout << "recordEntry.offset: " << recordEntry.offset << endl;
-// cout << "recordEntry.length: " << recordEntry.length << endl;
-// cout << "sizeof data: " << sizeof( data ) << endl;
-// cout << "data: " << (unsigned char*) data << endl;
-// cout << "sizeof pageData: " << sizeof( pageData ) << endl;
-// cout << "pageData: " << (unsigned char*) pageData << endl;
-
-// cout << "sizeof pageData + offset: " << sizeof((char*) pageData + recordEntry.offset) << endl;
-
 	// Retrieve the actual entry data.
 	memcpy	((char*) data, ((char*) pageData + recordEntry.offset), recordEntry.length);
-
-//cout << "-4-" << endl;
 
 	free(pageData);
 	return 0;

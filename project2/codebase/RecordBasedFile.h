@@ -1,3 +1,13 @@
+/**
+ * RecordBasedFile.h
+ * CMPS181 - Spring 2015
+ * Project 2
+ *
+ * Benjamin (Benjy) Strauss
+ * Paul-Valentin Mini (pcamille)
+ */
+
+
 #ifndef _RecordBasedFile_h_
 #define _RecordBasedFile_h_
 #include <string>
@@ -8,12 +18,6 @@
 #define INT_SIZE 4
 #define REAL_SIZE 4
 #define VARCHAR_LENGTH_SIZE 4
-
-/**
- * @modifier: Benjamin (Benjy) Strauss
- *
- * 
- */
 
 typedef unsigned AttrLength;
 using namespace std;
@@ -92,11 +96,7 @@ public:
 		currentPosition = 0;
 		currentSize = 0;
 	}
-	~RBFM_ScanIterator() {
-		// for (auto it = begin(dataVector); it != end(dataVector); ++it) {
-		// 	free(*it);
-		// }
-	}
+	~RBFM_ScanIterator() {}
 
 	int setVectors(vector<RID> rids, vector<void*> dataVector);
 	// "data" follows the same format as RecordBasedFileManager::insertRecord()
@@ -159,7 +159,7 @@ public:
 	bool checkScanCondition(float dataFloat, CompOp compOp, const void * value);
 	bool checkScanCondition(char* dataString, CompOp compOp, const void * value);
 
-// Extra credit for part 2 of the project, please ignore for part 1 of the project
+	// Extra credit for part 2 of the project, please ignore for part 1 of the project
 	int reorganizeFile(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor);
 };
 

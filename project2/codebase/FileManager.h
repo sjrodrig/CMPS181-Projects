@@ -1,3 +1,13 @@
+/**
+ * FileManager.h
+ * CMPS181 - Spring 2015
+ * Project 2
+ *
+ * Benjamin (Benjy) Strauss
+ * Paul-Valentin Mini (pcamille)
+ */
+
+
 #include <string>
 
 #ifndef _pfm_h_
@@ -7,12 +17,6 @@ typedef int RC;
 typedef unsigned PageNum;
 
 using std::string;
-
-/**
- * @modifyer: Benjamin (Benjy) Strauss
- *
- * 
- */
 
 #define PAGE_SIZE 4096
 #define PAGED_FILE_HEADER_STRING "PAGED_FILE__"

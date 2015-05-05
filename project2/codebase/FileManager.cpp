@@ -1,3 +1,10 @@
+/**
+ * Built on Paolo Di Febbo's project 1
+ * @modifyer: Benjamin (Benjy) Strauss
+ * @modifyer: Paul-Valentin Mini (pcamille)
+ * 
+ */
+
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
@@ -8,13 +15,6 @@
 #include "FileManager.h"
 
 using namespace std;
-
-/**
- * Built on Paolo Di Febbo's project 1
- * @modifyer: Benjamin (Benjy) Strauss
- *
- * 
- */
 
 PagedFileManager* PagedFileManager::_pf_manager = 0;
 

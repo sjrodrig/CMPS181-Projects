@@ -1,10 +1,14 @@
-#include "RecordBasedFile.h"
-
 /**
- * @author: Benjamin (Benjy) Strauss
- * @author: Paul Mini
- * 
+ * RelationManager.h
+ * CMPS181 - Spring 2015
+ * Project 2
+ *
+ * Benjamin (Benjy) Strauss
+ * Paul-Valentin Mini (pcamille)
  */
+
+
+#include "RecordBasedFile.h"
 
 #define user "usr_"
 #define system "sys_"
@@ -19,7 +23,7 @@ public:
 	RM_ScanIterator(RBFM_ScanIterator &r) { this->rbfm_SI = r; }
 	~RM_ScanIterator() {}
 
-	// "data" follows the same format as RelationManager::insertTuple()
+	// "Data" follows the same format as RelationManager::insertTuple()
 	int setVectors(vector<RID> rids, vector<void*> dataVector) {
   		return rbfm_SI.setVectors(rids, dataVector);
 	}
@@ -36,7 +40,7 @@ private:
 	string tables_table_name;
 	string columns_table_name;
 
-	//attributes and their names for the system tables
+	// Attributes and their names for the system tables
 	vector<Attribute> tabAttrs;
 	vector<Attribute> colAttrs;
 	vector<string> tabNames;
@@ -63,7 +67,7 @@ public:
 	int readAttribute(const string &tableName, const RID &rid, const string &attributeName, void *data);
 	int reorganizePage(const string &tableName, const unsigned pageNumber);
 
-	// scan returns an iterator to allow the caller to go through the results one by one. 
+	// Scan returns an iterator to allow the caller to go through the results one by one. 
 	int scan(const string &tableName,
 		const string &conditionAttribute,
 		const CompOp compOp,                  // comparision type such as "<" and "="

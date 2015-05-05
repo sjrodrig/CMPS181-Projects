@@ -1,3 +1,13 @@
+/**
+ * RelationManager.cpp
+ * CMPS181 - Spring 2015
+ * Project 2
+ *
+ * Benjamin (Benjy) Strauss
+ * Paul-Valentin Mini (pcamille)
+ */
+
+
 #include "RelationManager.h"
 #include <fstream>
 #include <iostream>
@@ -16,22 +26,6 @@
 #define f9 "flag #9"
 #define fA "flag #A"
 
-/** Progress:
- * Constructor() 		Complete + Tested
- * Destructior() 		Complete
- * createTable() 		Complete + Tested
- * deleteTable() 		Complete + Lightly Tested
- * getAttributes() 		Complete + Tested
- * insertTuple() 		Complete
- * deleteTuples() 		Complete
- * deleteTuple() 		Complete
- * updateTuple() 		Complete
- * readTuple() 			Complete
- * readAttribute() 		Complete
- * reorganizePage() 	>>Unstarted
- * scan()				Complete
- */
-
 using namespace std;
 
 
@@ -46,9 +40,7 @@ RelationManager* RelationManager::instance() {
 }
 
 /**
- * constructor
- *
- * 
+ * Constructor
  */
 RelationManager::RelationManager() {
 	tables_table_name = "sys_tables.tab";
@@ -119,7 +111,9 @@ RelationManager::RelationManager() {
     checkStream.close();
 }
 
-//destructor
+/**
+ * Destructor
+ */
 RelationManager::~RelationManager() {
 	//Nothing TODO
 }
@@ -128,7 +122,7 @@ RelationManager::~RelationManager() {
  * @COMPLETED
  * This method creates a table called tableName with a vector of attributes (attrs).
  * 
- * returns 0 on success and 1 on failure
+ * Returns 0 on success and 1 on failure
  *
  */
 int
@@ -142,37 +136,34 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		return 1;
 	}
 
-	//A dummy RID to be returned
+	// A dummy RID to be returned
 	RID dummyRID;
 
-	//handle for the tables table
+	// Handle for the tables table
 	FileHandle tableTable_handle;
 
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tableTable_handle.setFileDescriptor(ttable);
 
-	//assemble the data
+	// Assemble the data
 	int data_len = ((NAME_LEN * 2) + 20);
-	//cout << "data_len is: " << data_len << endl;
 	unsigned char* tableEntryData = new unsigned char[data_len];
 	for(int init = 0; init < data_len; init++) { tableEntryData[init] = 127; }
 
 	const char* tname = tableName.c_str();
-	//cout << "tname is: " << tname << endl;
 
 	tableIDs++;
 	int new_table_id = tableIDs;
 	int aa;
 
-	//This is an integer--set it's value
+	// This is an integer--set it's value
 	for(aa = 0; aa < 4; aa++) {
 		unsigned char meta = (new_table_id % 256);
 		tableEntryData[aa] = meta;
 		new_table_id /= 256;
 	}
 
-	int meta = NAME_LEN;
-	//cout << "meta: " << meta << endl; 
+	int meta = NAME_LEN; 
 	for(; aa < 8; aa++) {
 		tableEntryData[aa] = (meta % 256);
 		meta /= 256;
@@ -185,13 +176,11 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	for(; aa < 48; aa++) {
 		tableEntryData[aa] = 0;
 	}
-	//put the index in the right place
+	
+	// Put the index in the right place
 	aa = 48;
-
 	int cc = aa + 4;
-
 	meta = (NAME_LEN + 8);
-	//cout << "meta: " << meta << endl; 
 
 	for(; aa < cc; aa++) {
 		tableEntryData[aa] = (meta % 256);
@@ -235,47 +224,42 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		return retVal;
 	}
 
-	//handle for the columns table
+	// Handle for the columns table
 	FileHandle columnTable_handle;
 
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	columnTable_handle.setFileDescriptor(ctable);
 
-	//for loop to add all the columns to the columns table
+	// For loop to add all the columns to the columns table
 	for(unsigned int index = 0; index < attrs.size(); index++) {
-		//cout << "looping: " << index << endl;
-
 		string colName = attrs.at(index).name;
-		//cout << "colName is: " << colName << endl;
-
 		unsigned char* columnEntryData = new unsigned char[NAME_LEN+16];
 		int ee;
 
-		//enter the tableID
+		// Enter the tableID
 		for(ee = 0; ee < 4; ee++) {
 			columnEntryData[ee] = tableEntryData[ee];
 		}
 
-		//enter the number preceeding the columnName
+		// Enter the number preceeding the columnName
 		int temp = NAME_LEN;
-
 		for(; ee < 8; ee++) {
 			columnEntryData[ee] = (temp % 256);
 			temp /= 256;
 		}
 
-		//enter the column's name
+		// Enter the column's name
 		const char* cName = colName.c_str();
 		for(; cName[ee-8] != 0; ee++) {
 			columnEntryData[ee] = cName[ee-8];
 		}
 
-		//fill everything else with zeros
+		// Fill everything else with zeros
 		for(; ee < 48; ee++) {
 			columnEntryData[ee] = 0;
 		}
 
-		//enter the column's type
+		// Enter the column's type
 		int dd;
 		int meta2 = attrs.at(index).type;
 		for(dd = 0; dd < 4; dd++) {
@@ -283,7 +267,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 			meta2 /= 256;
 		}
 
-		//enter the column's length
+		// Enter the column's length
 		int meta3 = attrs.at(index).length;
 		for(; dd < 8; dd++) {
 			columnEntryData[ee+dd] = (meta3 % 256);
@@ -292,8 +276,6 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 	}
-
-	//cout << "ins-ret: " << retVal << endl;
 	return retVal;
 }
 
@@ -303,39 +285,38 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
  */
 int
 RelationManager::deleteTable(const string &tableName) {
-	//a table ID which will be used for finding the columns to delete
+	// Table ID which will be used for finding the columns to delete
 	int retVal;
 	RID tableRID, columnRID;
 	RBFM_ScanIterator tableRecordIter, colRecordIter;
 	int tableID = 0;
 	int control = 0;
 
-	//delete the file
+	// Delete the file
 	string tableFileName = user + tableName + ".tab";
 	sysTableHandler.destroyFile(tableFileName);
 
-	//the handle for the tables table to delete the table
+	// The handle for the tables table to delete the table
 	FileHandle tTable_handle;
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tTable_handle.setFileDescriptor(ttable);
 
-	//the handle for the columns table
+	// The handle for the columns table
 	FileHandle cTable_handle;
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	cTable_handle.setFileDescriptor(ctable);
 
-	//the attribute vectors that will be used to erase the table and it's columns
+	// The attribute vectors that will be used to erase the table and it's columns
 	const vector<string> table_attrNames = tabNames;
 	const vector<Attribute> table_recordDescriptor = tabAttrs;
 	const vector<string> column_attrNames = colNames;
 	const vector<Attribute> column_recordDescriptor = colAttrs;
 
-	//get the table's RID + data
+	// Get the table's RID + data
 	retVal = sysTableHandler.scan(tTable_handle, table_recordDescriptor, "TableName", EQ_OP, &tableName, table_attrNames, tableRecordIter);
 
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::deleteTable) Couldn't find table " << tableName << " in table's table." << endl;
-		cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
 
@@ -344,28 +325,25 @@ RelationManager::deleteTable(const string &tableName) {
 	unsigned char* columnRecord = new unsigned char[NAME_LEN+16];
 
 	tableRecordIter.getNextRecord(tableRID, metaPage);
-
 	sysTableHandler.readRecord(tTable_handle, table_recordDescriptor, tableRID, tableRecord);
-	//delete the table from the table of tables
+	
+	// Delete the table from the table of tables
 	sysTableHandler.deleteRecord(tTable_handle, table_recordDescriptor, tableRID);
-
 	memcpy(&tableID, tableRecord, 4);
 
-	//get the columns's RID + data
+	// Get the columns's RID + data
 	retVal = sysTableHandler.scan(cTable_handle, column_recordDescriptor, "TableName", EQ_OP, &tableName, column_attrNames, colRecordIter);
 
 	if( retVal != SUCCESS ) {
-		//cout << "(RelationManager::deleteTable) Couldn't find table " << tableName << " in table's table." << endl;
-		cout << "Failing with: " << retVal << endl;
+		cout << "(RelationManager::deleteTable) Couldn't find table " << tableName << " in table's table." << endl;
 		return retVal;
 	}
 
-	//delete the table's columns from the table of columns
+	// Delete the table's columns from the table of columns
 	control = colRecordIter.getNextRecord(columnRID, metaPage);
 
 	while(control == 0) {
 		sysTableHandler.readRecord(cTable_handle, column_recordDescriptor, columnRID, columnRecord);
-//printRawData(columnRecord, 56);
 		sysTableHandler.deleteRecord(cTable_handle, column_recordDescriptor, columnRID);
 		control = colRecordIter.getNextRecord(columnRID, metaPage);
 	}
@@ -373,7 +351,6 @@ RelationManager::deleteTable(const string &tableName) {
 	delete metaPage;
 	delete tableRecord;
 	delete columnRecord;
-
 	return retVal;
 }
 
@@ -386,13 +363,13 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	int tableID = 0;
 	int retVal = -1;
 
-if(CORE_DEBUG) { cout << f0 << endl; }
+	if(CORE_DEBUG) { cout << f0 << endl; }
 
-	//make the filehandle and set it to the columns table
+	// Make the filehandle and set it to the columns table
 	FileHandle tab_handle;
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tab_handle.setFileDescriptor(ttable);
-if(CORE_DEBUG) { cout << "ttable is: " << ttable << endl; }
+	if(CORE_DEBUG) { cout << "ttable is: " << ttable << endl; }
 
 	if(ttable == 0) {
 		cout << "Couldn't open file--trying again." << endl;
@@ -405,21 +382,21 @@ if(CORE_DEBUG) { cout << "ttable is: " << ttable << endl; }
 	}
 
 
-if(CORE_DEBUG) { cout << f1 << endl; }
+	if(CORE_DEBUG) { cout << f1 << endl; }
 	const vector<Attribute> _table_recordDescriptor = tabAttrs;
 	const vector<string> _table_attributeNames = tabNames;
 
-	//the iterator
+	// The iterator
 	RBFM_ScanIterator tableRecordIter;
-
-if(CORE_DEBUG) { cout << f2 << endl; }
-	//now scan
+	if(CORE_DEBUG) { cout << f2 << endl; }
+	
+	// Now scan
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
-if(CORE_DEBUG) { cout << f3 << endl; }
-	//check if scan was successful
+	if(CORE_DEBUG) { cout << f3 << endl; }
+
+	// Check if scan was successful
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
-		// cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
 
@@ -432,42 +409,36 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
-		// cout << "Failing with: " << retVal << endl;
 		return retVal;
 	}
-	//copy the table's id.
+
+	// Copy the table's id.
 	memcpy(&tableID, dataTuple, 4);
 
-	//make the filehandle and set it to the columns table
+	// Make the filehandle and set it to the columns table
 	FileHandle col_handle;
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	col_handle.setFileDescriptor(ctable);
 
-	//the vectors:
+	// The vectors
 	const vector<Attribute> _col_recordDescriptor = colAttrs;
 	const vector<string> _col_attributeNames = colNames;
 
-	//the iterator
+	// The iterator
 	RBFM_ScanIterator colRecordIter;
 
+	// Copy the table's id.
 	void* t_ID = malloc(4);
-	//copy the table's id.
 	memcpy(t_ID, &tableID, 4);
 
 	retVal = sysTableHandler.scan(col_handle, _col_recordDescriptor, "TableID", EQ_OP, t_ID, _col_attributeNames, colRecordIter);
 
-	//if something goes wrong, alert the user
+	// If something goes wrong, alert the user
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find columns for " << tableName << " in columns's table." << endl;
 	}
 
-	//vector<Attribute> &attrs
-	//[TAB_ID-4][NAME-VAR][TYPE-4][LEN-4]
 	int control = 0;
-
-
-//printRawToFile(unsigned char* data, int len, bool all)
-
 	RID metaRID2;
 	unsigned char* dataPage = new unsigned char[PAGE_SIZE];
 	unsigned char* data = new unsigned char[NAME_LEN+20];
@@ -487,19 +458,18 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 
 		Attribute pushMe;
 
-		//extract the name
+		// Extract the name
 		char* attrName = new char[NAME_LEN];
 		for(int aa = 8; aa < NAME_LEN+8; aa++) {
 			attrName[aa-8] = data[aa];
 		}
 
-		//compact and set the name
+		// Compact and set the name
 		for(int aa = 0; attrName[aa] != '\0'; aa++) {
 			pushMe.name += attrName[aa];
 		}
-		//cout << "name is: " << pushMe.name << endl;
 
-		//extract the type
+		// Extract the type
 		unsigned char* typeData = new unsigned char[4];
 		for(int aa = (NAME_LEN + 8); aa < (NAME_LEN + 12); aa++) { typeData[aa-(NAME_LEN+8)] = data[aa]; }
 		
@@ -510,7 +480,6 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 			power *= 256;
 		}
 
-//cout << "accu is: " << accu << endl;
 		if(accu == 0) {
 			pushMe.type = TypeInt;
 		} else if (accu == 1) {
@@ -521,7 +490,7 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 			cout << "ERROR READING ATTRIBUTE TYPE { " << accu << " }" << endl;
 		}
 
-		//extract the length
+		// Extract the length
 		unsigned char* lenData = new unsigned char[4];
 		for(int aa = (NAME_LEN + 12); aa < (NAME_LEN + 16); aa++) { lenData[aa-(NAME_LEN+12)] = data[aa]; }
 
@@ -533,9 +502,8 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 		}
 
 		pushMe.length = _accu;
-		//cout << "length is: " << pushMe.length << endl;
 
-		//free the allocated pointers
+		// Free the allocated pointers
 		delete attrName;
 		delete typeData;
 		delete lenData;
@@ -543,7 +511,7 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 		attrs.push_back(pushMe);
 	}
 
-	//now delete everything that isn't needed:
+	// Now delete everything that isn't needed:
 	delete ttable;
 	delete ctable;
 	delete data_value;
@@ -563,7 +531,6 @@ if(CORE_DEBUG) { cout << f3 << endl; }
 int
 RelationManager::insertTuple(const string &tableName, const void *data, RID &rid) {
 	string tableFileName = user + tableName + ".tab";
-	//the return value
 	int retVal = -1;
 
 	if (CORE_DEBUG) {
@@ -611,7 +578,6 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 int
 RelationManager::deleteTuples(const string &tableName) {
 	string tableFileName = user + tableName + ".tab";
-	//the return value
 	int retVal = -1;
 
 	FileHandle clearMe;
@@ -631,7 +597,6 @@ RelationManager::deleteTuples(const string &tableName) {
 int
 RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 	string tableFileName = user + tableName + ".tab";
-	//the return value
 	int retVal = -1;
 
 	FileHandle clearMe;
@@ -653,7 +618,6 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 
 /**
  * Simple delete + insert
- * Should work now
  *
  * This method updates a tuple identified by a given rid. Note: if the tuple grows 
  * (i.e., the size of tuple increases) and there is no space in the page to store the tuple 
@@ -677,22 +641,7 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 	}
 	const vector<Attribute> recordDescriptor = tableAttrs;
 
-	retVal = sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);
-
-	/** Old code
-	retVal = deleteTuple(tableName, rid);
-
-	if(retVal != SUCCESS) { //delete failed
-		cout << "ERROR: Failed to delete tuple targeted in update." << endl;
-		return retVal;
-	}
-
-	RID ins;
-	ins.slotNum = rid.slotNum;
-	ins.pageNum = rid.pageNum;
-	retVal = insertTuple(tableName, data, ins);
-	*/
-	return retVal;
+	return sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);
 }
 
 //This method reads a tuple identified by a given rid. 
@@ -700,7 +649,7 @@ int
 RelationManager::readTuple(const string &tableName, const RID &rid, void *data) {
 	int retVal;
 
-	//the handle for the tables table to delete the table
+	// The handle for the tables table to delete the table
 	FileHandle handle;
 	string s0 = user + tableName + ".tab";
 	FILE * tableFile = fopen(s0.c_str(), "r+");
@@ -718,11 +667,7 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 		cout << "data size is: " << sizeof(data) << endl;
 	}
 
-cout << f0 << endl;
-	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
-cout << f1 << endl;
-
-	return retVal;
+	return sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
 }
 
 //This method reads a specific attribute of a tuple identified by a given rid. 
