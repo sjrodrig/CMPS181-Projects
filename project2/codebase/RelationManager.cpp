@@ -51,7 +51,7 @@ RelationManager::RelationManager() {
 	ins.open("valid_ids.txt");
 	if(ins.good()) {
 		ins >> tableIDs;
-		cout << "tableID: " << tableIDs << endl;
+		//cout << "tableID: " << tableIDs << endl;
 		ins.close();
 	} else {
 		tableIDs = 0;
@@ -123,6 +123,7 @@ RelationManager::RelationManager() {
 
 /**
  * Destructor
+ * _IO_flush_all_lockp (do_lock=do_lock@entry=0) at genops.c:841
  */
 RelationManager::~RelationManager() {
 	delete _rm_manager;
@@ -537,7 +538,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 			_power *= 256;
 		}
 
-		cout << "_accu is: " << _accu << endl;
+		//cout << "_accu is: " << _accu << endl;
 		pushMe.length = _accu;
 
 		// Free the allocated pointers
@@ -550,8 +551,6 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	}
 
 	// Now delete everything that isn't needed:
-	delete ttable;
-	delete ctable;
 	delete data_value;
 	delete dataTuple;
 	delete dataPage;
@@ -611,7 +610,6 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
 
-	delete tableFile;
 	return retVal;
 }
 
@@ -711,7 +709,7 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
-	if (1) {
+	if (CORE_DEBUG) {
 		for(unsigned i = 0; i < _tableAttrs.size(); i++) { cout << "attr is: " << _tableAttrs.at(i).name << endl; }
 		cout << "data size is: " << sizeof(data) << endl;
 	}
