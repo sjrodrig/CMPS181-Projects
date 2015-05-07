@@ -1,3 +1,7 @@
+#ifndef _RelationManager_h_
+#define _RelationManager_h_
+#include "RecordBasedFile.h"
+
 /**
  * RelationManager.h
  * CMPS181 - Spring 2015
@@ -8,11 +12,10 @@
  */
 
 
-#include "RecordBasedFile.h"
-
 #define user "usr_"
 #define system "sys_"
 #define NAME_LEN 40
+#define RM_EOF -1
 
 class RM_ScanIterator {
 private:
@@ -75,5 +78,4 @@ public:
 		const vector<string> &attributeNames, // a list of projected attributes
 		RM_ScanIterator &rm_ScanIterator);
 }; 
-
-
+#endif
