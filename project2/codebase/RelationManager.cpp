@@ -130,6 +130,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 	string tableFileName = user + tableName + ".tab";
 
 	int go = sysTableHandler.createFile(tableFileName);
+
 	//couldn't make the file...
 	if(go != SUCCESS) { 
 		cout << "Couldn't make file for table: \"" << tableName << "\"" << endl;
@@ -533,17 +534,22 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	string tableFileName = user + tableName + ".tab";
 	int retVal = -1;
 
-	if (CORE_DEBUG) {
+	if (1) {
 		cout << "Inserting Data:" << endl;
 		unsigned char* ucdata;
 		ucdata = (unsigned char*) data;
-		printRawData(ucdata,14);
+		printRawData(ucdata,22);
 		delete ucdata;
 	}
 
 	FileHandle insertHandle;
 	FILE * tableFile = fopen(tableFileName.c_str(), "r+");
 	insertHandle.setFileDescriptor(tableFile);
+
+	if(tableFile == NULL) {
+		cout << "ERROR: Couldn't open table file!" << endl;
+		return -1;
+	}
 
 	vector<Attribute> insertVector;
 	int testRetVal = getAttributes(tableName, insertVector);
@@ -553,13 +559,19 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 		return -1;
 	}
 
-	if (CORE_DEBUG) {
-		cout << "%^%^" << endl;
-		for(unsigned i = 0; i < insertVector.size(); i++) { cout << "attr size: " << insertVector.at(i).length << endl; }
-		cout << "data size is: " << sizeof(data) << endl;
+	const vector<Attribute> _insertVector = insertVector;
+
+	if (1) {
+		cout << "++++" << endl;
+		for(unsigned i = 0; i < _insertVector.size(); i++) { 
+			cout << "attr name: " << _insertVector.at(i).name << endl;
+			cout << "attr type: " << _insertVector.at(i).type << endl;
+			cout << "attr size: " << _insertVector.at(i).length << endl;
+			cout << endl;
+		}
+		//cout << "data size is: " << sizeof(data) << endl;
 	}
 
-	const vector<Attribute> _insertVector = insertVector;
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
 
 	delete tableFile;

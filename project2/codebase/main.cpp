@@ -6,11 +6,11 @@ using namespace std;
  * edited by Benjy Strauss
  */
 
-void TEST_RM_0(const string &tableName)
-{
+void TEST_RM_0(const string &tableName) {
     // Functions Tested
     // 1. Get Attributes
     cout << "****In Test Case 0****" << endl;
+	cout << "tableName is: " << tableName << endl;
 
     // GetAttributes
     vector<Attribute> attrs;
@@ -27,6 +27,7 @@ void TEST_RM_0(const string &tableName)
     return;
 }
 
+//	    TEST_RM_1("tbl_employee", 6, "Peters", 24, 170.1, 5000);
 void TEST_RM_1(const string &tableName, const int nameLength, const string &name, const int age, const float height, const int salary)
 {
     // Functions tested
@@ -45,6 +46,7 @@ void TEST_RM_1(const string &tableName, const int nameLength, const string &name
     cout << "Insert Data:" << endl;
     printTuple(tuple, tupleSize);
     RC rc = rm->insertTuple(tableName, tuple, rid);
+
 	cout << "f0" << endl;
     assert(rc == success);
     
@@ -865,12 +867,16 @@ createTables() {
 	// Create Table tbl_employee
 	createTable("tbl_employee");
 
+	cout << endl << "Create Tables2 ..." << endl;
 	// Create Table tbl_employee2
 	createTable("tbl_employee2");
 
+
+	cout << endl << "Create Tables3 ..." << endl;
 	// Create Table tbl_employee3
 	createTable("tbl_employee3");
 
+	cout << endl << "Create Tables4 ..." << endl;
 	// Create Table tbl_employee4
 	createLargeTable("tbl_employee4");
 }
@@ -915,7 +921,8 @@ int main(int argc, char** argv) {
 
 	switch(testSelector) {
 	case -1:
-	    createTable("tbl_b_employee4");
+	    createTables();
+		break;
 	case 0:
     	TEST_RM_0("tbl_employee");
 		break;
