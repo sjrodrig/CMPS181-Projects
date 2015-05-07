@@ -514,30 +514,21 @@ int TEST_RM_8_B(const string &tableName)
     return 0;
 }
 
-void TEST_RM_1(const string &tableName, const int nameLength, const string &name, const int age, const float height, const int salary)
+void TEST_RM_9(const string &tableName, vector<RID> &rids, vector<int> &sizes)
 {
-    // Functions tested
-    // 1. Insert Tuple **
-    // 2. Read Tuple **
-    // NOTE: "**" signifies the new functions being tested in this test case. 
-    cout << "****In Test Case 1****" << endl;
-   
-    RID rid; 
-    int tupleSize = 0;
-    void *tuple = malloc(100);
-    void *returnedData = malloc(100);
+    // Functions Tested:
+    // 1. getAttributes
+    // 2. insert tuple
+    cout << "****In Test case 9****" << endl;
 
-    // Insert a tuple into a table
-    prepareTuple(nameLength, name, age, height, salary, tuple, &tupleSize);
-    cout << "Insert Data:" << endl;
-    printTuple(tuple, tupleSize);
-    RC rc = rm->insertTuple(tableName, tuple, rid);
+    RID rid; 
+    void *tuple = malloc(1000);
+    int numTuples = 2000;
+
+    // GetAttributes
+    vector<Attribute> attrs;
+    RC rc = rm->getAttributes(tableName, attrs);
     assert(rc == success);
-    
-    // Given the rid, read the tuple from table
-    rc = rm->readTuple(tableName, rid, returnedData);
-    assert(rc == success);
-<<<<<<< HEAD
 	
     for(unsigned i = 0; i < attrs.size(); i++)
     {
@@ -556,25 +547,14 @@ void TEST_RM_1(const string &tableName, const int nameLength, const string &name
 
         rc = rm->insertTuple(tableName, tuple, rid);
         assert(rc == success);
-=======
 
-    cout << "Returned Data:" << endl;
-    printTuple(returnedData, tupleSize);
->>>>>>> origin/master
-
-    // Compare whether the two memory blocks are the same
-    if(memcmp(tuple, returnedData, tupleSize) == 0)
-    {
-        cout << "****Test case 1 passed****" << endl << endl;
+        rids.push_back(rid);
+        sizes.push_back(size);        
     }
-    else
-    {
-        cout << "****Test case 1 failed****" << endl << endl;
-    }
-
+    cout << "****Test case 9 passed****" << endl << endl;
     free(tuple);
-    free(returnedData);
-    return;
+    writeRIDsToDisk(rids);
+    writeSizesToDisk(sizes);
 }
 
 void TEST_RM_10(const string &tableName, vector<RID> &rids, vector<int> &sizes)
@@ -754,7 +734,6 @@ void TEST_RM_13(const string &tableName)
 
 void TEST_RM_14(const string &tableName, vector<RID> &rids)
 {
-<<<<<<< HEAD
     // Functions Tested
     // 1. reorganize page
     // 2. delete tuples
@@ -910,22 +889,14 @@ int main(int argc, char** argv) {
     vector<RID> rids;
     vector<int> sizes;
 
-	int testSelector = -2;
-	string param = argv[1];
-	cout << param << endl;
-=======
-    cout << endl << "Test Insert/Read Tuple .." << endl;
-
-    // Make sure the proper tables are created before running this program.
-
-    // Insert/Read Tuple
-    TEST_RM_1("tbl_employee", 6, "Peters", 24, 170.1, 5000);
->>>>>>> origin/master
-
 	if(argc != 2) {
 		cout << "Error: please select a test to perform.\nSee specification in readme." << endl;
 		exit(0);
 	}
+
+	int testSelector = -2;
+	string param = argv[1];
+	cout << param << endl;
 
 	if(param.size() == 3) { //-0X or -1X
 		testSelector = (param.at(1) - 48) * 10;
