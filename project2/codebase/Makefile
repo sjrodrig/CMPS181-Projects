@@ -39,6 +39,7 @@ remake:
 
 purge:
 	make clear
+	rm -f valid_ids.txt
 	rm -f *.tab
 	rm -f *.dump
 	clear

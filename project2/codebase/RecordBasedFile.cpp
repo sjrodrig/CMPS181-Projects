@@ -419,7 +419,7 @@ RecordBasedFileManager::RecordBasedFileManager() {
 }
 
 RecordBasedFileManager::~RecordBasedFileManager() {
-
+	delete _rbf_manager;
 }
 
 // Configures a new record based page, and puts it in "page".

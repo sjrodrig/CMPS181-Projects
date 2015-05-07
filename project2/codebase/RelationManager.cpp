@@ -43,9 +43,19 @@ RelationManager* RelationManager::instance() {
  * Constructor
  */
 RelationManager::RelationManager() {
+	_rm_manager = NULL;
 	tables_table_name = "sys_tables.tab";
 	columns_table_name = "sys_columns.tab";
-	tableIDs = 0;
+
+	ifstream ins;
+	ins.open("valid_ids.txt");
+	if(ins.good()) {
+		ins >> tableIDs;
+		cout << "tableID: " << tableIDs << endl;
+		ins.close();
+	} else {
+		tableIDs = 0;
+	}
 
 	//Table Attributes
 	Attribute TableID;
@@ -115,7 +125,7 @@ RelationManager::RelationManager() {
  * Destructor
  */
 RelationManager::~RelationManager() {
-	//Nothing TODO
+	delete _rm_manager;
 }
 
 /**
@@ -155,6 +165,14 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	tableIDs++;
 	int new_table_id = tableIDs;
+	//cout << "table's id is: " << new_table_id << endl;
+
+	//write the table's ID to a file so no duplicates
+	ofstream out;
+	out.open("valid_ids.txt");
+	out << tableIDs;
+	out.close();
+
 	int aa;
 
 	// This is an integer--set it's value
@@ -382,7 +400,6 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		return retVal;
 	}
 
-
 	if(CORE_DEBUG) { cout << f1 << endl; }
 	const vector<Attribute> _table_recordDescriptor = tabAttrs;
 	const vector<string> _table_attributeNames = tabNames;
@@ -430,7 +447,11 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	// Copy the table's id.
 	void* t_ID = malloc(4);
+	unsigned* debugID = new unsigned[1];
 	memcpy(t_ID, &tableID, 4);
+	memcpy(debugID, &tableID, 4);
+
+	if(CORE_DEBUG) { cout << "table's ID: " << *debugID << endl; }
 
 	retVal = sysTableHandler.scan(col_handle, _col_recordDescriptor, "TableID", EQ_OP, t_ID, _col_attributeNames, colRecordIter);
 
@@ -443,18 +464,32 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	RID metaRID2;
 	unsigned char* dataPage = new unsigned char[PAGE_SIZE];
 	unsigned char* data = new unsigned char[NAME_LEN+20];
+	control = colRecordIter.getNextRecord(metaRID2, dataPage);
 
-	 for(control = colRecordIter.getNextRecord(metaRID2, dataPage); control == 0; control = colRecordIter.getNextRecord(metaRID2, dataPage)) {
-
+	for(unsigned debugVal = 0; control == 0; debugVal++) {
 		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
+		if(CORE_DEBUG) { cout << "debugVal is: " << debugVal << endl; }
 
 		if(CORE_DEBUG) {
 			cout << "reading col data:" << endl;
 			printRawToFile(data, PAGE_SIZE, true);
 		}
 		
+		/*if(debugVal % 2 == 0) {
+			cout << "reading col data:" << endl;
+			printRawData(data, 60);
+		}*/
+
 		if(data == NULL) { 
 			cout << "ERROR: NULL DATA!" << endl;
+		}
+
+		int colID;
+		//test if the attribute is ours:
+		memcpy(&colID, data, 4);
+		if(colID != tableID) {
+			control = colRecordIter.getNextRecord(metaRID2, dataPage);
+			continue;
 		}
 
 		Attribute pushMe;
@@ -502,6 +537,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 			_power *= 256;
 		}
 
+		cout << "_accu is: " << _accu << endl;
 		pushMe.length = _accu;
 
 		// Free the allocated pointers
@@ -510,6 +546,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		delete lenData;
 
 		attrs.push_back(pushMe);
+		control = colRecordIter.getNextRecord(metaRID2, dataPage);
 	}
 
 	// Now delete everything that isn't needed:
@@ -534,7 +571,7 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	string tableFileName = user + tableName + ".tab";
 	int retVal = -1;
 
-	if (1) {
+	if (CORE_DEBUG) {
 		cout << "Inserting Data:" << endl;
 		unsigned char* ucdata;
 		ucdata = (unsigned char*) data;
@@ -561,7 +598,7 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 
 	const vector<Attribute> _insertVector = insertVector;
 
-	if (1) {
+	if (CORE_DEBUG) {
 		cout << "++++" << endl;
 		for(unsigned i = 0; i < _insertVector.size(); i++) { 
 			cout << "attr name: " << _insertVector.at(i).name << endl;
@@ -674,7 +711,7 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
-	if (CORE_DEBUG) {
+	if (1) {
 		for(unsigned i = 0; i < _tableAttrs.size(); i++) { cout << "attr is: " << _tableAttrs.at(i).name << endl; }
 		cout << "data size is: " << sizeof(data) << endl;
 	}

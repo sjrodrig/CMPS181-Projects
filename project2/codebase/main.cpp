@@ -43,12 +43,12 @@ void TEST_RM_1(const string &tableName, const int nameLength, const string &name
 
     // Insert a tuple into a table
     prepareTuple(nameLength, name, age, height, salary, tuple, &tupleSize);
-    cout << "Insert Data:" << endl;
+    cout << "Insert Data of tupleSize: " << tupleSize << endl;
     printTuple(tuple, tupleSize);
     RC rc = rm->insertTuple(tableName, tuple, rid);
 
-	cout << "f0" << endl;
     assert(rc == success);
+	cout << "insert success" << endl;
     
     // Given the rid, read the tuple from table
     rc = rm->readTuple(tableName, rid, returnedData);
@@ -981,6 +981,7 @@ int main(int argc, char** argv) {
 		cout << "User error: Parameter not recognized." << endl;
 	}
 
-    exit(0);
+	cout << "Operations Complete." << endl;
+	return 0;
 }
 
