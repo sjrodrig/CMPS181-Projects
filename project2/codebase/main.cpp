@@ -524,6 +524,7 @@ int TEST_RM_8_B(const string &tableName)
     return 0;
 }
 
+//	    TEST_RM_9("tbl_employee4", rids, sizes);
 void TEST_RM_9(const string &tableName, vector<RID> &rids, vector<int> &sizes)
 {
     // Functions Tested:
@@ -537,9 +538,12 @@ void TEST_RM_9(const string &tableName, vector<RID> &rids, vector<int> &sizes)
 
     // GetAttributes
     vector<Attribute> attrs;
+	//cout << "FLAG-" << endl;
     RC rc = rm->getAttributes(tableName, attrs);
+	//cout << "FLAG+" << endl;
     assert(rc == success);
-	
+	//cout << "attrs.size() " << attrs.size() << endl;	
+
     for(unsigned i = 0; i < attrs.size(); i++)
     {
         cout << "Attribute Name: " << attrs[i].name << endl;
@@ -550,6 +554,7 @@ void TEST_RM_9(const string &tableName, vector<RID> &rids, vector<int> &sizes)
     // Insert 2000 tuples into table
     for(int i = 0; i < numTuples; i++)
     {
+		if(i > 337) { cout << "i is: " << i << endl; }
         // Test insert Tuple
         int size = 0;
         memset(tuple, 0, 1000);

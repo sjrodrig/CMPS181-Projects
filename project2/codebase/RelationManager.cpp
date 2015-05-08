@@ -57,6 +57,8 @@ RelationManager::RelationManager() {
 		tableIDs = 0;
 	}
 
+	myPFM = PagedFileManager::instance();
+
 	//Table Attributes
 	Attribute TableID;
 	TableID.name = "TableID";
@@ -296,6 +298,8 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 	}
+	myPFM->closeFile(tableTable_handle);
+	myPFM->closeFile(columnTable_handle);
 	return retVal;
 }
 
@@ -383,13 +387,11 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	int tableID = 0;
 	int retVal = -1;
 
-	if(CORE_DEBUG) { cout << f0 << endl; }
-
 	// Make the filehandle and set it to the columns table
 	FileHandle tab_handle;
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tab_handle.setFileDescriptor(ttable);
-	if(CORE_DEBUG) { cout << "ttable is: " << ttable << endl; }
+	if(CORE_DEBUG) { cout << "tableName is: " << tableName << endl; }
 
 	if(ttable == 0) {
 		cout << "Couldn't open file--trying again." << endl;
@@ -401,17 +403,14 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		return retVal;
 	}
 
-	if(CORE_DEBUG) { cout << f1 << endl; }
 	const vector<Attribute> _table_recordDescriptor = tabAttrs;
 	const vector<string> _table_attributeNames = tabNames;
 
 	// The iterator
 	RBFM_ScanIterator tableRecordIter;
-	if(CORE_DEBUG) { cout << f2 << endl; }
 	
 	// Now scan
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
-	if(CORE_DEBUG) { cout << f3 << endl; }
 
 	// Check if scan was successful
 	if( retVal != SUCCESS ) {
@@ -430,7 +429,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
 		return retVal;
 	}
-
+	if(1) { cout << f0 << endl; }
 	// Copy the table's id.
 	memcpy(&tableID, dataTuple, 4);
 
@@ -438,6 +437,16 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	FileHandle col_handle;
 	FILE * ctable = fopen(columns_table_name.c_str(), "r+");
 	col_handle.setFileDescriptor(ctable);
+
+	if(ctable == 0) {
+		cout << "Couldn't open file--trying again." << endl;
+		ctable = fopen(columns_table_name.c_str(), "r+");
+		col_handle.setFileDescriptor(ctable);
+	}
+	if(ctable == 0) {
+		cout << "ERROR: Can't open column file!" << endl;
+		return retVal;
+	}
 
 	// The vectors
 	const vector<Attribute> _col_recordDescriptor = colAttrs;
@@ -557,6 +566,9 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	delete data;
 	free(t_ID);
 
+	myPFM->closeFile(tab_handle);
+	myPFM->closeFile(col_handle);
+
 	return retVal;
 }
 
@@ -586,15 +598,14 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 
 	if(tableFile == NULL) {
 		cout << "ERROR: Couldn't open table file!" << endl;
-		return -1;
+		return retVal;
 	}
 
 	vector<Attribute> insertVector;
 	int testRetVal = getAttributes(tableName, insertVector);
 
 	if (testRetVal != SUCCESS){
-		free(tableFile);
-		return -1;
+		return testRetVal;
 	}
 
 	const vector<Attribute> _insertVector = insertVector;
@@ -611,15 +622,13 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	}
 
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
+	myPFM->closeFile(insertHandle);
 
 	return retVal;
 }
 
 /**
  * COMPLETE
- *
- * Test 5 segfaults
- * segfault is NOT in this method.
  *
  * This method deletes all tuples in a table called tableName.
  * This command should result in an empty table.
@@ -635,6 +644,7 @@ RelationManager::deleteTuples(const string &tableName) {
 	clearMe.setFileDescriptor(_clearMe);
 
 	retVal = sysTableHandler.deleteRecords(clearMe);
+	myPFM->closeFile(clearMe);
 
 	return retVal;
 }
@@ -662,6 +672,7 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
 	}
 
 	retVal = sysTableHandler.deleteRecord(clearMe, descriptor, rid);
+	myPFM->closeFile(clearMe);
 
 	return retVal;
 }
@@ -691,6 +702,7 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 	}
 	const vector<Attribute> recordDescriptor = tableAttrs;
 	retVal = sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);
+	myPFM->closeFile(fixMe);
 
 	return retVal;
 }
@@ -735,7 +747,8 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	if(testFileForEmptiness(s0) == SUCCESS) {
 		return 1;
 	}
-	cout << "returning: " << retVal << endl;
+	//cout << "returning: " << retVal << endl;
+	myPFM->closeFile(handle);
 
 	return retVal;
 }
@@ -760,6 +773,8 @@ RelationManager::readAttribute(const string &tableName, const RID &rid, const st
 	if (sysTableHandler.readAttribute(fileHandle, recordDescriptor, rid, attributeName, data) != SUCCESS){
 		return -3;
 	}
+
+	myPFM->closeFile(fileHandle);
 	return SUCCESS;
 }
 
@@ -787,6 +802,7 @@ RelationManager::scan(const string &tableName, const string &conditionAttribute,
 
 	// Set the result iterator & return
 	rm_ScanIterator = RM_ScanIterator(record_iterator); 
+	myPFM->closeFile(fileHandle);
 	return SUCCESS;
 }
 

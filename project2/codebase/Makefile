@@ -40,6 +40,8 @@ remake:
 purge:
 	make clear
 	rm -f valid_ids.txt
+	rm -f rids_file
+	rm -f sizes_file
 	rm -f *.tab
 	rm -f *.dump
 	clear

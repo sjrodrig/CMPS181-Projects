@@ -39,6 +39,7 @@ public:
 class RelationManager {
 private:
 	static RelationManager *_rm_manager;
+	PagedFileManager* myPFM;
 	RecordBasedFileManager sysTableHandler;
 	string tables_table_name;
 	string columns_table_name;
