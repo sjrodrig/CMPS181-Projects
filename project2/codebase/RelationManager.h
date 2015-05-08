@@ -50,6 +50,7 @@ private:
 	vector<string> colNames;
 
 	int tableIDs;
+	int testFileForEmptiness(string data);
 	void printRawData(unsigned char* data, int len);
 	void printRawToFile(unsigned char* data, int len, bool all);
 

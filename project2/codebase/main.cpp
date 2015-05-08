@@ -243,11 +243,15 @@ void TEST_RM_5(const string &tableName, const int nameLength, const string &name
     // Test Delete Tuples
     rc = rm->deleteTuples(tableName);
     assert(rc == success);
-    
+	cout << "delete success" << endl;    
+
     // Test Read Tuple
     memset((char*)returnedData1, 0, 100);
     rc = rm->readTuple(tableName, rid, returnedData1);
+	cout << "rc is: " << rc << endl;
+
     assert(rc != success);
+	cout << "read success" << endl;
     printTuple(returnedData1, tupleSize);
     
     if(memcmp(tuple, returnedData1, tupleSize) != 0)

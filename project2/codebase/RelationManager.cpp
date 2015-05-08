@@ -714,7 +714,14 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 		cout << "data size is: " << sizeof(data) << endl;
 	}
 
-	return sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
+	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
+
+	if(testFileForEmptiness(s0) == SUCCESS) {
+		return 1;
+	}
+	//cout << "returning: " << retVal << endl;
+
+	return retVal;
 }
 
 //This method reads a specific attribute of a tuple identified by a given rid. 
@@ -770,6 +777,41 @@ RelationManager::scan(const string &tableName, const string &conditionAttribute,
 int
 RelationManager::reorganizePage(const string &tableName, const unsigned pageNumber) {
 	return -1;
+}
+
+/**
+ * 0 = empty
+ * 1 != empty
+ */
+int
+RelationManager::testFileForEmptiness(string tableName) {
+	//test if the tuple is valid:
+	ifstream tester;
+	tester.open(tableName.c_str());
+	char* delMarker = new char[23];
+	tester.read(delMarker, 23);
+
+	cout << "opened: " << tableName.c_str() << endl;
+	cout << "delMarker is: ";
+	for(int i = 0; i < 23; i++) {
+		if(delMarker[i] == 0) { cout << "^@"; }
+		else { cout << delMarker[i]; }
+	}
+	cout << endl << flush;
+
+	if(delMarker[12] != 0) { return 1; }
+	if(delMarker[13] != 0) { return 1; }
+	if(delMarker[14] != 0) { return 1; }
+	if(delMarker[15] != 0) { return 1; }
+	if(delMarker[16] != 'D') { return 1; }
+	if(delMarker[17] != 'E') { return 1; }
+	if(delMarker[18] != 'L') { return 1; }
+	if(delMarker[19] != 'E') { return 1; }
+	if(delMarker[20] != 'T') { return 1; }
+	if(delMarker[21] != 'E') { return 1; }
+	if(delMarker[22] != 'D') { return 1; }
+
+	return SUCCESS;
 }
 
 void
