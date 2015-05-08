@@ -249,6 +249,7 @@ void prepareLargeTuple(const int index, void *buffer, int *size)
         memcpy((char *)buffer + offset, &real, sizeof(float));
         offset += sizeof(float);
     }
+	//cout << "size is: " << offset << endl;
     *size = offset;
 }
 

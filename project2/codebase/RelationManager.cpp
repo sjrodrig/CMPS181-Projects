@@ -28,6 +28,8 @@
 
 using namespace std;
 
+bool first;
+bool sflag;
 
 /**
  * Relation Manager Instance Manager
@@ -43,6 +45,8 @@ RelationManager* RelationManager::instance() {
  * Constructor
  */
 RelationManager::RelationManager() {
+	first = true;
+	sflag = false;
 	_rm_manager = NULL;
 	tables_table_name = "sys_tables.tab";
 	columns_table_name = "sys_columns.tab";
@@ -168,7 +172,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 	tableIDs++;
 	int new_table_id = tableIDs;
-	//cout << "table's id is: " << new_table_id << endl;
+	cout << "table's id is: " << new_table_id << endl;
 
 	//write the table's ID to a file so no duplicates
 	ofstream out;
@@ -235,10 +239,11 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		tableEntryData[aa] = 0;
 	}
 
-	if(DEBUG) {
+	if(1) {
 		cout << "inserting data:" << endl;
-		printRawData(tableEntryData, data_len);
+		printRawToFile(tableEntryData, data_len, true);
 	}
+
 	int retVal;
 	retVal = sysTableHandler.insertRecord(tableTable_handle, tabAttrs, tableEntryData, dummyRID);
 	if( retVal != SUCCESS ) {
@@ -291,12 +296,14 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 		// Enter the column's length
 		int meta3 = attrs.at(index).length;
+		int length_holder = meta3;
 		for(; dd < 8; dd++) {
 			columnEntryData[ee+dd] = (meta3 % 256);
 			meta3 /= 256;
 		}
 
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
+		printLog(tableName, colName, length_holder, tableIDs);
 	}
 	myPFM->closeFile(tableTable_handle);
 	myPFM->closeFile(columnTable_handle);
@@ -391,7 +398,6 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	FileHandle tab_handle;
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
 	tab_handle.setFileDescriptor(ttable);
-	if(CORE_DEBUG) { cout << "tableName is: " << tableName << endl; }
 
 	if(ttable == 0) {
 		cout << "Couldn't open file--trying again." << endl;
@@ -409,6 +415,8 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	// The iterator
 	RBFM_ScanIterator tableRecordIter;
 	
+	//have the right table name, so why is it getting the number wrong?
+
 	// Now scan
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
 
@@ -420,16 +428,46 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 
 	RID metaRID;															//a return value
 	unsigned char* data_value = new unsigned char[PAGE_SIZE];				//the page
-	tableRecordIter.getNextRecord(metaRID, data_value);
-
 	unsigned char* dataTuple = new unsigned char[(NAME_LEN * 2) + 20];
-	retVal = sysTableHandler.readRecord(tab_handle,  _table_recordDescriptor, metaRID, dataTuple);
+	int checkControl = 1;
+
+	/**
+	 * CHECKING SYSTEM
+	 * Don't delete this, this is a bugfix
+	 * before this loop, we were getting the wrong tableID for test 10
+	 */
+	while(checkControl != 0) {
+		tableRecordIter.getNextRecord(metaRID, data_value);
+		retVal = sysTableHandler.readRecord(tab_handle, _table_recordDescriptor, metaRID, dataTuple);
+
+		//cout << "looking for: " << tableName << endl;
+
+		printRawToFile(dataTuple, 100, true);
+	
+		char rawNameChar;
+		string foundName = "";
+		for(int pos = 0; pos < NAME_LEN; pos++) {
+			rawNameChar = dataTuple[pos+8];
+			if(rawNameChar != 0) {
+				foundName += rawNameChar;
+			} else { break; }
+		}
+
+		string foundName2 = user + foundName + ".tab";
+		//cout << "found: " << foundName << endl;
+
+		checkControl = strcmp(tableName.c_str(),foundName.c_str());
+		if(checkControl != 0) {
+			checkControl = strcmp(tableName.c_str(),foundName2.c_str());
+		}
+
+	}
 
 	if( retVal != SUCCESS ) {
 		cout << "(RelationManager::getAttributes) Couldn't find table " << tableName << " in table's table." << endl;
 		return retVal;
 	}
-	if(1) { cout << f0 << endl; }
+
 	// Copy the table's id.
 	memcpy(&tableID, dataTuple, 4);
 
@@ -461,7 +499,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	memcpy(t_ID, &tableID, 4);
 	memcpy(debugID, &tableID, 4);
 
-	if(CORE_DEBUG) { cout << "table's ID: " << *debugID << endl; }
+	if(sflag) { cout << "table's ID: " << *debugID << endl; }
 
 	retVal = sysTableHandler.scan(col_handle, _col_recordDescriptor, "TableID", EQ_OP, t_ID, _col_attributeNames, colRecordIter);
 
@@ -475,20 +513,16 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	unsigned char* dataPage = new unsigned char[PAGE_SIZE];
 	unsigned char* data = new unsigned char[NAME_LEN+20];
 	control = colRecordIter.getNextRecord(metaRID2, dataPage);
+	cout << "control is starting at: " << control << endl;
 
 	for(unsigned debugVal = 0; control == 0; debugVal++) {
 		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
-		if(CORE_DEBUG) { cout << "debugVal is: " << debugVal << endl; }
+		if(sflag) { cout << "debugVal is: " << debugVal << endl; }
 
 		if(CORE_DEBUG) {
 			cout << "reading col data:" << endl;
 			printRawToFile(data, PAGE_SIZE, true);
 		}
-		
-		/*if(debugVal % 2 == 0) {
-			cout << "reading col data:" << endl;
-			printRawData(data, 60);
-		}*/
 
 		if(data == NULL) { 
 			cout << "ERROR: NULL DATA!" << endl;
@@ -582,12 +616,12 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	string tableFileName = user + tableName + ".tab";
 	int retVal = -1;
 
-	if (CORE_DEBUG) {
+	if (tableFileName == "usr_tbl_employee4.tab" && first) {
 		if(data != NULL) {
 			cout << "Inserting Data:" << endl;
 			unsigned char* ucdata = NULL;
 			ucdata = (unsigned char*) data;
-			printRawData(ucdata,22);
+			printRawData(ucdata,130);
 			cout << flush;
 		}
 	}
@@ -610,7 +644,7 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 
 	const vector<Attribute> _insertVector = insertVector;
 
-	if (CORE_DEBUG) {
+	if (tableFileName == "usr_tbl_employee4.tab" && first) {
 		cout << "++++" << endl;
 		for(unsigned i = 0; i < _insertVector.size(); i++) { 
 			cout << "attr name: " << _insertVector.at(i).name << endl;
@@ -623,6 +657,8 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
 	myPFM->closeFile(insertHandle);
+
+	if (tableFileName == "usr_tbl_employee4.tab" && first) { first = false; }
 
 	return retVal;
 }
@@ -715,6 +751,9 @@ int
 RelationManager::readTuple(const string &tableName, const RID &rid, void *data) {
 	int retVal = -1;
 
+	cout << "StarFlag00" << endl;
+	cout << tableName << endl;
+
 	// The handle for the tables table to delete the table
 	FileHandle handle;
 	string s0 = user + tableName + ".tab";
@@ -731,9 +770,16 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	handle.setFileDescriptor(tableFile);
 
 	vector<Attribute> tableAttrs;
-	if (getAttributes(tableName, tableAttrs) != SUCCESS){
-		return -2;
+	retVal = getAttributes(tableName, tableAttrs);
+
+	if(tableAttrs.size() == 0) { 
+		cout << "StarFlag01" << endl;
+		sflag = true;
+		retVal = getAttributes(tableName, tableAttrs);
 	}
+
+	//if we can't get the attributes, pass along the error code
+	if (retVal != SUCCESS) { return retVal; }
 
 	const vector<Attribute> _tableAttrs = tableAttrs;
 
@@ -744,9 +790,19 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 
 	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
 
-	if(testFileForEmptiness(s0) == SUCCESS) {
-		return 1;
+	if (1) {
+		if(data != NULL) {
+			cout << "Reading Data:" << endl;
+			unsigned char* ucdata = NULL;
+			ucdata = (unsigned char*) data;
+			printRawData(ucdata,22);
+			cout << flush;
+		}
 	}
+
+
+	//if(testFileForEmptiness(s0) == SUCCESS) { return 1; }
+
 	//cout << "returning: " << retVal << endl;
 	myPFM->closeFile(handle);
 
@@ -882,4 +938,27 @@ RelationManager::printRawToFile(unsigned char* data, int len, bool all) {
 		if(!all && meta != 0) { outfile << endl; }
 	}
 	outfile << endl;
+	outfile.close();
 }
+
+void
+RelationManager::printLog(string tab, string col, int size, int id) {
+	ofstream outfile;
+	outfile.open("logfile.dump", ios::out | ios::app);
+	
+	outfile << "Wrote column: \"" << col << "\" for table \"" << tab << "\"(ID): " << id << " of size: " << size << endl;
+
+	outfile.close();
+}
+
+void
+RelationManager::printRawToLog(string data) {
+	ofstream outfile;
+	outfile.open("logfile.dump", ios::out | ios::app);
+	
+	outfile << data << endl;
+
+	outfile.close();
+}
+
+

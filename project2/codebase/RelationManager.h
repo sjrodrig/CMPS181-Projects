@@ -54,6 +54,8 @@ private:
 	int testFileForEmptiness(string data);
 	void printRawData(unsigned char* data, int len);
 	void printRawToFile(unsigned char* data, int len, bool all);
+	void printLog(string tab, string col, int size, int id);
+	void printRawToLog(string data);
 
 protected:
 public:

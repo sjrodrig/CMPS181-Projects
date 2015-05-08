@@ -554,7 +554,7 @@ void TEST_RM_9(const string &tableName, vector<RID> &rids, vector<int> &sizes)
     // Insert 2000 tuples into table
     for(int i = 0; i < numTuples; i++)
     {
-		if(i > 337) { cout << "i is: " << i << endl; }
+		//if(i > 337) { cout << "i is: " << i << endl; }
         // Test insert Tuple
         int size = 0;
         memset(tuple, 0, 1000);
@@ -588,6 +588,7 @@ void TEST_RM_10(const string &tableName, vector<RID> &rids, vector<int> &sizes)
     RC rc = 0;
     for(int i = 0; i < numTuples; i++)
     {
+		cout << "i is: " << i << endl;
         memset(tuple, 0, 1000);
         memset(returnedData, 0, 1000);
         rc = rm->readTuple(tableName, rids[i], returnedData);
@@ -595,6 +596,8 @@ void TEST_RM_10(const string &tableName, vector<RID> &rids, vector<int> &sizes)
 
         int size = 0;
         prepareLargeTuple(i, tuple, &size);
+		cout << "size should be: " << size << endl;
+
         if(memcmp(returnedData, tuple, sizes[i]) != 0)
         {
             cout << "****Test case 10 failed****" << endl << endl;
