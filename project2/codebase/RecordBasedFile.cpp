@@ -7,7 +7,6 @@
  * Paul-Valentin Mini (pcamille)
  */
 
-
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
@@ -19,7 +18,6 @@
 #include <bitset>
 #include "RecordBasedFile.h"
 
-
 /**
  * @Completed
  * Delete all records in a file.
@@ -29,14 +27,21 @@ int
 RecordBasedFileManager::deleteRecords(FileHandle &fileHandle) {
 	unsigned meta = 0;
 	unsigned blankThis = fileHandle.getNumberOfPages();
+	//cout << "blanking: " << blankThis << endl;
+
+	PagedFileManager* my_pfm = PagedFileManager::instance();
+
+	my_pfm->destroyFile(fileHandle.fname.c_str());
+	my_pfm->createFile(fileHandle.fname.c_str());
 
 	for(; meta == 0 && blankThis != 0; blankThis--) {
-		meta = fileHandle.writePage(blankThis, 0);
+		if(deleteProcedure == 1) {
+			meta = fileHandle.writePage(blankThis-1, "\0\0\0\0DELETED");
+		} else if(deleteProcedure == 2) {
+			meta = fileHandle.writePage(blankThis-1, DEL_SEQ);
+		} 
 	}
-	// Write that zero entries are on the page, and then put the word "DELETED"
-	if (fileHandle.writePage(0, "\0\0\0\0DELETED") != SUCCESS){
-		return -1;
-	}
+
 	return SUCCESS;
 }
 
@@ -359,14 +364,14 @@ bool RecordBasedFileManager::checkScanCondition(char* dataString, CompOp compOp,
 int
 RecordBasedFileManager::reorganizePage(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const unsigned pageNumber) {
 
-	return -1;
+	return SUCCESS;
 }
 
 // optional
 // Reorganize the records in the file such that the records are collected towards the beginning of the file.
 int
 RecordBasedFileManager::reorganizeFile(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor) {
-	return -1;
+	return SUCCESS;
 }
 
 int

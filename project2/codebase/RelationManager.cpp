@@ -571,11 +571,13 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	int retVal = -1;
 
 	if (CORE_DEBUG) {
-		cout << "Inserting Data:" << endl;
-		unsigned char* ucdata;
-		ucdata = (unsigned char*) data;
-		printRawData(ucdata,22);
-		delete ucdata;
+		if(data != NULL) {
+			cout << "Inserting Data:" << endl;
+			unsigned char* ucdata = NULL;
+			ucdata = (unsigned char*) data;
+			printRawData(ucdata,22);
+			cout << flush;
+		}
 	}
 
 	FileHandle insertHandle;
@@ -628,6 +630,7 @@ RelationManager::deleteTuples(const string &tableName) {
 	int retVal = -1;
 
 	FileHandle clearMe;
+	clearMe.fname = tableFileName;
 	FILE * _clearMe = fopen(tableFileName.c_str(), "r+");
 	clearMe.setFileDescriptor(_clearMe);
 
@@ -675,7 +678,7 @@ RelationManager::deleteTuple(const string &tableName, const RID &rid) {
  */
 int
 RelationManager::updateTuple(const string &tableName, const void *data, const RID &rid) {
-	int retVal;
+	int retVal = -1;
 	string tableFileName = user + tableName + ".tab";
 
 	FileHandle fixMe;
@@ -684,27 +687,40 @@ RelationManager::updateTuple(const string &tableName, const void *data, const RI
 
 	vector<Attribute> tableAttrs;
 	if (getAttributes(tableName, tableAttrs) != SUCCESS){
-		return -1;
+		return retVal;
 	}
 	const vector<Attribute> recordDescriptor = tableAttrs;
+	retVal = sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);
 
-	return sysTableHandler.updateRecord(fixMe, tableAttrs, data, rid);
+	return retVal;
 }
 
-//This method reads a tuple identified by a given rid. 
+//This method reads a tuple identified by a given rid.
+/**
+ * -1 = File I/O error
+ */ 
 int
 RelationManager::readTuple(const string &tableName, const RID &rid, void *data) {
-	int retVal;
+	int retVal = -1;
 
 	// The handle for the tables table to delete the table
 	FileHandle handle;
 	string s0 = user + tableName + ".tab";
 	FILE * tableFile = fopen(s0.c_str(), "r+");
+	if(tableFile == NULL) {
+		cout << "Couldn't open file--trying again." << endl;
+		tableFile = fopen(s0.c_str(), "r+");
+	}
+	if(tableFile == 0) {
+		cout << "ERROR: Can't open file!" << endl;
+		return retVal;
+	}
+
 	handle.setFileDescriptor(tableFile);
 
 	vector<Attribute> tableAttrs;
 	if (getAttributes(tableName, tableAttrs) != SUCCESS){
-		return -1;
+		return -2;
 	}
 
 	const vector<Attribute> _tableAttrs = tableAttrs;
@@ -719,7 +735,7 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	if(testFileForEmptiness(s0) == SUCCESS) {
 		return 1;
 	}
-	//cout << "returning: " << retVal << endl;
+	cout << "returning: " << retVal << endl;
 
 	return retVal;
 }
@@ -803,6 +819,7 @@ RelationManager::testFileForEmptiness(string tableName) {
 	if(delMarker[13] != 0) { return 1; }
 	if(delMarker[14] != 0) { return 1; }
 	if(delMarker[15] != 0) { return 1; }
+	if(deleteProcedure == 2) { return SUCCESS; }
 	if(delMarker[16] != 'D') { return 1; }
 	if(delMarker[17] != 'E') { return 1; }
 	if(delMarker[18] != 'L') { return 1; }

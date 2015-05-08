@@ -243,15 +243,12 @@ void TEST_RM_5(const string &tableName, const int nameLength, const string &name
     // Test Delete Tuples
     rc = rm->deleteTuples(tableName);
     assert(rc == success);
-	cout << "delete success" << endl;    
 
     // Test Read Tuple
     memset((char*)returnedData1, 0, 100);
     rc = rm->readTuple(tableName, rid, returnedData1);
-	cout << "rc is: " << rc << endl;
 
     assert(rc != success);
-	cout << "read success" << endl;
     printTuple(returnedData1, tupleSize);
     
     if(memcmp(tuple, returnedData1, tupleSize) != 0)
@@ -286,7 +283,13 @@ void TEST_RM_6(const string &tableName, const int nameLength, const string &name
    
     // Test Insert Tuple
     prepareTuple(nameLength, name, age, height, salary, tuple, &tupleSize);
+	cout << "****Insert..****" << endl;
+	cout << "tableName is: " << tableName << endl;
+	cout << "tupleSize is: " << tupleSize << endl;
+
     RC rc = rm->insertTuple(tableName, tuple, rid);
+	cout << "****Inserted****" << endl;
+
     assert(rc == success);
 
     // Test Read Tuple 
@@ -434,6 +437,7 @@ void TEST_RM_8_A(const string &tableName)
     vector<string> attributes;
     attributes.push_back(attr);
     rc = rm->scan(tableName, "", NO_OP, NULL, attributes, rmsi);
+	cout << "rc is: " << rc << endl;
     assert(rc == success);
 
     cout << "Scanned Data:" << endl;

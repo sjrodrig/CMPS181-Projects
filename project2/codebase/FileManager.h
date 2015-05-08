@@ -28,8 +28,8 @@ using std::string;
 class FileHandle {
 private:
     FILE* _fileDescriptor;											//Project 1 Imported
-	string fname;
 public:
+	string fname;
     FileHandle();
     ~FileHandle();
 
