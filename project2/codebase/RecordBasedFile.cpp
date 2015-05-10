@@ -619,6 +619,9 @@ RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribut
     
 	// Retrieve the specific page.
 	void * pageData = malloc(PAGE_SIZE);
+
+	// cout << "readRecord RID.pageNum = " << rid.pageNum << endl;
+
 	if (fileHandle.readPage(rid.pageNum, pageData) != SUCCESS) {
 		return 1;
 	}

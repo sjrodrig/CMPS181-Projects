@@ -598,7 +598,11 @@ void TEST_RM_10(const string &tableName, vector<RID> &rids, vector<int> &sizes)
         prepareLargeTuple(i, tuple, &size);
 		cout << "size should be: " << size << endl;
 
-        if(memcmp(returnedData, tuple, sizes[i]) != 0)
+        int copy_val = memcmp(returnedData, tuple, sizes[i]);
+
+        cout << "copy_val = " << copy_val << endl;
+
+        if(copy_val != 0)
         {
             cout << "****Test case 10 failed****" << endl << endl;
             return;

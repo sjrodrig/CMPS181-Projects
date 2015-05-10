@@ -304,7 +304,12 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
 		printLog(tableName, colName, length_holder, tableIDs);
+
+		delete[] columnEntryData;
 	}
+
+	delete[] tableEntryData;
+
 	myPFM->closeFile(tableTable_handle);
 	myPFM->closeFile(columnTable_handle);
 	return retVal;
@@ -379,9 +384,9 @@ RelationManager::deleteTable(const string &tableName) {
 		control = colRecordIter.getNextRecord(columnRID, metaPage);
 	}
 
-	delete metaPage;
-	delete tableRecord;
-	delete columnRecord;
+	delete[] metaPage;
+	delete[] tableRecord;
+	delete[] columnRecord;
 	return retVal;
 }
 
@@ -500,6 +505,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	memcpy(debugID, &tableID, 4);
 
 	if(sflag) { cout << "table's ID: " << *debugID << endl; }
+	delete[] debugID;
 
 	retVal = sysTableHandler.scan(col_handle, _col_recordDescriptor, "TableID", EQ_OP, t_ID, _col_attributeNames, colRecordIter);
 
@@ -585,19 +591,19 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		pushMe.length = _accu;
 
 		// Free the allocated pointers
-		delete attrName;
-		delete typeData;
-		delete lenData;
+		delete[] attrName;
+		delete[] typeData;
+		delete[] lenData;
 
 		attrs.push_back(pushMe);
 		control = colRecordIter.getNextRecord(metaRID2, dataPage);
 	}
 
 	// Now delete everything that isn't needed:
-	delete data_value;
-	delete dataTuple;
-	delete dataPage;
-	delete data;
+	delete[] data_value;
+	delete[] dataTuple;
+	delete[] dataPage;
+	delete[] data;
 	free(t_ID);
 
 	myPFM->closeFile(tab_handle);
@@ -900,6 +906,8 @@ RelationManager::testFileForEmptiness(string tableName) {
 	if(delMarker[20] != 'T') { return 1; }
 	if(delMarker[21] != 'E') { return 1; }
 	if(delMarker[22] != 'D') { return 1; }
+
+	delete[] delMarker;
 
 	return SUCCESS;
 }
