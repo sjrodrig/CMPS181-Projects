@@ -989,7 +989,7 @@ int main(int argc, char** argv) {
 	    TEST_RM_14("tbl_employee4", rids);
 		break;
 	case 15:
-		createTable("tbl_b_employee");
+		createTable("tbl_b_employee4");
 	    TEST_RM_15("tbl_b_employee4");
 		break;
 	case 16:

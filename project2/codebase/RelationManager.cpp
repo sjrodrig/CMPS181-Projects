@@ -239,7 +239,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		tableEntryData[aa] = 0;
 	}
 
-	if(1) {
+	if(CORE_DEBUG) {
 		cout << "inserting data:" << endl;
 		printRawToFile(tableEntryData, data_len, true);
 	}
@@ -303,7 +303,7 @@ RelationManager::createTable(const string &tableName, const vector<Attribute> &a
 		}
 
 		sysTableHandler.insertRecord(columnTable_handle, colAttrs, columnEntryData, dummyRID);
-		printLog(tableName, colName, length_holder, tableIDs);
+		//printLog(tableName, colName, length_holder, tableIDs);
 
 		delete[] columnEntryData;
 	}
@@ -436,6 +436,8 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	unsigned char* dataTuple = new unsigned char[(NAME_LEN * 2) + 20];
 	int checkControl = 1;
 
+	string lastFound = "";
+
 	/**
 	 * CHECKING SYSTEM
 	 * Don't delete this, this is a bugfix
@@ -445,9 +447,12 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		tableRecordIter.getNextRecord(metaRID, data_value);
 		retVal = sysTableHandler.readRecord(tab_handle, _table_recordDescriptor, metaRID, dataTuple);
 
+		//string breaker;
+		//getline(cin, breaker);
+
 		//cout << "looking for: " << tableName << endl;
 
-		printRawToFile(dataTuple, 100, true);
+		//printRawToFile(dataTuple, 100, true);
 	
 		char rawNameChar;
 		string foundName = "";
@@ -466,6 +471,13 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 			checkControl = strcmp(tableName.c_str(),foundName2.c_str());
 		}
 
+		//check to make sure we aren't in an infinite loop...
+		if(strcmp(foundName.c_str(), lastFound.c_str()) == 0) {
+			retVal = -1;
+			break;
+		}
+
+		lastFound = foundName;
 	}
 
 	if( retVal != SUCCESS ) {
@@ -519,7 +531,7 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	unsigned char* dataPage = new unsigned char[PAGE_SIZE];
 	unsigned char* data = new unsigned char[NAME_LEN+20];
 	control = colRecordIter.getNextRecord(metaRID2, dataPage);
-	cout << "control is starting at: " << control << endl;
+	if(sflag) { cout << "control is starting at: " << control << endl; }
 
 	for(unsigned debugVal = 0; control == 0; debugVal++) {
 		sysTableHandler.readRecord(col_handle, _col_recordDescriptor, metaRID2, data);
@@ -622,13 +634,15 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	string tableFileName = user + tableName + ".tab";
 	int retVal = -1;
 
-	if (tableFileName == "usr_tbl_employee4.tab" && first) {
-		if(data != NULL) {
-			cout << "Inserting Data:" << endl;
-			unsigned char* ucdata = NULL;
-			ucdata = (unsigned char*) data;
-			printRawData(ucdata,130);
-			cout << flush;
+	if(1) {
+		if (tableFileName == "usr_tbl_b_employee4.tab" && first) {
+			if(data != NULL) {
+				cout << "Inserting Data:" << endl;
+				unsigned char* ucdata = NULL;
+				ucdata = (unsigned char*) data;
+				printRawData(ucdata,100);
+				cout << flush;
+			}
 		}
 	}
 
@@ -637,7 +651,7 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 	insertHandle.setFileDescriptor(tableFile);
 
 	if(tableFile == NULL) {
-		cout << "ERROR: Couldn't open table file!" << endl;
+		cout << "ERROR: Couldn't open file: " << tableFileName << "!" << endl;
 		return retVal;
 	}
 
@@ -650,21 +664,23 @@ RelationManager::insertTuple(const string &tableName, const void *data, RID &rid
 
 	const vector<Attribute> _insertVector = insertVector;
 
-	if (tableFileName == "usr_tbl_employee4.tab" && first) {
-		cout << "++++" << endl;
-		for(unsigned i = 0; i < _insertVector.size(); i++) { 
-			cout << "attr name: " << _insertVector.at(i).name << endl;
-			cout << "attr type: " << _insertVector.at(i).type << endl;
-			cout << "attr size: " << _insertVector.at(i).length << endl;
-			cout << endl;
+	if(CORE_DEBUG) {
+		if (tableFileName == "usr_tbl_employee4.tab" && first) {
+			cout << "++++" << endl;
+			for(unsigned i = 0; i < _insertVector.size(); i++) { 
+				cout << "attr name: " << _insertVector.at(i).name << endl;
+				cout << "attr type: " << _insertVector.at(i).type << endl;
+				cout << "attr size: " << _insertVector.at(i).length << endl;
+				cout << endl;
+			}
+			cout << "data size is: " << sizeof(data) << endl;
 		}
-		//cout << "data size is: " << sizeof(data) << endl;
 	}
 
 	retVal = sysTableHandler.insertRecord(insertHandle, _insertVector, data, rid);
 	myPFM->closeFile(insertHandle);
 
-	if (tableFileName == "usr_tbl_employee4.tab" && first) { first = false; }
+	if (tableFileName == "usr_tbl_b_employee4.tab" && first) { first = false; }
 
 	return retVal;
 }
@@ -757,8 +773,8 @@ int
 RelationManager::readTuple(const string &tableName, const RID &rid, void *data) {
 	int retVal = -1;
 
-	cout << "StarFlag00" << endl;
-	cout << tableName << endl;
+	//cout << "StarFlag00" << endl;
+	//cout << tableName << endl;
 
 	// The handle for the tables table to delete the table
 	FileHandle handle;
@@ -778,7 +794,7 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 	vector<Attribute> tableAttrs;
 	retVal = getAttributes(tableName, tableAttrs);
 
-	if(tableAttrs.size() == 0) { 
+	if(CORE_DEBUG) { 
 		cout << "StarFlag01" << endl;
 		sflag = true;
 		retVal = getAttributes(tableName, tableAttrs);
@@ -796,7 +812,7 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 
 	retVal = sysTableHandler.readRecord(handle, _tableAttrs, rid, data);
 
-	if (1) {
+	if (CORE_DEBUG) {
 		if(data != NULL) {
 			cout << "Reading Data:" << endl;
 			unsigned char* ucdata = NULL;
@@ -805,7 +821,6 @@ RelationManager::readTuple(const string &tableName, const RID &rid, void *data) 
 			cout << flush;
 		}
 	}
-
 
 	//if(testFileForEmptiness(s0) == SUCCESS) { return 1; }
 
@@ -857,7 +872,8 @@ RelationManager::scan(const string &tableName, const string &conditionAttribute,
 	}
 
 	// Initialize iterator for record scan
-	RBFM_ScanIterator record_iterator = RBFM_ScanIterator();
+	RBFM_ScanIterator record_iterator;
+
 	if (sysTableHandler.scan(fileHandle, recordDescriptor, conditionAttribute, compOp, value, attributeNames, record_iterator) != SUCCESS){
 		return -3;
 	}
