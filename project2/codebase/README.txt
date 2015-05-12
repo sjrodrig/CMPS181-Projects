@@ -23,8 +23,9 @@ reorganizeFile() is currently not supported.
 
 Known issues:
 	If you run the tests in order, 10 and 11 will fail.  To get 10
-and 11 to work, recompile with "make remake" and then "./db181 -create"
-before running them.
+and 11 to work, recompile/clean with "make remake" and then "./db181 -create"
+and execute Test 09 (“./db181 -09”) before running them. Test 09 inserts data 
+used in Test 10 and 11.
 
 Test 16 doesn’t make any sense since it doesn’t make the table that it
 looks for.

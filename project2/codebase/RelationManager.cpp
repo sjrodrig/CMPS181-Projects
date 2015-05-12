@@ -399,6 +399,11 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	int tableID = 0;
 	int retVal = -1;
 
+	if (tableName.compare(tables_table_name) == 0 || tableName.compare(columns_table_name) == 0){
+		attrs = tabAttrs;
+		return SUCCESS;
+	}
+
 	// Make the filehandle and set it to the columns table
 	FileHandle tab_handle;
 	FILE * ttable = fopen(tables_table_name.c_str(), "r+");
@@ -420,7 +425,6 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	// The iterator
 	RBFM_ScanIterator tableRecordIter;
 	
-	//have the right table name, so why is it getting the number wrong?
 
 	// Now scan
 	retVal = sysTableHandler.scan(tab_handle, _table_recordDescriptor, "TableName", EQ_OP, &tableName, _table_attributeNames, tableRecordIter);
@@ -446,13 +450,6 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 	while(checkControl != 0) {
 		tableRecordIter.getNextRecord(metaRID, data_value);
 		retVal = sysTableHandler.readRecord(tab_handle, _table_recordDescriptor, metaRID, dataTuple);
-
-		//string breaker;
-		//getline(cin, breaker);
-
-		//cout << "looking for: " << tableName << endl;
-
-		//printRawToFile(dataTuple, 100, true);
 	
 		char rawNameChar;
 		string foundName = "";
@@ -464,7 +461,6 @@ RelationManager::getAttributes(const string &tableName, vector<Attribute> &attrs
 		}
 
 		string foundName2 = user + foundName + ".tab";
-		//cout << "found: " << foundName << endl;
 
 		checkControl = strcmp(tableName.c_str(),foundName.c_str());
 		if(checkControl != 0) {
@@ -859,6 +855,9 @@ RelationManager::readAttribute(const string &tableName, const RID &rid, const st
 int
 RelationManager::scan(const string &tableName, const string &conditionAttribute, const CompOp compOp, const void *value, const vector<string> &attributeNames, RM_ScanIterator &rm_ScanIterator) {
 	string s0 = user + tableName + ".tab";
+	if (tableName.compare(tables_table_name) == 0 || tableName.compare(columns_table_name) == 0){
+		s0 = tableName;
+	}
 	// Open table file
 	FileHandle fileHandle;
 	FILE *table_file = fopen(s0.c_str(), "r+");

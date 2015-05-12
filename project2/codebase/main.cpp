@@ -911,7 +911,7 @@ createTables() {
 
 int main(int argc, char** argv) {
 	//preliminary fields;
-    string catalog_table_name = "Tables";
+    string catalog_table_name = "sys_tables.tab";
     vector<RID> rids;
     vector<int> sizes;
 
