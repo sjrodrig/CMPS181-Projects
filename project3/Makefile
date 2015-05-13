@@ -8,8 +8,8 @@ GCC	= g++ -g -O0 -Wall -Wextra -std=gnu++11
 
 all:	db181
 
-db181: FileManager.o RecordBasedFile.o RelationManager.o main.o
-	${GCC} -o db181 FileManager.o RecordBasedFile.o RelationManager.o main.o
+db181: FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
+	${GCC} -o db181 FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
 
 main.o: main.cpp
 	${GCC} -c main.cpp
@@ -25,6 +25,9 @@ RecordBasedFile.o: RecordBasedFile.cpp
 
 RelationManager.o: RelationManager.cpp
 	${GCC} -c RelationManager.cpp
+
+IndexManager.o: IndexManager.cpp
+	${GCC} -c IndexManager.cpp
 
 #delete the executable
 clear:

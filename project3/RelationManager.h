@@ -1,5 +1,5 @@
-#ifndef _rm_h_
-#define _rm_h_
+#ifndef _RelationManager_h_
+#define _RelationManager_h_
 
 #include <string>
 #include <vector>
