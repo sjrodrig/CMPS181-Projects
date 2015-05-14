@@ -35,7 +35,7 @@
 #define ERROR_NO_FREE_SPACE				11
 
 // PageType definition
-enum PageType {LeafPage, NonLeafPage};
+enum PageType { LeafPage, NonLeafPage };
 
 // LeafPageHeader definition
 typedef struct {

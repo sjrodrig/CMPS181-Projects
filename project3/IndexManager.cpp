@@ -1,24 +1,126 @@
-#include "IndexManager.h"
 #include <iostream>
 #include <string.h>
 #include <stdexcept>
 #include <stdio.h>
 #include <algorithm>
+#include <fstream>
+#include <cstring>
+#include <bitset>
+#include "IndexManager.h"
+
+#define DEFAULT_ROOT_LOCATION 1
 
 /**
  * CMPS 181 - Project 3
  * Author: Paolo Di Febbo
  * Modifier: Benjy Strauss
  * File description: Implementing a B+ tree indexing system.
- *						(ref. p. 344-351 Ramakrishnan - Gehrke).
+ *						(ref. p. 344-351 Ramakrishnan - Gehrke).\
+ * 
+ * METHOD PROGRESS
+ * insertNonLeafRecord		--	Waiting for compareKeys, otherwise complete
+ * insertLeafRecord			--	unstarted
+ * insert					--	unstarted
+ * deleteEntryFromLeaf		--	unstarted
+ * deleteEntry				--	unstarted
+ * treeSearch				--	unstarted
+ * scan						--	unstarted
+ * getKeyLength				--	unstarted <!>
+ * getSonPageID				--	unstarted
+ * createFile				--	Lightly Tested
  */
 
 using namespace std;
 
-// Given a ChildEntry structure (<key, child page id>), writes it into the correct position within the non leaf page "pageData".
+/**
+ * Given a ChildEntry structure (<key, child page id>), writes it into the correct position within the non leaf page "pageData".
+ * Need to put it in order...  
+ * going to assume pageData has a size of 4096
+ * 
+ * 0 = success
+ * -1 = page is full
+ * 
+ * ChildEntry PAIRS START AT INDEX 16
+ */
 int
 IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChildEntry, void* pageData) {
-	return -1;
+	int retVal = -1;
+
+	unsigned char* metaPage = new unsigned char[PAGE_SIZE];
+	memcpy(metaPage, pageData, PAGE_SIZE);
+
+	unsigned char bottomBit = metaPage[8];
+	unsigned char lowerBit = metaPage[9];
+	unsigned char upperBit = metaPage[10];
+	unsigned char topBit = metaPage[11];
+
+	int freeSpaceStart = 0;
+	freeSpaceStart = bottomBit;
+	freeSpaceStart += (lowerBit * 256);
+	freeSpaceStart += (upperBit * 65536);
+	freeSpaceStart += (topBit * 16777216);
+
+	void* keyPointer = newChildEntry.key;
+	int childSize = getKeyLength(attribute, keyPointer) + 4;
+	int netSpace = childSize + freeSpaceStart;
+
+	//if page is full, return an error
+	if(netSpace >= PAGE_SIZE) { return retVal; }
+	
+	//copy the child array into an array of unsigned chars
+	unsigned char* newChildEntryData = new unsigned char[childSize];
+	memcpy(newChildEntryData, &newChildEntry, childSize);
+
+	int keyIndex;
+
+	unsigned char* oldChildEntryData = new unsigned char[childSize];
+	for(keyIndex = 16; keyIndex < freeSpaceStart; keyIndex += childSize) {
+
+		//load the key from the file into "oldChildEntryData" to compare it
+		for(int loadIndex = keyIndex; loadIndex < (keyIndex+childSize); loadIndex++) {
+			oldChildEntryData[loadIndex-keyIndex] = metaPage[keyIndex+loadIndex];
+		}
+
+		bool nextKeyGreater;
+		//COMPARE THE DATA -- NOT CODED YET!
+
+		if(!nextKeyGreater) {
+			continue;
+		} else { //insert the key
+
+			//compute the amount of memory to move
+			int moveBytes = freeSpaceStart - keyIndex;
+			int moveOffset = keyIndex + childSize;
+
+			//first move memory
+			memmove(metaPage+moveOffset, metaPage+keyIndex, moveBytes);
+
+			//do the copying of the data
+			for(int ucIndex = 0; ucIndex < childSize; ucIndex++) {
+				metaPage[ucIndex+keyIndex] = newChildEntryData[ucIndex];
+			}
+		}
+	}
+
+
+	//NEED TO PUT CODE TO COMPARE KEYS AND PUT KEY IN RIGHT PLACE!!!
+
+	//if the key is the largest, so it wasn't inserted
+	if(keyIndex >= freeSpaceStart) {
+		//write the newChildEntry onto the page
+		for(int ucIndex = freeSpaceStart; ucIndex < netSpace; ucIndex++) {
+			metaPage[ucIndex] = newChildEntryData[ucIndex];
+		}
+	}
+
+	//copy back the modified memory
+	memcpy(pageData, metaPage, PAGE_SIZE);
+
+	delete[] newChildEntryData;
+	delete[] metaPage;
+	retVal = SUCCESS;
+
+	return retVal;
 }
 
 // Given a record entry (<key, RID>), writes it into the correct position within the leaf page "pageData".
@@ -61,21 +163,96 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	return -1;
 }
 
+unsigned
+IndexManager::getKeyLength(const Attribute &attribute, const void * key) {
+	return -1;
+}
+
 // Given a non-leaf page and a key, finds the correct (direct) son page ID in which the key "fits".
 unsigned
 IndexManager::getSonPageID(const Attribute attribute, const void * key, void * pageData) {
 	return -1;
 }
 
+/**
+ * Page 0 is neither a leaf nor a branch
+ * Page 0 contains ONE four-byte number, which is the location of the root page.
+ * 
+ * This method creates a file with a root pointer, root, and a single leaf
+ * 
+ * untested -- in beta
+ */
 int
 IndexManager::createFile(const string &fileName) {
-	return -1;
+	FileHandle handle;
+	int retVal = -1;
+	retVal = _pf_manager->createFile(fileName.c_str());
+	//if we couldn't create the file, return.
+	if(retVal != SUCCESS) {
+		cout << "Could not create file: \"" << fileName << "\"" << endl;
+		cout << "Returning on: " << retVal << endl;
+		return retVal;
+	}
+
+	retVal = _pf_manager->openFile(fileName.c_str(), handle);
+	if(retVal != SUCCESS) {
+		cout << "Could not open newly created file: \"" << fileName << "\"" << endl;
+		return retVal;
+	}
+
+	//write the location of the root on the first page
+	unsigned* defaultRootLocation = new unsigned[1];
+	defaultRootLocation[0] = DEFAULT_ROOT_LOCATION;
+	handle.appendPage(defaultRootLocation);
+
+	//write the root on page 1
+	unsigned char* rootPage = new unsigned char[PAGE_SIZE];
+
+	//set the page's type to non-leaf
+	setPageType(rootPage, NonLeafPage);
+
+	//write the header
+	NonLeafPageHeader rootHeader;
+	rootHeader.recordsNumber = 0;
+	rootHeader.freeSpaceOffset = (sizeof(PageType) + sizeof(NonLeafPageHeader) + sizeof(unsigned));
+	setNonLeafPageHeader(rootPage, rootHeader);
+
+	unsigned linkOffset = rootHeader.freeSpaceOffset - sizeof(unsigned);
+
+	//write the first leaf number
+	rootPage[linkOffset] = 0x2;
+
+	/*unsigned char meta0;
+	for(int aa = 0; aa < 256; aa++) {
+		meta0 = rootPage[aa];
+		cout << "[" << aa << "]";
+ 		cout << (bitset<8>) meta0;
+		if ((aa+1) % 4 == 0) { cout << endl; }
+	}*/
+
+	handle.appendPage(rootPage);
+
+	//write the first non-leaf page
+	unsigned char* firstLeaf = new unsigned char[PAGE_SIZE];
+	setPageType(firstLeaf, LeafPage);
+
+	LeafPageHeader leafHeader1;
+	leafHeader1.prevPage = NULL_PAGE_ID;
+	leafHeader1.nextPage = NULL_PAGE_ID;
+	leafHeader1.recordsNumber = 0;
+	leafHeader1.freeSpaceOffset = sizeof(PageType) + sizeof(LeafPageHeader);
+	setLeafPageHeader(firstLeaf, leafHeader1);
+
+	handle.appendPage(firstLeaf);
+
+	_pf_manager->closeFile(handle);
+
+	return retVal;
 }
 
 /*********************************************************************************
  *								Already Implemented								 *
  *********************************************************************************/
-
 
 IndexManager* IndexManager::_index_manager = 0;
 PagedFileManager* IndexManager::_pf_manager = 0;

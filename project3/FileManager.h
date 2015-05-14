@@ -9,7 +9,7 @@ typedef unsigned PageNum;
 using std::string;
 
 /**
- * @modifyer: Benjamin (Benjy) Strauss
+ * @modifier: Benjamin (Benjy) Strauss
  *
  * 
  */
