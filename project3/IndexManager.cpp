@@ -15,19 +15,20 @@
  * Author: Paolo Di Febbo
  * Modifier: Benjy Strauss
  * File description: Implementing a B+ tree indexing system.
- *						(ref. p. 344-351 Ramakrishnan - Gehrke).\
+ *						(ref. p. 344-351 Ramakrishnan - Gehrke)
  * 
  * METHOD PROGRESS
- * insertNonLeafRecord		--	Waiting for compareKeys, otherwise complete
+ * insertNonLeafRecord		--	Complete but untested
  * insertLeafRecord			--	unstarted
  * insert					--	unstarted
  * deleteEntryFromLeaf		--	unstarted
  * deleteEntry				--	unstarted
  * treeSearch				--	unstarted
  * scan						--	unstarted
- * getKeyLength				--	unstarted <!>
+ * getKeyLength				--	Complete but untested
  * getSonPageID				--	unstarted
  * createFile				--	Lightly Tested
+ * compareKeys				--  Complete but untested
  */
 
 using namespace std;
@@ -81,10 +82,8 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 			oldChildEntryData[loadIndex-keyIndex] = metaPage[keyIndex+loadIndex];
 		}
 
-		bool nextKeyGreater;
-		//COMPARE THE DATA -- NOT CODED YET!
-
-		if(!nextKeyGreater) {
+		//compare the keys
+		if(compareKeys(attribute, newChildEntryData, oldChildEntryData) < 0) {
 			continue;
 		} else { //insert the key
 
@@ -163,9 +162,12 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	return -1;
 }
 
+/**
+ * should work...
+ */
 unsigned
 IndexManager::getKeyLength(const Attribute &attribute, const void * key) {
-	return -1;
+	return attribute.length;
 }
 
 // Given a non-leaf page and a key, finds the correct (direct) son page ID in which the key "fits".
@@ -248,6 +250,31 @@ IndexManager::createFile(const string &fileName) {
 	_pf_manager->closeFile(handle);
 
 	return retVal;
+}
+
+/**
+ * negative if first key is smaller
+ * positive if second key is smaller
+ */
+int
+IndexManager::compareKeys(Attribute attr, const void* key1, const void* key2) {
+	int attrLen = getKeyLength(attr, key1);
+	int retVal;
+
+	unsigned char* ucKey1 = new unsigned char[attrLen];
+	unsigned char* ucKey2 = new unsigned char[attrLen];
+	
+	memcpy(ucKey1, key1, attrLen);
+	memcpy(ucKey2, key2, attrLen);
+
+	//compare the data
+	for(int byte = 0; byte < attrLen; byte++) {
+		if( ucKey1[byte] < ucKey2[byte] ) { return -1; }
+		if( ucKey1[byte] > ucKey2[byte] ) { return 1; }
+	}
+
+	//timeout means keys are equal
+	return 0;
 }
 
 /*********************************************************************************
