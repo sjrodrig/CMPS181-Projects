@@ -18,17 +18,17 @@
  *						(ref. p. 344-351 Ramakrishnan - Gehrke)
  * 
  * METHOD PROGRESS
- * insertNonLeafRecord		--	Complete but untested
+ * insertNonLeafRecord		--	Moderately Tested
  * insertLeafRecord			--	unstarted
  * insert					--	unstarted
  * deleteEntryFromLeaf		--	unstarted
  * deleteEntry				--	unstarted
  * treeSearch				--	unstarted
  * scan						--	unstarted
- * getKeyLength				--	Complete but untested
+ * getKeyLength				--	Moderately Tested
  * getSonPageID				--	unstarted
  * createFile				--	Lightly Tested
- * compareKeys				--  Complete but untested
+ * compareKeys				--  Moderately Tested
  */
 
 using namespace std;
@@ -42,10 +42,14 @@ using namespace std;
  * -1 = page is full
  * 
  * ChildEntry PAIRS START AT INDEX 16
+ *
+ *
+ * BROKEN -- data entry not being put in the child
  */
 int
 IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChildEntry, void* pageData) {
 	int retVal = -1;
+	bool inserted = false;
 
 	unsigned char* metaPage = new unsigned char[PAGE_SIZE];
 	memcpy(metaPage, pageData, PAGE_SIZE);
@@ -67,14 +71,25 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 
 	//if page is full, return an error
 	if(netSpace >= PAGE_SIZE) { return retVal; }
-	
-	//copy the child array into an array of unsigned chars
+
 	unsigned char* newChildEntryData = new unsigned char[childSize];
-	memcpy(newChildEntryData, &newChildEntry, childSize);
+	unsigned char* oldChildEntryData = new unsigned char[childSize];
+
+	cout << "newChildEntry.childPageNumber: " << newChildEntry.childPageNumber << endl;
+
+	//copy the child into an array of unsigned chars
+	memcpy(newChildEntryData, newChildEntry.key, childSize-4);
+	newChildEntryData[childSize-4] = newChildEntry.childPageNumber % 256;
+	newChildEntryData[childSize-3] = (newChildEntry.childPageNumber % 65536) / 256;
+	newChildEntryData[childSize-2] = (newChildEntry.childPageNumber % 16777216) / 65536;
+	newChildEntryData[childSize-1] = newChildEntry.childPageNumber / 16777216;
+
+	for(int ucIndex = 0; ucIndex < childSize; ucIndex++) {
+		cout << "ucIndex: " << ucIndex << endl;
+		cout << (bitset<8>) newChildEntryData[ucIndex] << endl;
+	}
 
 	int keyIndex;
-
-	unsigned char* oldChildEntryData = new unsigned char[childSize];
 	for(keyIndex = 16; keyIndex < freeSpaceStart; keyIndex += childSize) {
 
 		//load the key from the file into "oldChildEntryData" to compare it
@@ -82,7 +97,12 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 			oldChildEntryData[loadIndex-keyIndex] = metaPage[keyIndex+loadIndex];
 		}
 
-		//compare the keys
+		/**
+		 * compare the keys
+		 * since they both have the childEntryData in the same place,
+		 * it should be irrelevant since this data is the same
+		 * (they're the same attribute)
+		 */
 		if(compareKeys(attribute, newChildEntryData, oldChildEntryData) < 0) {
 			continue;
 		} else { //insert the key
@@ -98,22 +118,59 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 			for(int ucIndex = 0; ucIndex < childSize; ucIndex++) {
 				metaPage[ucIndex+keyIndex] = newChildEntryData[ucIndex];
 			}
+			inserted = true;
 		}
 	}
-
-
-	//NEED TO PUT CODE TO COMPARE KEYS AND PUT KEY IN RIGHT PLACE!!!
 
 	//if the key is the largest, so it wasn't inserted
 	if(keyIndex >= freeSpaceStart) {
 		//write the newChildEntry onto the page
 		for(int ucIndex = freeSpaceStart; ucIndex < netSpace; ucIndex++) {
-			metaPage[ucIndex] = newChildEntryData[ucIndex];
+
+			metaPage[ucIndex] = newChildEntryData[ucIndex-freeSpaceStart];
 		}
 	}
 
+	//Update the place where the free space starts and write it back
+
+	//increase free space offset by length inserted
+	unsigned char bottomByte = netSpace % 256;
+	unsigned char lowerByte = (netSpace % 65536) / 256;
+	unsigned char upperByte = (netSpace % 16777216) / 65536;
+	unsigned char topByte = netSpace / 16777216;
+
+	metaPage[8] = bottomByte;
+	metaPage[9] = lowerByte;
+	metaPage[10] = upperByte;
+	metaPage[11] = topByte;
+
+	//Update the number of records on the page and write it back
+	//bytes 4-7
+	int recordsOnPage = 0;
+	int mult = 1;
+	for(int index = 4; index < 8; index++) {
+		recordsOnPage += metaPage[index] * mult;
+		mult *= 256;
+	}
+
+	//increment
+	recordsOnPage++;
+	for(int index = 4, mult = 1; index < 8; index++) {
+		metaPage[index] = recordsOnPage / mult;
+		mult *= 256;
+	}
+
+	/*unsigned char meta0;
+	for(int aa = 0; aa < 32; aa++) {
+		meta0 = metaPage[aa];
+		cout << " [" << aa << "]";
+ 		cout << (bitset<8>) meta0;
+		if ((aa+1) % 4 == 0) { cout << endl; }
+	}*/
+
 	//copy back the modified memory
 	memcpy(pageData, metaPage, PAGE_SIZE);
+	debugTool.fprintNBytes("after_insert.dump", metaPage, PAGE_SIZE);
 
 	delete[] newChildEntryData;
 	delete[] metaPage;
@@ -128,9 +185,11 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	return -1;
 }
 
-// Recursive insert of the record <key, rid> into the (current) page "pageID".
-// newChildEntry will store the return information of the "child" insert call.
-// Following the exact implementation described in Ramakrishnan - Gehrke, p.349.
+/**
+ * Recursive insert of the record <key, rid> into the (current) page "pageID".
+ * newChildEntry will store the return information of the "child" insert call.
+ * Following the exact implementation described in Ramakrishnan - Gehrke, p.349.
+ */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
 	return -1;
@@ -164,15 +223,36 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 
 /**
  * should work...
+ * feels like it's missing something though
  */
 unsigned
 IndexManager::getKeyLength(const Attribute &attribute, const void * key) {
 	return attribute.length;
 }
 
-// Given a non-leaf page and a key, finds the correct (direct) son page ID in which the key "fits".
+/**
+ * Given a non-leaf page and a key, finds the correct (direct) son page ID in which the key "fits".
+ */
 unsigned
 IndexManager::getSonPageID(const Attribute attribute, const void * key, void * pageData) {
+	
+	// eventually pass this in to the recursive call if we have to
+	unsigned char* nextPage = new unsigned char[PAGE_SIZE];
+	//the length of the key in bytes
+	int keyLen = getKeyLength(attribute,key);
+	//the keys for use in comparison
+	unsigned char* hiKey = new unsigned char[keyLen];
+	unsigned char* lowKey = new unsigned char[keyLen];
+
+
+/*
+compare the input key with the page's high key and it's low key
+
+if it fits, return the page
+
+if it doesn't fit, do a recursive call on the next page.
+
+*/
 	return -1;
 }
 
@@ -225,7 +305,7 @@ IndexManager::createFile(const string &fileName) {
 	rootPage[linkOffset] = 0x2;
 
 	/*unsigned char meta0;
-	for(int aa = 0; aa < 256; aa++) {
+	for(int aa = 0; aa < 32; aa++) {
 		meta0 = rootPage[aa];
 		cout << "[" << aa << "]";
  		cout << (bitset<8>) meta0;
@@ -233,6 +313,7 @@ IndexManager::createFile(const string &fileName) {
 	}*/
 
 	handle.appendPage(rootPage);
+	debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE);
 
 	//write the first non-leaf page
 	unsigned char* firstLeaf = new unsigned char[PAGE_SIZE];

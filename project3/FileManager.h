@@ -1,7 +1,7 @@
-#include <string>
-
 #ifndef _pfm_h_
 #define _pfm_h_
+#include <string>
+#include "Tools.h"
 
 typedef int RC;
 typedef unsigned PageNum;

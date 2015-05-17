@@ -76,6 +76,7 @@ public:
 
 class IndexManager {
 private:
+	Tools debugTool;
 	static IndexManager *_index_manager;
 	static PagedFileManager* _pf_manager;
 	// Auxiliary methods.
@@ -107,6 +108,11 @@ public:
 	int destroyFile(const string &fileName);
 	int openFile(const string &fileName, FileHandle &fileHandle);
 	int closeFile(FileHandle &fileHandle);
+
+	int testInsertNonLeafRecord(const Attribute &attribute, ChildEntry &newChildEntry, void * pageData) {
+		return insertNonLeafRecord(attribute, newChildEntry, pageData);
+	}
+
 
 	/**
 	 * The following two functions are using the following format for the passed key value.

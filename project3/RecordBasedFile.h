@@ -63,7 +63,7 @@ typedef unsigned AttrLength;
 struct Attribute {
 	string name;			// attribute name
 	AttrType type;			// attribute type
-	AttrLength length;		// attribute length
+	unsigned length;		// attribute length
 };
 
 // Comparison Operator

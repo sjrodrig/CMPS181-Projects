@@ -8,14 +8,14 @@ GCC	= g++ -g -O0 -Wall -Wextra -std=gnu++11
 
 all:	db181
 
-db181: FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
-	${GCC} -o db181 FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
+db181: Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
+	${GCC} -o db181 Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
 
 main.o: main.cpp
 	${GCC} -c main.cpp
 
-#tools.o: tools.cpp
-#	${GCC} -c tools.cpp
+Tools.o: Tools.cpp
+	${GCC} -c Tools.cpp
 
 FileManager.o: FileManager.cpp
 	${GCC} -c FileManager.cpp
