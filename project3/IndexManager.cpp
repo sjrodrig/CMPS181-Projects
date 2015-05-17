@@ -23,10 +23,10 @@
  * insert					--	unstarted
  * deleteEntryFromLeaf		--	unstarted
  * deleteEntry				--	unstarted
- * treeSearch				--	unstarted
+ * treeSearch				--	Completed using the TA's code provided on Piazza
  * scan						--	unstarted
  * getKeyLength				--	Moderately Tested
- * getSonPageID				--	unstarted
+ * getSonPageID				--	Completed but Untested
  * createFile				--	Lightly Tested
  * compareKeys				--  Moderately Tested
  */
@@ -93,9 +93,14 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	for(keyIndex = 16; keyIndex < freeSpaceStart; keyIndex += childSize) {
 
 		//load the key from the file into "oldChildEntryData" to compare it
-		for(int loadIndex = keyIndex; loadIndex < (keyIndex+childSize); loadIndex++) {
-			oldChildEntryData[loadIndex-keyIndex] = metaPage[keyIndex+loadIndex];
+		for(int loadIndex = 0; loadIndex < childSize; loadIndex++) {
+			oldChildEntryData[loadIndex] = metaPage[keyIndex+loadIndex];
 		}
+
+		unsigned char* newChildEntryKey = new unsigned char[childSize-4];
+		unsigned char* oldChildEntryKey = new unsigned char[childSize-4];
+		memcpy(newChildEntryKey, newChildEntryData, childSize-4);
+		memcpy(oldChildEntryKey, oldChildEntryData, childSize-4);
 
 		/**
 		 * compare the keys
@@ -103,7 +108,7 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 		 * it should be irrelevant since this data is the same
 		 * (they're the same attribute)
 		 */
-		if(compareKeys(attribute, newChildEntryData, oldChildEntryData) < 0) {
+		if(compareKeys(attribute, newChildEntryKey, oldChildEntryKey) < 0) {
 			continue;
 		} else { //insert the key
 
@@ -160,14 +165,6 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 		mult *= 256;
 	}
 
-	/*unsigned char meta0;
-	for(int aa = 0; aa < 32; aa++) {
-		meta0 = metaPage[aa];
-		cout << " [" << aa << "]";
- 		cout << (bitset<8>) meta0;
-		if ((aa+1) % 4 == 0) { cout << endl; }
-	}*/
-
 	//copy back the modified memory
 	memcpy(pageData, metaPage, PAGE_SIZE);
 	debugTool.fprintNBytes("after_insert.dump", metaPage, PAGE_SIZE);
@@ -213,7 +210,26 @@ IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, co
 // Recursive search through the tree, returning the page ID of the leaf page that should contain the input key.
 int
 IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, const void * key, unsigned currentPageID, unsigned &returnPageID) {
-	return -1;
+	void * pageData = malloc(PAGE_SIZE);
+
+	// Gets the current page.
+	if (fileHandle.readPage(currentPageID, pageData) != SUCCESS) {
+		return ERROR_PFM_READPAGE;
+	}
+
+	// If it's a leaf page, we're done. Returns its id.
+	if (isLeafPage(pageData)) {
+		returnPageID = currentPageID;
+		free(pageData);
+		return SUCCESS;
+	}
+
+	// Otherwise, we go one level below (towards the correct son page) and call the method again.
+	unsigned sonPageID = getSonPageID(attribute, key, pageData);
+
+	free(pageData);
+
+	return treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
 }
 
 int
@@ -232,28 +248,47 @@ IndexManager::getKeyLength(const Attribute &attribute, const void * key) {
 
 /**
  * Given a non-leaf page and a key, finds the correct (direct) son page ID in which the key "fits".
+ *
+ * As the method name says, you are returning only the page ID (unsigned). It should receive a non-leaf page and a key as an argument, scan through all the records within the page and stop when your input key is lower than the current record key: by doing this, you can get/return the correct pointer ("son" page ID) that refers to the son page in which your input key should fit.
+ *
+ *
+ *
  */
 unsigned
 IndexManager::getSonPageID(const Attribute attribute, const void * key, void * pageData) {
-	
-	// eventually pass this in to the recursive call if we have to
-	unsigned char* nextPage = new unsigned char[PAGE_SIZE];
+	unsigned retVal = 0;
+
+	//get the page as unsigned chars
+	unsigned char* ucPage = new unsigned char[PAGE_SIZE];
+	memcpy(ucPage, pageData, PAGE_SIZE);
+
 	//the length of the key in bytes
 	int keyLen = getKeyLength(attribute,key);
-	//the keys for use in comparison
-	unsigned char* hiKey = new unsigned char[keyLen];
-	unsigned char* lowKey = new unsigned char[keyLen];
+	int valSize = keyLen + 4; //take the unsigned int into account
 
+	for(int keyIndex = 16; true; keyIndex += valSize) {
+		unsigned char* oldChildEntryKey = new unsigned char[keyLen];
 
-/*
-compare the input key with the page's high key and it's low key
+		int loadIndex;
+		//load the key from the file into "oldChildEntryData" to compare it
+		for(loadIndex = 0; loadIndex < keyLen; loadIndex++) {
+			oldChildEntryKey[loadIndex] = ucPage[keyIndex+loadIndex];
+		}
 
-if it fits, return the page
+		if(compareKeys(attribute, key, oldChildEntryKey) <= 0) {
+			continue;
+		} else { //read the value
 
-if it doesn't fit, do a recursive call on the next page.
-
-*/
-	return -1;
+			int mult = 1;
+			for(int aa = 0; aa < 4; aa++) {
+				retVal += (mult * ucPage[keyIndex+loadIndex]);
+				loadIndex++;
+				mult *= 256;
+			}
+			return retVal;
+		}
+	}
+	return retVal;
 }
 
 /**
