@@ -176,10 +176,103 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	return retVal;
 }
 
+bool IndexManager::recordExistsInLeafPage(const Attribute &attribute, const void *key, const RID &rid, void * pageData){
+	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
+
+	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
+	for (unsigned i = 0; i < pageHeader.recordsNumber; i++){
+
+		// FETCH THE KEY
+		// CALL COMPARE KEYS
+		// COMPARE RIDs?
+
+		offset += sizeof(RID);
+	}
+	return false;
+}
+
+int compareKeys(const Attribute attribute, const void * key1, const void * key2){
+	switch(attribute.type){
+		case TypeInt:
+			int key_int_1;
+			int key_int_2;
+			memcpy(&key_int_1, key1, INT_SIZE);
+			memcpy(&key_int_2, key2, INT_SIZE);
+			if (key_int_1 > key_int_2){
+				return 1;
+			} else if (key_int_1 < key_int_2){
+				return -1;
+			} else {
+				return 0;
+			}
+			break;
+		case TypeReal:
+			double key_double_1;
+			double key_double_2;
+			memcpy(&key_double_1, key1, REAL_SIZE);
+			memcpy(&key_double_2, key2, REAL_SIZE);
+			if (key_double_1 > key_double_2){
+				return 1;
+			} else if (key_double_1 < key_double_2){
+				return -1;
+			} else {
+				return 0;
+			}
+			break;
+		case TypeVarChar:
+			// Fetch the sizes of the two strings
+			unsigned key_size_1;
+			unsigned key_size_2;
+			memcpy(&key_size_1, key1, VARCHAR_LENGTH_SIZE);
+			memcpy(&key_size_2, key2, VARCHAR_LENGTH_SIZE);
+
+			// Fetch the strings
+			char* key_string_1;
+			char* key_string_2;
+			memcpy(key_string_1, key1 + VARCHAR_LENGTH_SIZE, key_size_1);
+			memcpy(key_string_2, key2 + VARCHAR_LENGTH_SIZE, key_size_2);
+
+			// Compare the retreived values
+			return strcmp(key_string_1, key_string_2);
+	}
+}
+
 // Given a record entry (<key, RID>), writes it into the correct position within the leaf page "pageData".
 int
 IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, const RID &rid, void* pageData) {
-	return -1;
+	// Check if record is already present
+	if (recordExistsInLeafPage(attribute, key, rid, pageData)) return ERROR_RECORD_EXISTS;
+
+	// Fetch the page header
+	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
+
+	// Make sure Leaf has space for given key
+	unsigned keyLength = getKeyLength(attribute, key);
+	if (PAGE_SIZE - pageHeader.freeSpaceOffset < keyLength + sizeof(RID)){
+		return ERROR_NO_FREE_SPACE;
+	}
+
+	// Cycle existing records until the appropriate space is found for the new one
+	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
+	for(unsigned i = 0; i < pageHeader.recordsNumber; i++){
+		//
+		// FIX FETCHING OF KEY AFTER T.A ANSWERS QUESTION
+		//
+		void *cur_key;
+		if (compareKeys(attribute, key, cur_key) < 0) break;
+		offset += sizeof(RID);
+	}
+
+	// Make space for the new record
+	memmove((char *) pageData + offset + keyLength + sizeof(RID), (char *)pageData + offset, keyLength + sizeof(RID));
+
+	// Copy new data into free'd space
+	memcpy((char *) pageData + offset, &key, keyLength);
+	memcpy((char *) pageData + offset + keyLength, &rid, sizeof(RID));
+
+	// Update the page header
+	setLeafPageHeader(pageData, pageHeader);
+	return 0;
 }
 
 /**
@@ -191,7 +284,6 @@ int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
 	return -1;
 }
-
 
 
 // Given a record entry <key, rid>, deletes it from the leaf page "pageData".
@@ -237,13 +329,19 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	return -1;
 }
 
-/**
- * should work...
- * feels like it's missing something though
- */
-unsigned
-IndexManager::getKeyLength(const Attribute &attribute, const void * key) {
-	return attribute.length;
+unsigned 
+IndexManager::getKeyLength(const Attribute &attribute, const void *key){
+	switch(attribute.type){
+		case TypeInt:
+			return INT_SIZE;
+		case TypeReal:
+			return REAL_SIZE;
+		case TypeVarChar:
+			unsigned key_size;
+			memcpy(&key_size, key, VARCHAR_LENGTH_SIZE);
+			return key_size + VARCHAR_LENGTH_SIZE;
+	}
+	return 0;
 }
 
 /**
