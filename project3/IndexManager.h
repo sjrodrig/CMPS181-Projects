@@ -136,6 +136,6 @@ public:
 };
 
 // print out the error message for a given return code
-void IX_PrintError (RC rc);
+void IX_PrintError (int rc);
 
 #endif

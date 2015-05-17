@@ -19,10 +19,11 @@
  * 
  * METHOD PROGRESS
  * insertNonLeafRecord		--	Moderately Tested
- * insertLeafRecord			--	unstarted
+ * insertLeafRecord			--	In Progress -- almost complete
  * insert					--	unstarted
  * deleteEntryFromLeaf		--	unstarted
  * deleteEntry				--	unstarted
+ * recordExistsInLeafPage	--  
  * treeSearch				--	Completed using the TA's code provided on Piazza
  * scan						--	unstarted
  * getKeyLength				--	Moderately Tested
@@ -74,8 +75,10 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 
 	unsigned char* newChildEntryData = new unsigned char[childSize];
 	unsigned char* oldChildEntryData = new unsigned char[childSize];
+	unsigned char* newChildEntryKey = new unsigned char[childSize-4];
+	unsigned char* oldChildEntryKey = new unsigned char[childSize-4];
 
-	cout << "newChildEntry.childPageNumber: " << newChildEntry.childPageNumber << endl;
+	//cout << "newChildEntry.childPageNumber: " << newChildEntry.childPageNumber << endl;
 
 	//copy the child into an array of unsigned chars
 	memcpy(newChildEntryData, newChildEntry.key, childSize-4);
@@ -97,8 +100,6 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 			oldChildEntryData[loadIndex] = metaPage[keyIndex+loadIndex];
 		}
 
-		unsigned char* newChildEntryKey = new unsigned char[childSize-4];
-		unsigned char* oldChildEntryKey = new unsigned char[childSize-4];
 		memcpy(newChildEntryKey, newChildEntryData, childSize-4);
 		memcpy(oldChildEntryKey, oldChildEntryData, childSize-4);
 
@@ -169,14 +170,21 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	memcpy(pageData, metaPage, PAGE_SIZE);
 	debugTool.fprintNBytes("after_insert.dump", metaPage, PAGE_SIZE);
 
-	delete[] newChildEntryData;
 	delete[] metaPage;
+	delete[] newChildEntryData;
+	delete[] oldChildEntryData;
+	delete[] newChildEntryKey;
+	delete[] oldChildEntryKey;
 	retVal = SUCCESS;
 
 	return retVal;
 }
 
-bool IndexManager::recordExistsInLeafPage(const Attribute &attribute, const void *key, const RID &rid, void * pageData){
+/**
+ * @Return: Whether or not the record is in a given leaf page
+ */
+bool
+IndexManager::recordExistsInLeafPage(const Attribute &attribute, const void *key, const RID &rid, void * pageData){
 	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
 
 	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
@@ -191,8 +199,14 @@ bool IndexManager::recordExistsInLeafPage(const Attribute &attribute, const void
 	return false;
 }
 
-int compareKeys(const Attribute attribute, const void * key1, const void * key2){
-	switch(attribute.type){
+/**
+ * @Return: Negative: Second key is larger
+ * @Return: Zero: Keys are equal
+ * @Return: Positive: First key is larger
+ */
+int
+IndexManager::compareKeys(const Attribute attribute, const void * key1, const void * key2) {
+	switch(attribute.type) {
 		case TypeInt:
 			int key_int_1;
 			int key_int_2;
@@ -211,9 +225,9 @@ int compareKeys(const Attribute attribute, const void * key1, const void * key2)
 			double key_double_2;
 			memcpy(&key_double_1, key1, REAL_SIZE);
 			memcpy(&key_double_2, key2, REAL_SIZE);
-			if (key_double_1 > key_double_2){
+			if (key_double_1 > key_double_2) {
 				return 1;
-			} else if (key_double_1 < key_double_2){
+			} else if (key_double_1 < key_double_2) {
 				return -1;
 			} else {
 				return 0;
@@ -235,13 +249,14 @@ int compareKeys(const Attribute attribute, const void * key1, const void * key2)
 			// Compare the retreived values
 			return strcmp(key_string_1, key_string_2);
 	}
+	return SUCCESS;
 }
 
 // Given a record entry (<key, RID>), writes it into the correct position within the leaf page "pageData".
 int
 IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, const RID &rid, void* pageData) {
 	// Check if record is already present
-	if (recordExistsInLeafPage(attribute, key, rid, pageData)) return ERROR_RECORD_EXISTS;
+	if (recordExistsInLeafPage(attribute, key, rid, pageData)) { return ERROR_RECORD_EXISTS; }
 
 	// Fetch the page header
 	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
@@ -254,12 +269,12 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 
 	// Cycle existing records until the appropriate space is found for the new one
 	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
-	for(unsigned i = 0; i < pageHeader.recordsNumber; i++){
+	for(unsigned i = 0; i < pageHeader.recordsNumber; i++) {
 		//
 		// FIX FETCHING OF KEY AFTER T.A ANSWERS QUESTION
 		//
 		void *cur_key;
-		if (compareKeys(attribute, key, cur_key) < 0) break;
+		if (compareKeys(attribute, key, cur_key) < 0) { break; }
 		offset += sizeof(RID);
 	}
 
@@ -272,7 +287,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 
 	// Update the page header
 	setLeafPageHeader(pageData, pageHeader);
-	return 0;
+	return SUCCESS;
 }
 
 /**
@@ -320,7 +335,6 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 	unsigned sonPageID = getSonPageID(attribute, key, pageData);
 
 	free(pageData);
-
 	return treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
 }
 
@@ -469,9 +483,9 @@ IndexManager::createFile(const string &fileName) {
 /**
  * negative if first key is smaller
  * positive if second key is smaller
- */
+ *
 int
-IndexManager::compareKeys(Attribute attr, const void* key1, const void* key2) {
+IndexManager::compareKeys(const Attribute attr, const void* key1, const void* key2) {
 	int attrLen = getKeyLength(attr, key1);
 	int retVal;
 
@@ -489,7 +503,7 @@ IndexManager::compareKeys(Attribute attr, const void* key1, const void* key2) {
 
 	//timeout means keys are equal
 	return 0;
-}
+}*/
 
 /*********************************************************************************
  *								Already Implemented								 *
