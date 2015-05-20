@@ -18,18 +18,18 @@
  *						(ref. p. 344-351 Ramakrishnan - Gehrke)
  * 
  * METHOD PROGRESS
- * insertNonLeafRecord		--	Moderately Tested
- * insertLeafRecord			--	In Progress -- almost complete
- * insert					--	unstarted
- * deleteEntryFromLeaf		--	unstarted
- * deleteEntry				--	unstarted
- * recordExistsInLeafPage	--  
- * treeSearch				--	Completed using the TA's code provided on Piazza
- * scan						--	unstarted
- * getKeyLength				--	Moderately Tested
- * getSonPageID				--	Completed but Untested
- * createFile				--	Lightly Tested
- * compareKeys				--  Moderately Tested
+ * insertNonLeafRecord		--	# Moderately Tested
+ * insertLeafRecord			--	@ In Progress -- almost complete
+ * insert					--	@ unstarted
+ * deleteEntryFromLeaf		--	@ unstarted
+ * deleteEntry				--	# Complete but Untested
+ * recordExistsInLeafPage	--  @ In Progress
+ * treeSearch				--	# Completed using the TA's code provided on Piazza
+ * scan						--	@ unstarted
+ * getKeyLength				--	# Moderately Tested
+ * getSonPageID				--	# Complete but Untested
+ * createFile				--	# Lightly Tested
+ * compareKeys				--  # Moderately Tested
  */
 
 using namespace std;
@@ -307,11 +307,44 @@ IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, c
 	return -1;
 }
 
+/**
+ * Finds the leaf page in the tree and calls deleteEntryFromLeaf() on it
+ */
 int
 IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, const void *key, const RID &rid) {
-	// Simplification: Lazy deletion.
+	unsigned char* targetPage = new unsigned char[PAGE_SIZE];
+	unsigned char* rootLocPage = new unsigned char[PAGE_SIZE];
+	int retVal = -1;
 
-	return -1;
+	if (fileHandle.readPage(0, rootLocPage) != SUCCESS) {
+		cout << "Error Searching: Couldn't read page 0 (Zero)." << endl;
+		return ERROR_PFM_READPAGE;
+	}
+
+	unsigned rootLoc = 0;						//location of the root
+	rootLoc += rootLocPage[0];
+	rootLoc += (rootLocPage[1] * 256);			//256^1
+	rootLoc += (rootLocPage[2] * 65536);		//256^2
+	rootLoc += (rootLocPage[3] * 16777216);		//256^3
+
+	delete[] rootLocPage;						//don't need it anymore
+	unsigned targetPageID;
+
+	retVal = treeSearch(fileHandle, attribute, key, rootLoc, targetPageID);
+	if(retVal != SUCCESS) {
+		cout << "Error Searching B+ Tree: error code " << retVal << "." << endl;
+		return retVal;
+	}
+
+	if (fileHandle.readPage(targetPageID, targetPage) != SUCCESS) {
+		cout << "Error Searching: Couldn't read page " << targetPageID << "." << endl;
+		return ERROR_PFM_READPAGE;
+	}
+
+	retVal = deleteEntryFromLeaf(attribute, key, rid, targetPage);
+
+	delete[] targetPage;
+	return retVal;
 }
 
 // Recursive search through the tree, returning the page ID of the leaf page that should contain the input key.
@@ -432,7 +465,7 @@ IndexManager::createFile(const string &fileName) {
 	//write the location of the root on the first page
 	unsigned* defaultRootLocation = new unsigned[1];
 	defaultRootLocation[0] = DEFAULT_ROOT_LOCATION;
-	handle.appendPage(defaultRootLocation);
+	handle.writePage(0, defaultRootLocation);
 
 	//write the root on page 1
 	unsigned char* rootPage = new unsigned char[PAGE_SIZE];
