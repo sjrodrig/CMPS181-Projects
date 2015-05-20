@@ -20,7 +20,7 @@
  * METHOD PROGRESS
  * insertNonLeafRecord		--	# Moderately Tested
  * insertLeafRecord			--	@ In Progress -- almost complete
- * insert					--	@ unstarted
+ * insert					--	@ started...
  * deleteEntryFromLeaf		--	@ unstarted
  * deleteEntry				--	# Complete but Untested
  * recordExistsInLeafPage	--  @ In Progress
@@ -292,17 +292,60 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  * Recursive insert of the record <key, rid> into the (current) page "pageID".
  * newChildEntry will store the return information of the "child" insert call.
  * Following the exact implementation described in Ramakrishnan - Gehrke, p.349.
+ *
+ * Complete for leaf pages
+ * Incomplete for branch (non-leaf) pages
+ * 
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-	return -1;
+	//define the return value
+	int retVal = -1;
+
+	//the page we're going to read
+	unsigned char* page = new unsigned char[PAGE_SIZE];
+
+	if (fileHandle.readPage(pageID, page) != SUCCESS) {
+		cout << "Error inserting: Couldn't read page " << pageID << "." << endl;
+		return ERROR_PFM_READPAGE;
+	}
+
+	//determine if the page is a leaf or a branch
+	bool isLeaf = isLeafPage(page);
+
+	//if the page is a leaf
+	if(isLeaf) {
+		//insert the record
+		retVal = insertLeafRecord(attribute, key, rid, page);
+
+		if(retVal != SUCCESS) {
+			cout << "Error: Record could not be inserted in leaf page." << endl;
+			return retVal;
+		}
+
+		//write the page back
+		if (fileHandle.writePage(pageID, page) != SUCCESS) {
+			cout << "Error inserting: Couldn't write page " << pageID << "." << endl;
+			return ERROR_PFM_WRITEPAGE;
+		}
+	}
+	//if the page is not a leaf
+	else {
+
+
+
+	}
+
+	return retVal;
 }
 
 
 // Given a record entry <key, rid>, deletes it from the leaf page "pageData".
 int
 IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, const RID &rid, void * pageData) {
-	return -1;
+	int retVal = -1;
+
+	return retVal;
 }
 
 /**
@@ -632,37 +675,37 @@ void
 IX_PrintError (int rc) {
 	switch (rc) {
 		case ERROR_PFM_CREATE:
-			cout << "Paged File Manager error: create file." << endl;
+			cerr << "Paged File Manager error: create file." << endl;
 		break;
 		case ERROR_PFM_DESTROY:
-			cout << "Paged File Manager error: destroy file." << endl;
+			cerr << "Paged File Manager error: destroy file." << endl;
 		break;
 		case ERROR_PFM_OPEN:
-			cout << "Paged File Manager error: open file." << endl;
+			cerr << "Paged File Manager error: open file." << endl;
 		break;
 		case ERROR_PFM_CLOSE:
-			cout << "Paged File Manager error: close file." << endl;
+			cerr << "Paged File Manager error: close file." << endl;
 		break;
 		case ERROR_PFM_READPAGE:
-			cout << "Paged File Manager error: read page." << endl;
+			cerr << "Paged File Manager error: read page." << endl;
 		break;
 		case ERROR_PFM_WRITEPAGE:
-			cout << "Paged File Manager error: write page." << endl;
+			cerr << "Paged File Manager error: write page." << endl;
 		break;
 		case ERROR_PFM_FILEHANDLE:
-			cout << "Paged File Manager error: FileHandle problem." << endl;
+			cerr << "Paged File Manager error: FileHandle problem." << endl;
 		break;
 		case ERROR_NO_SPACE_AFTER_SPLIT:
-			cout << "Tree split error: There is no space for the new entry, even after the split." << endl;
+			cerr << "Tree split error: There is no space for the new entry, even after the split." << endl;
 		break;
 		case ERROR_RECORD_EXISTS:
-			cout << "Index insert error: record already exists." << endl;
+			cerr << "Index insert error: record already exists." << endl;
 		break;
 		case ERROR_RECORD_NOT_EXISTS:
-			cout << "Index delete error: record does not exists." << endl;
+			cerr << "Index delete error: record does not exists." << endl;
 		break;
 		case ERROR_UNKNOWN:
-			cout << "Unknown error." << endl;
+			cerr << "Unknown error." << endl;
 		break;
 	}
 }
