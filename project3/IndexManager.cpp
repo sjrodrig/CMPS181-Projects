@@ -78,8 +78,6 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	unsigned char* newChildEntryKey = new unsigned char[childSize-4];
 	unsigned char* oldChildEntryKey = new unsigned char[childSize-4];
 
-	//cout << "newChildEntry.childPageNumber: " << newChildEntry.childPageNumber << endl;
-
 	//copy the child into an array of unsigned chars
 	memcpy(newChildEntryData, newChildEntry.key, childSize-4);
 	newChildEntryData[childSize-4] = newChildEntry.childPageNumber % 256;
@@ -342,6 +340,8 @@ IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, co
 	}
 
 	retVal = deleteEntryFromLeaf(attribute, key, rid, targetPage);
+	//write the page to the file.
+	fileHandle.writePage(targetPageID, targetPage);
 
 	delete[] targetPage;
 	return retVal;
@@ -484,13 +484,6 @@ IndexManager::createFile(const string &fileName) {
 	//write the first leaf number
 	rootPage[linkOffset] = 0x2;
 
-	/*unsigned char meta0;
-	for(int aa = 0; aa < 32; aa++) {
-		meta0 = rootPage[aa];
-		cout << "[" << aa << "]";
- 		cout << (bitset<8>) meta0;
-		if ((aa+1) % 4 == 0) { cout << endl; }
-	}*/
 
 	handle.appendPage(rootPage);
 	debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE);
@@ -512,31 +505,6 @@ IndexManager::createFile(const string &fileName) {
 
 	return retVal;
 }
-
-/**
- * negative if first key is smaller
- * positive if second key is smaller
- *
-int
-IndexManager::compareKeys(const Attribute attr, const void* key1, const void* key2) {
-	int attrLen = getKeyLength(attr, key1);
-	int retVal;
-
-	unsigned char* ucKey1 = new unsigned char[attrLen];
-	unsigned char* ucKey2 = new unsigned char[attrLen];
-	
-	memcpy(ucKey1, key1, attrLen);
-	memcpy(ucKey2, key2, attrLen);
-
-	//compare the data
-	for(int byte = 0; byte < attrLen; byte++) {
-		if( ucKey1[byte] < ucKey2[byte] ) { return -1; }
-		if( ucKey1[byte] > ucKey2[byte] ) { return 1; }
-	}
-
-	//timeout means keys are equal
-	return 0;
-}*/
 
 /*********************************************************************************
  *								Already Implemented								 *
