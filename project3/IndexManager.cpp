@@ -173,9 +173,7 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	delete[] oldChildEntryData;
 	delete[] newChildEntryKey;
 	delete[] oldChildEntryKey;
-	retVal = SUCCESS;
-
-	return retVal;
+	return SUCCESS;
 }
 
 /**
@@ -276,11 +274,6 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	// Cycle existing records until the appropriate space is found for the new one
 	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
 	for(unsigned i = 0; i < pageHeader.recordsNumber; i++) {
-
-		// unsigned cur_keyLength = getKeyLength(attribute, pageData + offset);
-		// void *cur_key = malloc(cur_keyLength);
-		// memcpy((char *)cur_key, pageData + offset, cur_keyLength);
-		
 		if (compareKeys(attribute, key, pageData + offset) < 0) { break; }
 		offset += getKeyLength(attribute, pageData + offset) + sizeof(RID);
 	}
@@ -300,7 +293,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 
 	// IS NODE A PARENT (NON-LEAF)? getPageType(pageData)
 		// TRUE
-			// Find i? Cycle tree using key info?
+			// Find i? Cycle tree using key info? getSonPageID()
 			// Call insert recursivly
 			// IS newChildEntry == null
 				// TRUE
@@ -323,7 +316,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 					// Split page in half
 					// setPageType() of new page
 					// Insert into first or second half?
-					// Set newChildEntry to ????
+					// Set newChildEntry to middle value being copied up
 			
 
 /**
@@ -337,44 +330,110 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-	//define the return value
-	int retVal = -1;
-
-	//the page we're going to read
-	unsigned char* page = new unsigned char[PAGE_SIZE];
-
-	if (fileHandle.readPage(pageID, page) != SUCCESS) {
-		cout << "Error inserting: Couldn't read page " << pageID << "." << endl;
+	// Allocate & Read-in the desired page
+	void* pageDate = malloc(PAGE_SIZE);
+	if (fileHandle.readPage(pageID, pageDate) != SUCCESS) {
+		cout << "ERROR insert(): Failed to read page " << pageID << "." << endl;
 		return ERROR_PFM_READPAGE;
 	}
 
-	//determine if the page is a leaf or a branch
-	bool isLeaf = isLeafPage(page);
+	// Check the page type
+	if(isLeafPage(pageDate)) {
+		// Attempt to insert new leaf record
+		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageDate);
+		if (insert_return == SUCCESS){
+			if (fileHandle.writePage(pageID, pageDate) != SUCCESS) {
+				cout << "ERROR insert(): Failed to write page " << pageID << "." << endl;
+				return ERROR_PFM_WRITEPAGE;
+			}
+			free(pageData);
+		} else if (insert_return == ERROR_NO_FREE_SPACE){
+			// Allocate space for a second page
+			void* new_pageData = malloc(PAGE_SIZE);
 
-	//if the page is a leaf
-	if(isLeaf) {
-		//insert the record
-		retVal = insertLeafRecord(attribute, key, rid, page);
+			// Fetch the current page header
+			LeafPageHeader pageHeader = getLeafPageHeader(pageData);
 
-		if(retVal != SUCCESS) {
-			cout << "Error: Record could not be inserted in leaf page." << endl;
-			return retVal;
+			// Find place to split page
+			unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
+			unsigned i = 0;
+			for(; i < pageHeader.recordsNumber; i++) {
+				if (offset > PAGE_SIZE / 2) break;
+				offset += getKeyLength(attribute, (char*) pageData + offset) + sizeof(RID);
+			}
+
+			// Copy out the middle value
+			unsigned middleValue_length = getKeyLength(attribute, pageData + offset) + sizeof(RID);
+			void* middleValue = malloc(middleValue_length);
+			memcpy(middleValue, (char*) pageData + offset, middleValue_length);
+
+			// Copy the middle value and further records into the new page
+			memcpy(new_pageData, (char*) pageData + offset, PAGE_SIZE - offset);
+
+			// Set the new page's information
+			setPageType(new_pageData, LeafPage);
+			LeafPageHeader new_leafPageHeader;
+			new_leafPageHeader.prevPage = pageID
+			new_leafPageHeader.nextPage = pageHeader.nextPage;
+			new_leafPageHeader.recordsNumber = pageHeader.recordsNumber - (i + 1);
+			new_leafPageHeader.freeSpaceOffset = sizeof(PageType) + sizeof(LeafPageHeader) + pageHeader.freeSpaceOffset - offset; 
+			setLeafPageHeader(new_pageData, new_leafPageHeader);
+
+			// Adapt the existing page's information
+			pageHeader.nextPage = fileHandle.getNumberOfPages();
+			pageHeader.recordsNumber = i;
+			pageHeader.freeSpaceOffset = offset;
+			setLeafPageHeader(pageData, pageHeader);
+
+			// Write/Append the pages
+			fileHandle.writePage(pageID, pageData);
+			fileHandle.appendPage(new_pageData);
+
+			// Set the "return" paramaters & clean up
+			newChildEntry.key = middleValue;
+			newChildEntry.childPageNumber = pageHeader.nextPage;
+			free(new_pageData);
+			free(pageData);
+		} else {
+			cout << "ERROR insert(): Failed to insert new leaf." << endl;
+			return -1;
+		}
+	} else {
+		unsigned targetPageID = getSonPageID(attribute, key, pageData);
+		int insert_return = insert(attribute, key, rid, fileHandle, targetPageID, newChildEntry);
+		if (insert_return != SUCCESS){
+			cout << "ERROR insert(): Failed to recursivly call method. (" << insert_return << ")" << endl;
+			free(pageData);
+			return -2;
 		}
 
-		//write the page back
-		if (fileHandle.writePage(pageID, page) != SUCCESS) {
-			cout << "Error inserting: Couldn't write page " << pageID << "." << endl;
-			return ERROR_PFM_WRITEPAGE;
+		if(newChildEntry == NULL){
+			free(pageData);
+		} else {
+			// Insert the new child entry returned
+			insert_return = insertNonLeafRecord(attribute, newChildEntry, pageData);
+			if (insert_return == SUCCESS){
+				newChildEntry = NULL;
+			} else if (insert_return == ERROR_NO_FREE_SPACE){
+				// Allocate space for a new page
+				void* new_pageData = malloc(PAGE_SIZE);
+
+				// Fetch the current page's header
+				NonLeafPageHeader pageHeader = getNonLeafPageHeader(pageData);
+
+				// Find place to split page
+				unsigned offset = sizeof(PageType) + sizeof(NonLeafPageHeader) + sizeof(unsigned);
+				unsigned i = 0;
+				for(; i < pageHeader.recordsNumber; i++) {
+					if (offset > PAGE_SIZE / 2) break;
+					offset = getKeyLength(attribute, (char*) pageData + offset) + sizeof(unsigned);
+				}
+
+				
+			}
 		}
 	}
-	//if the page is not a leaf
-	else {
-
-
-
-	}
-
-	return retVal;
+	return SUCCESS;
 }
 
 
