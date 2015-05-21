@@ -458,27 +458,28 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 				memcpy(new_pageData, (char*) pageData + true_offset, PAGE_SIZE - true_offset);
 
 				// Set new page information
-				setPageType(NonLeafPage);
+				setPageType(new_pageData, NonLeafPage);
 				NonLeafPageHeader new_pageHeader;
-				new_pageHeader.prevPage = pageID;
-				new_pageHeader.nextPage = pageHeader.nextPage;
+				// new_pageHeader.prevPage = pageID;
+				// new_pageHeader.nextPage = pageHeader.nextPage;
 				new_pageHeader.recordsNumber = pageHeader.recordsNumber - i;
 				new_pageHeader.freeSpaceOffset = sizeof(PageType) + sizeof(NonLeafPageHeader) + pageHeader.freeSpaceOffset - true_offset;
 				setNonLeafPageHeader(new_pageData, new_pageHeader);
 
 				// Update the current page's information
-				pageHeader.nextPage = fileHandle.getNumberOfPages();
 				pageHeader.recordsNumber = i;
 				pageHeader.freeSpaceOffset = offset - sizeof(unsigned);
 				setNonLeafPageHeader(pageData, pageHeader);
 
+				unsigned new_pageID = fileHandle.getNumberOfPages();
+
 				// Write/Append the pages
-				fileHandle.write(pageID, pageData);
-				fileHandle.append(new_pageData);
+				fileHandle.writePage(pageID, pageData);
+				fileHandle.appendPage(new_pageData);
 
 				// Set the "return" paramaters & clean up
 				newChildEntry.key = middleValue;
-				newChildEntry.childPageNumber = pageHeader.nextPage;
+				newChildEntry.childPageNumber = new_pageID;
 				free(new_pageData);
 				free(pageData);
 			}
