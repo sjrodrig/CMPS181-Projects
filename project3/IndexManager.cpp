@@ -725,7 +725,7 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 			oldChildEntryKey[loadIndex] = ucPage[keyIndex+loadIndex];
 		}
 
-		if(compareKeys(attribute, key, oldChildEntryKey) <= 0) {
+		if(compareKeys(attribute, key, oldChildEntryKey) < 0) {
 			continue;
 		} else { //read the value
 
@@ -735,9 +735,16 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 				loadIndex++;
 				mult *= 256;
 			}
+
+			cout << "(1) getSonPageID() Return Value = " << retVal << endl;
 			return retVal;
 		}
+		delete[] oldChildEntryKey;
 	}
+
+	cout << "(2) getSonPageID() Return Value = " << retVal << endl;
+
+	delete[] ucPage;
 	return retVal;
 }
 
@@ -768,12 +775,13 @@ IndexManager::createFile(const string &fileName) {
 	}
 
 	//write the location of the root on the first page
-	unsigned* defaultRootLocation = new unsigned[1];
-	defaultRootLocation[0] = DEFAULT_ROOT_LOCATION;
-	handle.writePage(0, defaultRootLocation);
+	void* defaultRootLocation = malloc(PAGE_SIZE);
+	unsigned rootPageNumber = DEFAULT_ROOT_LOCATION;
+	memcpy(defaultRootLocation, &rootPageNumber, sizeof(unsigned));
+	handle.appendPage(defaultRootLocation);
 
 	//write the root on page 1
-	unsigned char* rootPage = new unsigned char[PAGE_SIZE];
+	void* rootPage = malloc(PAGE_SIZE);
 
 	//set the page's type to non-leaf
 	setPageType(rootPage, NonLeafPage);
@@ -781,7 +789,7 @@ IndexManager::createFile(const string &fileName) {
 	//write the header
 	NonLeafPageHeader rootHeader;
 	rootHeader.recordsNumber = 0;
-	rootHeader.freeSpaceOffset = (sizeof(PageType) + sizeof(NonLeafPageHeader) + sizeof(unsigned));
+	rootHeader.freeSpaceOffset = sizeof(PageType) + sizeof(NonLeafPageHeader) + sizeof(unsigned);
 	setNonLeafPageHeader(rootPage, rootHeader);
 
 	unsigned linkOffset = rootHeader.freeSpaceOffset - sizeof(unsigned);
@@ -791,10 +799,10 @@ IndexManager::createFile(const string &fileName) {
 	 * this is the first pointer
 	 * after this pointer, we write (key, pointer) pairs
 	 */
-	rootPage[linkOffset] = 0x2;
+	unsigned firstLeafNumber = 2;
+	memcpy((char*)rootPage + linkOffset, &firstLeafNumber, sizeof(unsigned));
 
 	handle.appendPage(rootPage);
-	debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE);
 
 	//write the first non-leaf page
 	unsigned char* firstLeaf = new unsigned char[PAGE_SIZE];
