@@ -337,11 +337,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-<<<<<<< HEAD
-//define the return value
-=======
 	//define the return value
->>>>>>> origin/master
 	int retVal = -1;
 
 	//the page we're going to read
@@ -387,11 +383,7 @@ int
 IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, const RID &rid, void * pageData) {
 	int retVal = -1;
 
-<<<<<<< HEAD
- 	return retVal;
-=======
 	return retVal;
->>>>>>> origin/master
 }
 
 /**
@@ -573,10 +565,6 @@ IndexManager::createFile(const string &fileName) {
 	//write the first leaf number
 	rootPage[linkOffset] = 0x2;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
 	handle.appendPage(rootPage);
 	debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE);
 
