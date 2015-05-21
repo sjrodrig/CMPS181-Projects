@@ -9,6 +9,10 @@
 #include "IndexManager.h"
 
 #define DEFAULT_ROOT_LOCATION 1
+#define LEAF_DATA_START 16
+#define B1 256
+#define B2 65536
+#define B3 16777216
 
 /**
  * CMPS 181 - Project 3
@@ -19,11 +23,11 @@
  * 
  * METHOD PROGRESS
  * insertNonLeafRecord		--	# Moderately Tested
- * insertLeafRecord			--	@ In Progress -- almost complete
+ * insertLeafRecord			--	# Complete but Untested
  * insert					--	@ started...
- * deleteEntryFromLeaf		--	@ unstarted
+ * deleteEntryFromLeaf		--	# Complete but Untested
  * deleteEntry				--	# Complete but Untested
- * recordExistsInLeafPage	--  @ In Progress
+ * recordExistsInLeafPage	--  @ In Progress -- will be completed upon a merge
  * treeSearch				--	# Completed using the TA's code provided on Piazza
  * scan						--	@ unstarted
  * getKeyLength				--	# Moderately Tested
@@ -44,8 +48,6 @@ using namespace std;
  * 
  * ChildEntry PAIRS START AT INDEX 16
  *
- *
- * BROKEN -- data entry not being put in the child
  */
 int
 IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChildEntry, void* pageData) {
@@ -62,9 +64,9 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 
 	int freeSpaceStart = 0;
 	freeSpaceStart = bottomBit;
-	freeSpaceStart += (lowerBit * 256);
-	freeSpaceStart += (upperBit * 65536);
-	freeSpaceStart += (topBit * 16777216);
+	freeSpaceStart += (lowerBit * B1);
+	freeSpaceStart += (upperBit * B2);
+	freeSpaceStart += (topBit * B3);
 
 	void* keyPointer = newChildEntry.key;
 	int childSize = getKeyLength(attribute, keyPointer) + 4;
@@ -80,10 +82,10 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 
 	//copy the child into an array of unsigned chars
 	memcpy(newChildEntryData, newChildEntry.key, childSize-4);
-	newChildEntryData[childSize-4] = newChildEntry.childPageNumber % 256;
-	newChildEntryData[childSize-3] = (newChildEntry.childPageNumber % 65536) / 256;
-	newChildEntryData[childSize-2] = (newChildEntry.childPageNumber % 16777216) / 65536;
-	newChildEntryData[childSize-1] = newChildEntry.childPageNumber / 16777216;
+	newChildEntryData[childSize-4] = newChildEntry.childPageNumber % B1;
+	newChildEntryData[childSize-3] = (newChildEntry.childPageNumber % B2) / B1;
+	newChildEntryData[childSize-2] = (newChildEntry.childPageNumber % B3) / B2;
+	newChildEntryData[childSize-1] = newChildEntry.childPageNumber / B3;
 
 	for(int ucIndex = 0; ucIndex < childSize; ucIndex++) {
 		cout << "ucIndex: " << ucIndex << endl;
@@ -138,10 +140,10 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	//Update the place where the free space starts and write it back
 
 	//increase free space offset by length inserted
-	unsigned char bottomByte = netSpace % 256;
-	unsigned char lowerByte = (netSpace % 65536) / 256;
-	unsigned char upperByte = (netSpace % 16777216) / 65536;
-	unsigned char topByte = netSpace / 16777216;
+	unsigned char bottomByte = netSpace % B1;
+	unsigned char lowerByte = (netSpace % B2) / B1;
+	unsigned char upperByte = (netSpace % B3) / B2;
+	unsigned char topByte = netSpace / B3;
 
 	metaPage[8] = bottomByte;
 	metaPage[9] = lowerByte;
@@ -173,7 +175,9 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	delete[] oldChildEntryData;
 	delete[] newChildEntryKey;
 	delete[] oldChildEntryKey;
-	return SUCCESS;
+	retVal = SUCCESS;
+
+	return retVal;
 }
 
 /**
@@ -186,16 +190,27 @@ IndexManager::recordExistsInLeafPage(const Attribute &attribute, const void *key
 	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
 	for (unsigned i = 0; i < pageHeader.recordsNumber; i++){
 		void* position = pageData + offset;
-		unsigned key_length = getKeyLength(position);
+		unsigned key_length = getKeyLength(attribute, position);
 
 		// Are the keys the same?
-		if (compareKeys(key, position) == 0){
+		if (compareKeys(attribute, key, position) == 0) {
 			RID cur_RID;
-			memcpy(cur_RID, (char*) position + key_length, sizeof(RID));
+			unsigned char* ridData = new unsigned char[8];
+			memcpy(ridData, position + key_length, 8);
+
+			cur_RID.pageNum = ridData[0];
+			cur_RID.pageNum += (ridData[1] * B1);
+			cur_RID.pageNum += (ridData[2] * B1);
+			cur_RID.pageNum += (ridData[3] * B1);
+
+			cur_RID.slotNum = ridData[4];
+			cur_RID.slotNum += (ridData[5] * B1);
+			cur_RID.slotNum += (ridData[6] * B1);
+			cur_RID.slotNum += (ridData[7] * B1);
 
 			// Are the RIDs the same?
-			if (cur_RID == rid){
-				return true
+			if (cur_RID == rid) {
+				return true;
 			}
 		}
 		offset += key_length + sizeof(RID);
@@ -331,18 +346,18 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
 	// Allocate & Read-in the desired page
-	void* pageDate = malloc(PAGE_SIZE);
-	if (fileHandle.readPage(pageID, pageDate) != SUCCESS) {
+	void* pageData = malloc(PAGE_SIZE);
+	if (fileHandle.readPage(pageID, pageData) != SUCCESS) {
 		cout << "ERROR insert(): Failed to read page " << pageID << "." << endl;
 		return ERROR_PFM_READPAGE;
 	}
 
 	// Check the page type
-	if(isLeafPage(pageDate)) {
+	if(isLeafPage(pageData)) {
 		// Attempt to insert new leaf record
-		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageDate);
+		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageData);
 		if (insert_return == SUCCESS){
-			if (fileHandle.writePage(pageID, pageDate) != SUCCESS) {
+			if (fileHandle.writePage(pageID, pageData) != SUCCESS) {
 				cout << "ERROR insert(): Failed to write page " << pageID << "." << endl;
 				return ERROR_PFM_WRITEPAGE;
 			}
@@ -473,16 +488,110 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 }
 
 
-// Given a record entry <key, rid>, deletes it from the leaf page "pageData".
+/**
+ * Given a record entry <key, rid>, deletes it from the leaf page "pageData".
+ * keys start at byte 16 (LEAF_DATA_START)
+ * 0 = Delete Success
+ * -2 = Key not found
+ */
 int
 IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, const RID &rid, void * pageData) {
 	int retVal = -1;
+	//a page of unsigned chars
+	unsigned char* ucdata = new unsigned char[PAGE_SIZE];
+	//copy the data
+	memcpy(ucdata, pageData, PAGE_SIZE);
 
+	int keyLength = getKeyLength(attribute, key);
+	int keyRIDPairLength = keyLength + 8;
+
+	//specifically to hold the key
+	unsigned char* indexKey = new unsigned char[keyLength]; 
+	RID indexRID;
+
+	bool deleteSuccess = false;
+
+	for(int pageIndex = LEAF_DATA_START; true; pageIndex += keyRIDPairLength) {
+		int keyDataIndex;
+
+		//load the key
+		for(keyDataIndex = 0; keyDataIndex < keyLength; keyLength++) {
+			indexKey[keyDataIndex] = ucdata[pageIndex + keyDataIndex];
+		}
+
+		if(compareKeys(attribute, indexKey, key) > 0) {
+			//haven't found the place yet
+			continue;
+		} else if(compareKeys(attribute, indexKey, key) < 0) {
+			cerr << "Error: Key not found." << endl;
+			retVal = -2;
+			break;
+		} else {
+			indexRID.pageNum = ucdata[pageIndex + keyDataIndex];
+			indexRID.pageNum += (ucdata[pageIndex + keyDataIndex + 1] * B1);
+			indexRID.pageNum += (ucdata[pageIndex + keyDataIndex + 2] * B2);
+			indexRID.pageNum += (ucdata[pageIndex + keyDataIndex + 3] * B3);
+			indexRID.slotNum = ucdata[pageIndex + keyDataIndex + 4];
+			indexRID.slotNum += (ucdata[pageIndex + keyDataIndex + 5] * B1);
+			indexRID.slotNum += (ucdata[pageIndex + keyDataIndex + 6] * B2);
+			indexRID.slotNum += (ucdata[pageIndex + keyDataIndex + 7] * B3);
+
+			//if the RIDs match, then it's the record we want to delete
+			if(indexRID.pageNum == rid.pageNum && indexRID.slotNum == rid.slotNum) {
+				/**
+				 * pageIndex = record start
+				 * pageIndex + keyRIDPairLength = 1st byte of next record
+				 * 
+				 */
+
+				//compute the amount of memory to move
+				int moveBytes = PAGE_SIZE - (pageIndex + keyRIDPairLength);
+				int src_offset = pageIndex + keyRIDPairLength;
+
+				// move memory to close gap
+				memmove(ucdata+pageIndex, ucdata+src_offset, moveBytes);
+
+				//decrement the number of entries on the page
+				int records = ucdata[LEAF_DATA_START - 8];
+				records += (ucdata[LEAF_DATA_START - 7] * B1);
+				records += (ucdata[LEAF_DATA_START - 6] * B2);
+				records += (ucdata[LEAF_DATA_START - 5] * B3);
+
+				records--;
+				ucdata[LEAF_DATA_START - 8] = records % B1;
+				ucdata[LEAF_DATA_START - 7] = (records % B2) / B1;
+				ucdata[LEAF_DATA_START - 6] = (records % B3) / B2;
+				ucdata[LEAF_DATA_START - 5] = records / B3;
+
+				//decrement the free space offset
+				int freeOffset = ucdata[LEAF_DATA_START - 4];
+				freeOffset += (ucdata[LEAF_DATA_START - 3] * B1);
+				freeOffset += (ucdata[LEAF_DATA_START - 2] * B2);
+				freeOffset += (ucdata[LEAF_DATA_START - 1] * B3);
+
+				freeOffset -= keyRIDPairLength;
+				ucdata[LEAF_DATA_START - 4] = freeOffset % B1;
+				ucdata[LEAF_DATA_START - 3] = (freeOffset % B2) / B1;
+				ucdata[LEAF_DATA_START - 2] = (freeOffset % B3) / B2;
+				ucdata[LEAF_DATA_START - 1] = freeOffset / B3;
+
+				memcpy(pageData, ucdata, PAGE_SIZE);
+
+				retVal = SUCCESS;
+				break;
+			}
+		}
+	}
+
+	delete[] indexKey;
+	delete[] ucdata;
 	return retVal;
 }
 
 /**
  * Finds the leaf page in the tree and calls deleteEntryFromLeaf() on it
+ * No merging is ever done for the sake of simplicity and because splitting is
+ * an expensive operation
  */
 int
 IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, const void *key, const RID &rid) {
@@ -495,13 +604,13 @@ IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, co
 		return ERROR_PFM_READPAGE;
 	}
 
-	unsigned rootLoc = 0;						//location of the root
+	unsigned rootLoc = 0;					//location of the root
 	rootLoc += rootLocPage[0];
-	rootLoc += (rootLocPage[1] * 256);			//256^1
-	rootLoc += (rootLocPage[2] * 65536);		//256^2
-	rootLoc += (rootLocPage[3] * 16777216);		//256^3
+	rootLoc += (rootLocPage[1] * B1);		//256^1
+	rootLoc += (rootLocPage[2] * B2);		//256^2
+	rootLoc += (rootLocPage[3] * B3);		//256^3
 
-	delete[] rootLocPage;						//don't need it anymore
+	delete[] rootLocPage;					//don't need it anymore
 	unsigned targetPageID;
 
 	retVal = treeSearch(fileHandle, attribute, key, rootLoc, targetPageID);
@@ -547,9 +656,30 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 	return treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
 }
 
+/**
+ * Scan
+ * barely started
+ */
 int
 IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const void *lowKey, const void *highKey, bool lowKeyInclusive, bool highKeyInclusive, IX_ScanIterator &ix_ScanIterator) {
-	return -1;
+	int retVal = -1;
+
+	//the location of the root
+	unsigned rootLoc;
+	unsigned char* page0 = new unsigned char[PAGE_SIZE];	
+	fileHandle.readPage(0, page0);
+
+	rootLoc = page0[0];
+	rootLoc += (page0[1] * B1);
+	rootLoc += (page0[2] * B2);
+	rootLoc += (page0[3] * B3);
+
+	//UNFINISHED
+
+
+
+	delete[] page0;
+	return retVal;
 }
 
 unsigned 
@@ -657,7 +787,11 @@ IndexManager::createFile(const string &fileName) {
 
 	unsigned linkOffset = rootHeader.freeSpaceOffset - sizeof(unsigned);
 
-	//write the first leaf number
+	/**
+	 * write the first leaf number
+	 * this is the first pointer
+	 * after this pointer, we write (key, pointer) pairs
+	 */
 	rootPage[linkOffset] = 0x2;
 
 	handle.appendPage(rootPage);

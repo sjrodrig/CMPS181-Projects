@@ -11,6 +11,18 @@ all:	db181
 db181: Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
 	${GCC} -o db181 Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o main.o
 
+one: Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o ixtest1.o
+	${GCC} -o db181 Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o ixtest1.o
+
+two: Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o ixtest2.o
+	${GCC} -o db181 Tools.o FileManager.o RecordBasedFile.o RelationManager.o IndexManager.o ixtest2.o
+
+ixtest1.o: ixtest1.cpp
+	${GCC} -c ixtest1.cpp	
+
+ixtest2.o: ixtest2.cpp
+	${GCC} -c ixtest2.cpp
+
 main.o: main.cpp
 	${GCC} -c main.cpp
 
@@ -49,9 +61,15 @@ purge:
 	rm -f *.dump
 	clear
 
+remake1:
+	make purge
+	make one
+	clear
 
-
-
+remake2:
+	make purge
+	make two
+	clear
 
 
 
