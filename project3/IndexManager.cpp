@@ -460,8 +460,6 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 				// Set new page information
 				setPageType(new_pageData, NonLeafPage);
 				NonLeafPageHeader new_pageHeader;
-				// new_pageHeader.prevPage = pageID;
-				// new_pageHeader.nextPage = pageHeader.nextPage;
 				new_pageHeader.recordsNumber = pageHeader.recordsNumber - i;
 				new_pageHeader.freeSpaceOffset = sizeof(PageType) + sizeof(NonLeafPageHeader) + pageHeader.freeSpaceOffset - true_offset;
 				setNonLeafPageHeader(new_pageData, new_pageHeader);
