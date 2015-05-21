@@ -79,7 +79,9 @@ private:
 	Tools debugTool;
 	static IndexManager *_index_manager;
 	static PagedFileManager* _pf_manager;
+
 	// Auxiliary methods.
+	vector<RID> SortRIDs(vector<RID> input);
 	bool isLeafPage(void * pageData);
 	bool recordExistsInLeafPage(const Attribute &attribute, const void *key, const RID &rid, void * pageData);
 	PageType getPageType(void * pageData);

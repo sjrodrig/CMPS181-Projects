@@ -9,7 +9,7 @@
 #include "IndexManager.h"
 
 #define DEFAULT_ROOT_LOCATION 1
-#define LEAF_DATA_START 16
+#define LEAF_DATA_START (sizeof(PageType) + sizeof(LeafPageHeader))
 #define B1 256
 #define B2 65536
 #define B3 16777216
@@ -24,14 +24,14 @@
  * METHOD PROGRESS
  * insertNonLeafRecord		--	# Moderately Tested
  * insertLeafRecord			--	# Complete but Untested
- * insert					--	@ started...
+ * insert					--	# Complete but Untested
  * deleteEntryFromLeaf		--	# Complete but Untested
  * deleteEntry				--	# Complete but Untested
- * recordExistsInLeafPage	--  @ In Progress -- will be completed upon a merge
+ * recordExistsInLeafPage	--  # Complete but Untested
  * treeSearch				--	# Completed using the TA's code provided on Piazza
- * scan						--	@ unstarted
+ * scan						--	# Complete but Untested
  * getKeyLength				--	# Moderately Tested
- * getSonPageID				--	# Complete but Untested
+ * getSonPageID				--	@ Tested and Broken
  * createFile				--	# Lightly Tested
  * compareKeys				--  # Moderately Tested
  */
@@ -305,33 +305,34 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	return SUCCESS;
 }
 
-
-	// IS NODE A PARENT (NON-LEAF)? getPageType(pageData)
-		// TRUE
-			// Find i? Cycle tree using key info? getSonPageID()
-			// Call insert recursivly
-			// IS newChildEntry == null
-				// TRUE
-					// Return;
-				// FALSE
-					// Does parent page have space?
-						// TRUE
-							// insert newChildEntry
-							// set newChildEntry = null
-							// Return;
-						// FALSE
-							// Split page? 
-							// Dont forget to setPageType()
-		// FALSE
-			// Does leaf page have space? (using page header and its space offset)
-				// TRUE
-					// Insert Key & RID?
-					// Set newChildEntry to null
-				// FALSE
-					// Split page in half
-					// setPageType() of new page
-					// Insert into first or second half?
-					// Set newChildEntry to middle value being copied up
+/*
+	IS NODE A PARENT (NON-LEAF)? getPageType(pageData)
+		TRUE
+			Find i? Cycle tree using key info? getSonPageID()
+			Call insert recursivly
+			IS newChildEntry == null
+				TRUE
+					Return;
+				FALSE
+					Does parent page have space?
+						TRUE
+							insert newChildEntry
+							set newChildEntry = null
+							Return;
+						FALSE
+							Split page? 
+							Dont forget to setPageType()
+		FALSE
+			Does leaf page have space? (using page header and its space offset)
+				TRUE
+					Insert Key & RID?
+					Set newChildEntry to null
+				FALSE
+					Split page in half
+					setPageType() of new page
+					Insert into first or second half?
+					Set newChildEntry to middle value being copied up
+*/
 			
 
 /**
@@ -486,6 +487,32 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 	return SUCCESS;
 }
 
+/**
+ * outputs a vector of sorted RIDs when given a vector of unsorted RIDs
+ */
+vector<RID>
+IndexManager::SortRIDs(vector<RID> input) {
+	vector<RID> output;
+
+	RID smallest;
+	unsigned smallest_location;
+	
+	while(input.size() != 0) {
+		for(unsigned aa = 0; aa < input.size(); aa++) {
+	
+			if(smallest.pageNum > input.at(aa).pageNum) {
+				smallest = input.at(aa);
+				smallest_location = aa;
+			} else if (smallest.pageNum == input.at(aa).pageNum && smallest.slotNum > input.at(aa).slotNum) {
+				smallest = input.at(aa);
+				smallest_location = aa;
+			}			
+		}
+		output.push_back(smallest);
+		input.erase(output.begin()+smallest_location);
+	}
+	return output;
+}
 
 /**
  * Given a record entry <key, rid>, deletes it from the leaf page "pageData".
@@ -507,8 +534,6 @@ IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, c
 	//specifically to hold the key
 	unsigned char* indexKey = new unsigned char[keyLength]; 
 	RID indexRID;
-
-	bool deleteSuccess = false;
 
 	for(int pageIndex = LEAF_DATA_START; true; pageIndex += keyRIDPairLength) {
 		int keyDataIndex;
@@ -657,27 +682,171 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 
 /**
  * Scan
- * barely started
  */
 int
 IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const void *lowKey, const void *highKey, bool lowKeyInclusive, bool highKeyInclusive, IX_ScanIterator &ix_ScanIterator) {
 	int retVal = -1;
 
+	//get the size (all of the keys that are the same size)
+	int keySize = getKeyLength(attribute, lowKey);
+
+	//going to nest this iterator in the IX_ScanIterator
+	RBFM_ScanIterator nestMe;
+	vector<RID> rids;
+	vector<int> dataVectorSizes;
+	vector<void*> dataVector;
+
 	//the location of the root
 	unsigned rootLoc;
-	unsigned char* page0 = new unsigned char[PAGE_SIZE];	
-	fileHandle.readPage(0, page0);
+	unsigned char* page0 = new unsigned char[PAGE_SIZE];
+
+	retVal = fileHandle.readPage(0, page0);
+	if (retVal != SUCCESS) {
+		cerr << "Error: Page 0 (zero) could not be read: Thus, the root could not be found." << endl;
+		return retVal;
+	}
 
 	rootLoc = page0[0];
 	rootLoc += (page0[1] * B1);
 	rootLoc += (page0[2] * B2);
 	rootLoc += (page0[3] * B3);
 
-	//UNFINISHED
+	unsigned pageToRead;
+	retVal = treeSearch(fileHandle, attribute, lowKey, rootLoc, pageToRead);
+	if(retVal == ERROR_PFM_READPAGE) {
+		cerr << "Page Read Error." << endl;
+		return retVal;
+	}
 
+	//start getting ready to read the (RID, key) pairs, one at a time.
+	unsigned char* curPage = new unsigned char[PAGE_SIZE];
+	unsigned char* keyRead = new unsigned char[keySize+8];
+	unsigned char* pureKey = new unsigned char[keySize];
+	RID rIDRead;
+	//set this flag so we read a page to start
+	bool endOfPage = true;
+	//the next page
+	int nextPage;
+	//the total number of records on the page
+	unsigned recordsNumber;
+	//how many records on the page we've read
+	unsigned readRecNum;
+	unsigned pageReadOffset;
 
+	do {
+		if(endOfPage == true) {
+			//read the page
+			retVal = fileHandle.readPage(pageToRead, curPage);
+			pageReadOffset = LEAF_DATA_START;
+
+			//set the next leaf page to be read
+			nextPage = curPage[4];
+			nextPage += (curPage[5] * B1);
+			nextPage += (curPage[6] * B2);
+			nextPage += (curPage[7] * B3);
+ 
+			//get the number of records on the page
+			recordsNumber = curPage[8];
+			recordsNumber += (curPage[9] * B1);
+			recordsNumber += (curPage[10] * B2);
+			recordsNumber += (curPage[11] * B3);
+
+			if (retVal != SUCCESS) {
+				cerr << "Error: Page " << pageToRead << " could not be read." << endl;
+				return retVal;
+			}
+			endOfPage = false;
+		}
+
+		readRecNum++;
+
+		/**
+		 * actually read the record
+		 * Key, then RID
+		 */
+		for(int index = 0; index < (keySize+8); index++) {
+			keyRead[index] = curPage[pageReadOffset + index];
+			if(index < keySize) {
+				pureKey[index] = curPage[pageReadOffset + index];
+			}
+		}
+
+		/**
+		 * @Return: Negative: Second key is larger
+		 * @Return: Zero: Keys are equal
+		 * @Return: Positive: First key is larger
+		 */
+		int lowKeyComp = compareKeys(attribute, lowKey, keyRead);
+		int highKeyComp = compareKeys(attribute, highKey, keyRead);
+
+		//equals low key and lowKeyInclusive
+		if(lowKeyComp == 0 && lowKeyInclusive == true) {
+			rIDRead.pageNum = keyRead[keySize];
+			rIDRead.pageNum += (curPage[keySize+1] * B1);
+			rIDRead.pageNum += (curPage[keySize+2] * B2);
+			rIDRead.pageNum += (curPage[keySize+3] * B3);
+
+			rIDRead.slotNum = keyRead[keySize+4];
+			rIDRead.slotNum += (curPage[keySize+5] * B1);
+			rIDRead.slotNum += (curPage[keySize+6] * B2);
+			rIDRead.slotNum += (curPage[keySize+7] * B3);
+
+			rids.push_back(rIDRead);
+			dataVectorSizes.push_back(keySize);
+			dataVector.push_back(pureKey);
+		//equals high key and lowKeyInclusive
+		} else if (highKeyComp == 0 && highKeyInclusive == true) {
+			rIDRead.pageNum = keyRead[keySize];
+			rIDRead.pageNum += (curPage[keySize+1] * B1);
+			rIDRead.pageNum += (curPage[keySize+2] * B2);
+			rIDRead.pageNum += (curPage[keySize+3] * B3);
+
+			rIDRead.slotNum = keyRead[keySize+4];
+			rIDRead.slotNum += (curPage[keySize+5] * B1);
+			rIDRead.slotNum += (curPage[keySize+6] * B2);
+			rIDRead.slotNum += (curPage[keySize+7] * B3);
+
+			rids.push_back(rIDRead);
+			dataVectorSizes.push_back(keySize);
+			dataVector.push_back(pureKey);
+		//within the range
+		} else if (highKeyComp > 0 && lowKeyInclusive < true) {
+			rIDRead.pageNum = keyRead[keySize];
+			rIDRead.pageNum += (curPage[keySize+1] * B1);
+			rIDRead.pageNum += (curPage[keySize+2] * B2);
+			rIDRead.pageNum += (curPage[keySize+3] * B3);
+
+			rIDRead.slotNum = keyRead[keySize+4];
+			rIDRead.slotNum += (curPage[keySize+5] * B1);
+			rIDRead.slotNum += (curPage[keySize+6] * B2);
+			rIDRead.slotNum += (curPage[keySize+7] * B3);
+
+			rids.push_back(rIDRead);
+			dataVectorSizes.push_back(keySize);
+			dataVector.push_back(pureKey);
+		}
+
+		pageReadOffset += (keySize+8);
+
+		//reached the end of the page
+		if(readRecNum == recordsNumber) {
+			endOfPage = true;
+			pageToRead = nextPage;
+			readRecNum = 0;
+		}
+	} while(compareKeys(attribute, highKey, keyRead) > 0);
+
+	//set the vectors of the RBFM_ScanIterator
+	nestMe.setVectors(rids, dataVectorSizes, dataVector);
+
+	//set the IX_ScanIterator
+	IX_ScanIterator retIter(nestMe);
+	ix_ScanIterator = retIter;
 
 	delete[] page0;
+	delete[] curPage;
+	delete[] keyRead;
+	delete[] pureKey;
 	return retVal;
 }
 
