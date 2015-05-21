@@ -363,7 +363,7 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			}
 
 			// Copy out the middle value
-			unsigned middleValue_length = getKeyLength(attribute, pageData + offset) + sizeof(RID);
+			unsigned middleValue_length = getKeyLength(attribute, (char*) pageData + offset) + sizeof(RID);
 			void* middleValue = malloc(middleValue_length);
 			memcpy(middleValue, (char*) pageData + offset, middleValue_length);
 
@@ -373,7 +373,7 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			// Set the new page's information
 			setPageType(new_pageData, LeafPage);
 			LeafPageHeader new_leafPageHeader;
-			new_leafPageHeader.prevPage = pageID
+			new_leafPageHeader.prevPage = pageID;
 			new_leafPageHeader.nextPage = pageHeader.nextPage;
 			new_leafPageHeader.recordsNumber = pageHeader.recordsNumber - (i + 1);
 			new_leafPageHeader.freeSpaceOffset = sizeof(PageType) + sizeof(LeafPageHeader) + pageHeader.freeSpaceOffset - offset; 
@@ -407,13 +407,14 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			return -2;
 		}
 
-		if(newChildEntry == NULL){
+		if(newChildEntry.key == NULL){
 			free(pageData);
 		} else {
 			// Insert the new child entry returned
 			insert_return = insertNonLeafRecord(attribute, newChildEntry, pageData);
 			if (insert_return == SUCCESS){
-				newChildEntry = NULL;
+				free(newChildEntry.key);
+				newChildEntry.key = NULL;
 			} else if (insert_return == ERROR_NO_FREE_SPACE){
 				// Allocate space for a new page
 				void* new_pageData = malloc(PAGE_SIZE);
@@ -429,7 +430,42 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 					offset = getKeyLength(attribute, (char*) pageData + offset) + sizeof(unsigned);
 				}
 
-				
+				// Copy out the middle value
+				unsigned middleValue_key_length = getKeyLength(attribute, (char*) pageData + offset);
+				void* middleValue = malloc(middleValue_key_length + sizeof(unsigned));
+				memcpy(middleValue, (char*) pageData + offset - sizeof(unsigned), sizeof(unsigned));
+				memcpy((char*) middleValue + sizeof(unsigned), (char*) pageData + offset, middleValue_key_length);
+
+				// Offset where the second page's data starts
+				unsigned true_offset = offset + middleValue_key_length;
+
+				// Copy out the records after the middle value into the new page
+				memcpy(new_pageData, (char*) pageData + true_offset, PAGE_SIZE - true_offset);
+
+				// Set new page information
+				setPageType(NonLeafPage);
+				NonLeafPageHeader new_pageHeader;
+				new_pageHeader.prevPage = pageID;
+				new_pageHeader.nextPage = pageHeader.nextPage;
+				new_pageHeader.recordsNumber = pageHeader.recordsNumber - i;
+				new_pageHeader.freeSpaceOffset = sizeof(PageType) + sizeof(NonLeafPageHeader) + pageHeader.freeSpaceOffset - true_offset;
+				setNonLeafPageHeader(new_pageData, new_pageHeader);
+
+				// Update the current page's information
+				pageHeader.nextPage = fileHandle.getNumberOfPages();
+				pageHeader.recordsNumber = i;
+				pageHeader.freeSpaceOffset = offset - sizeof(unsigned);
+				setNonLeafPageHeader(pageData, pageHeader);
+
+				// Write/Append the pages
+				fileHandle.write(pageID, pageData);
+				fileHandle.append(new_pageData);
+
+				// Set the "return" paramaters & clean up
+				newChildEntry.key = middleValue;
+				newChildEntry.childPageNumber = pageHeader.nextPage;
+				free(new_pageData);
+				free(pageData);
 			}
 		}
 	}
