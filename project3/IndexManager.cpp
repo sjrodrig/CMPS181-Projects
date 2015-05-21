@@ -18,18 +18,18 @@
  *						(ref. p. 344-351 Ramakrishnan - Gehrke)
  * 
  * METHOD PROGRESS
- * insertNonLeafRecord		--	Moderately Tested
- * insertLeafRecord			--	In Progress -- almost complete
- * insert					--	unstarted
- * deleteEntryFromLeaf		--	unstarted
- * deleteEntry				--	unstarted
- * recordExistsInLeafPage	--  
- * treeSearch				--	Completed using the TA's code provided on Piazza
- * scan						--	unstarted
- * getKeyLength				--	Moderately Tested
- * getSonPageID				--	Completed but Untested
- * createFile				--	Lightly Tested
- * compareKeys				--  Moderately Tested
+ * insertNonLeafRecord		--	# Moderately Tested
+ * insertLeafRecord			--	@ In Progress -- almost complete
+ * insert					--	@ started...
+ * deleteEntryFromLeaf		--	@ unstarted
+ * deleteEntry				--	# Complete but Untested
+ * recordExistsInLeafPage	--  @ In Progress
+ * treeSearch				--	# Completed using the TA's code provided on Piazza
+ * scan						--	@ unstarted
+ * getKeyLength				--	# Moderately Tested
+ * getSonPageID				--	# Complete but Untested
+ * createFile				--	# Lightly Tested
+ * compareKeys				--  # Moderately Tested
  */
 
 using namespace std;
@@ -77,8 +77,6 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	unsigned char* oldChildEntryData = new unsigned char[childSize];
 	unsigned char* newChildEntryKey = new unsigned char[childSize-4];
 	unsigned char* oldChildEntryKey = new unsigned char[childSize-4];
-
-	//cout << "newChildEntry.childPageNumber: " << newChildEntry.childPageNumber << endl;
 
 	//copy the child into an array of unsigned chars
 	memcpy(newChildEntryData, newChildEntry.key, childSize-4);
@@ -332,10 +330,18 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  * Recursive insert of the record <key, rid> into the (current) page "pageID".
  * newChildEntry will store the return information of the "child" insert call.
  * Following the exact implementation described in Ramakrishnan - Gehrke, p.349.
+ *
+ * Complete for leaf pages
+ * Incomplete for branch (non-leaf) pages
+ * 
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
+<<<<<<< HEAD
 //define the return value
+=======
+	//define the return value
+>>>>>>> origin/master
 	int retVal = -1;
 
 	//the page we're going to read
@@ -381,14 +387,53 @@ int
 IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, const RID &rid, void * pageData) {
 	int retVal = -1;
 
+<<<<<<< HEAD
  	return retVal;
+=======
+	return retVal;
+>>>>>>> origin/master
 }
 
+/**
+ * Finds the leaf page in the tree and calls deleteEntryFromLeaf() on it
+ */
 int
 IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, const void *key, const RID &rid) {
-	// Simplification: Lazy deletion.
+	unsigned char* targetPage = new unsigned char[PAGE_SIZE];
+	unsigned char* rootLocPage = new unsigned char[PAGE_SIZE];
+	int retVal = -1;
 
-	return -1;
+	if (fileHandle.readPage(0, rootLocPage) != SUCCESS) {
+		cout << "Error Searching: Couldn't read page 0 (Zero)." << endl;
+		return ERROR_PFM_READPAGE;
+	}
+
+	unsigned rootLoc = 0;						//location of the root
+	rootLoc += rootLocPage[0];
+	rootLoc += (rootLocPage[1] * 256);			//256^1
+	rootLoc += (rootLocPage[2] * 65536);		//256^2
+	rootLoc += (rootLocPage[3] * 16777216);		//256^3
+
+	delete[] rootLocPage;						//don't need it anymore
+	unsigned targetPageID;
+
+	retVal = treeSearch(fileHandle, attribute, key, rootLoc, targetPageID);
+	if(retVal != SUCCESS) {
+		cout << "Error Searching B+ Tree: error code " << retVal << "." << endl;
+		return retVal;
+	}
+
+	if (fileHandle.readPage(targetPageID, targetPage) != SUCCESS) {
+		cout << "Error Searching: Couldn't read page " << targetPageID << "." << endl;
+		return ERROR_PFM_READPAGE;
+	}
+
+	retVal = deleteEntryFromLeaf(attribute, key, rid, targetPage);
+	//write the page to the file.
+	fileHandle.writePage(targetPageID, targetPage);
+
+	delete[] targetPage;
+	return retVal;
 }
 
 // Recursive search through the tree, returning the page ID of the leaf page that should contain the input key.
@@ -509,7 +554,7 @@ IndexManager::createFile(const string &fileName) {
 	//write the location of the root on the first page
 	unsigned* defaultRootLocation = new unsigned[1];
 	defaultRootLocation[0] = DEFAULT_ROOT_LOCATION;
-	handle.appendPage(defaultRootLocation);
+	handle.writePage(0, defaultRootLocation);
 
 	//write the root on page 1
 	unsigned char* rootPage = new unsigned char[PAGE_SIZE];
@@ -528,6 +573,10 @@ IndexManager::createFile(const string &fileName) {
 	//write the first leaf number
 	rootPage[linkOffset] = 0x2;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 	handle.appendPage(rootPage);
 	debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE);
 

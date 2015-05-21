@@ -12,8 +12,9 @@ RelationManager *rm;
 IndexManager *indexTester;
 
 /**
- * NOTE:	THERE APPEARS TO BE A 12-BYTE SPACING BETWEEN THE PAGES.
- * 			I DO NOT KNOW WHY IT IS THERE, BUT IT NEEDS TO BE CONSIDERED
+ * NOTE:	ALL DATA WAS 12-BYTES FURTHER ALONG THE PAGE THAN EXPECTED.
+ * 			This is here because of the "PAGED_FILE__" text on the first page
+ *	>>> THIS IS FIXED!
  */
 
 void rbfTest() {
@@ -54,7 +55,7 @@ int main() {
 	util.fprintNBytes("check.dump", pageData, 8192);
 
 	for(int index = 0; index < PAGE_SIZE; index++) {
-		useData[index] = rawPageData[index+PAGE_SIZE+12];
+		useData[index] = rawPageData[index+PAGE_SIZE];
 	}
 	indexTester->testInsertNonLeafRecord(testInt, TestEntry, useData);
 
