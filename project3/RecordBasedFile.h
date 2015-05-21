@@ -25,6 +25,10 @@ typedef struct R {
 	bool operator != (R r) {
 		return pageNum != r.pageNum || slotNum != r.slotNum;
 	}
+
+	bool operator == (R r) {
+		return pageNum == r.pageNum && slotNum == r.slotNum;
+	}
 } RID;
 
 // Slot directory structure

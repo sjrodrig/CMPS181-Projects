@@ -189,12 +189,20 @@ IndexManager::recordExistsInLeafPage(const Attribute &attribute, const void *key
 
 	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
 	for (unsigned i = 0; i < pageHeader.recordsNumber; i++){
+		void* position = pageData + offset;
+		unsigned key_length = getKeyLength(position);
 
-		// FETCH THE KEY
-		// CALL COMPARE KEYS
-		// COMPARE RIDs?
+		// Are the keys the same?
+		if (compareKeys(key, position) == 0){
+			RID cur_RID;
+			memcpy(cur_RID, (char*) position + key_length, sizeof(RID));
 
-		offset += sizeof(RID);
+			// Are the RIDs the same?
+			if (cur_RID == rid){
+				return true
+			}
+		}
+		offset += key_length + sizeof(RID);
 	}
 	return false;
 }
@@ -270,12 +278,13 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	// Cycle existing records until the appropriate space is found for the new one
 	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
 	for(unsigned i = 0; i < pageHeader.recordsNumber; i++) {
-		//
-		// FIX FETCHING OF KEY AFTER T.A ANSWERS QUESTION
-		//
-		void *cur_key;
-		if (compareKeys(attribute, key, cur_key) < 0) { break; }
-		offset += sizeof(RID);
+
+		// unsigned cur_keyLength = getKeyLength(attribute, pageData + offset);
+		// void *cur_key = malloc(cur_keyLength);
+		// memcpy((char *)cur_key, pageData + offset, cur_keyLength);
+		
+		if (compareKeys(attribute, key, pageData + offset) < 0) { break; }
+		offset += getKeyLength(attribute, pageData + offset) + sizeof(RID);
 	}
 
 	// Make space for the new record
@@ -290,6 +299,35 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	return SUCCESS;
 }
 
+
+	// IS NODE A PARENT (NON-LEAF)? getPageType(pageData)
+		// TRUE
+			// Find i? Cycle tree using key info?
+			// Call insert recursivly
+			// IS newChildEntry == null
+				// TRUE
+					// Return;
+				// FALSE
+					// Does parent page have space?
+						// TRUE
+							// insert newChildEntry
+							// set newChildEntry = null
+							// Return;
+						// FALSE
+							// Split page? 
+							// Dont forget to setPageType()
+		// FALSE
+			// Does leaf page have space? (using page header and its space offset)
+				// TRUE
+					// Insert Key & RID?
+					// Set newChildEntry to null
+				// FALSE
+					// Split page in half
+					// setPageType() of new page
+					// Insert into first or second half?
+					// Set newChildEntry to ????
+			
+
 /**
  * Recursive insert of the record <key, rid> into the (current) page "pageID".
  * newChildEntry will store the return information of the "child" insert call.
@@ -297,14 +335,53 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-	return -1;
+//define the return value
+	int retVal = -1;
+
+	//the page we're going to read
+	unsigned char* page = new unsigned char[PAGE_SIZE];
+
+	if (fileHandle.readPage(pageID, page) != SUCCESS) {
+		cout << "Error inserting: Couldn't read page " << pageID << "." << endl;
+		return ERROR_PFM_READPAGE;
+	}
+
+	//determine if the page is a leaf or a branch
+	bool isLeaf = isLeafPage(page);
+
+	//if the page is a leaf
+	if(isLeaf) {
+		//insert the record
+		retVal = insertLeafRecord(attribute, key, rid, page);
+
+		if(retVal != SUCCESS) {
+			cout << "Error: Record could not be inserted in leaf page." << endl;
+			return retVal;
+		}
+
+		//write the page back
+		if (fileHandle.writePage(pageID, page) != SUCCESS) {
+			cout << "Error inserting: Couldn't write page " << pageID << "." << endl;
+			return ERROR_PFM_WRITEPAGE;
+		}
+	}
+	//if the page is not a leaf
+	else {
+
+
+
+	}
+
+	return retVal;
 }
 
 
 // Given a record entry <key, rid>, deletes it from the leaf page "pageData".
 int
 IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, const RID &rid, void * pageData) {
-	return -1;
+	int retVal = -1;
+
+ 	return retVal;
 }
 
 int
@@ -451,14 +528,6 @@ IndexManager::createFile(const string &fileName) {
 	//write the first leaf number
 	rootPage[linkOffset] = 0x2;
 
-	/*unsigned char meta0;
-	for(int aa = 0; aa < 32; aa++) {
-		meta0 = rootPage[aa];
-		cout << "[" << aa << "]";
- 		cout << (bitset<8>) meta0;
-		if ((aa+1) % 4 == 0) { cout << endl; }
-	}*/
-
 	handle.appendPage(rootPage);
 	debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE);
 
@@ -479,31 +548,6 @@ IndexManager::createFile(const string &fileName) {
 
 	return retVal;
 }
-
-/**
- * negative if first key is smaller
- * positive if second key is smaller
- *
-int
-IndexManager::compareKeys(const Attribute attr, const void* key1, const void* key2) {
-	int attrLen = getKeyLength(attr, key1);
-	int retVal;
-
-	unsigned char* ucKey1 = new unsigned char[attrLen];
-	unsigned char* ucKey2 = new unsigned char[attrLen];
-	
-	memcpy(ucKey1, key1, attrLen);
-	memcpy(ucKey2, key2, attrLen);
-
-	//compare the data
-	for(int byte = 0; byte < attrLen; byte++) {
-		if( ucKey1[byte] < ucKey2[byte] ) { return -1; }
-		if( ucKey1[byte] > ucKey2[byte] ) { return 1; }
-	}
-
-	//timeout means keys are equal
-	return 0;
-}*/
 
 /*********************************************************************************
  *								Already Implemented								 *
@@ -631,37 +675,37 @@ void
 IX_PrintError (int rc) {
 	switch (rc) {
 		case ERROR_PFM_CREATE:
-			cout << "Paged File Manager error: create file." << endl;
+			cerr << "Paged File Manager error: create file." << endl;
 		break;
 		case ERROR_PFM_DESTROY:
-			cout << "Paged File Manager error: destroy file." << endl;
+			cerr << "Paged File Manager error: destroy file." << endl;
 		break;
 		case ERROR_PFM_OPEN:
-			cout << "Paged File Manager error: open file." << endl;
+			cerr << "Paged File Manager error: open file." << endl;
 		break;
 		case ERROR_PFM_CLOSE:
-			cout << "Paged File Manager error: close file." << endl;
+			cerr << "Paged File Manager error: close file." << endl;
 		break;
 		case ERROR_PFM_READPAGE:
-			cout << "Paged File Manager error: read page." << endl;
+			cerr << "Paged File Manager error: read page." << endl;
 		break;
 		case ERROR_PFM_WRITEPAGE:
-			cout << "Paged File Manager error: write page." << endl;
+			cerr << "Paged File Manager error: write page." << endl;
 		break;
 		case ERROR_PFM_FILEHANDLE:
-			cout << "Paged File Manager error: FileHandle problem." << endl;
+			cerr << "Paged File Manager error: FileHandle problem." << endl;
 		break;
 		case ERROR_NO_SPACE_AFTER_SPLIT:
-			cout << "Tree split error: There is no space for the new entry, even after the split." << endl;
+			cerr << "Tree split error: There is no space for the new entry, even after the split." << endl;
 		break;
 		case ERROR_RECORD_EXISTS:
-			cout << "Index insert error: record already exists." << endl;
+			cerr << "Index insert error: record already exists." << endl;
 		break;
 		case ERROR_RECORD_NOT_EXISTS:
-			cout << "Index delete error: record does not exists." << endl;
+			cerr << "Index delete error: record does not exists." << endl;
 		break;
 		case ERROR_UNKNOWN:
-			cout << "Unknown error." << endl;
+			cerr << "Unknown error." << endl;
 		break;
 	}
 }
