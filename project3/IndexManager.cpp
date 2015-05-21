@@ -744,6 +744,11 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 			nextPage += (curPage[5] * B1);
 			nextPage += (curPage[6] * B2);
 			nextPage += (curPage[7] * B3);
+
+			//no next page!
+			if(nextPage == 0) {
+				break;
+			}
  
 			//get the number of records on the page
 			recordsNumber = curPage[8];
@@ -758,6 +763,7 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 			endOfPage = false;
 		}
 
+		//increment to show another record being read
 		readRecNum++;
 
 		/**
@@ -904,15 +910,16 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 				loadIndex++;
 				mult *= 256;
 			}
-
+			
 			cout << "(1) getSonPageID() Return Value = " << retVal << endl;
+
+			delete[] oldChildEntryKey;
 			return retVal;
 		}
 		delete[] oldChildEntryKey;
 	}
 
 	cout << "(2) getSonPageID() Return Value = " << retVal << endl;
-
 	delete[] ucPage;
 	return retVal;
 }
@@ -947,10 +954,16 @@ IndexManager::createFile(const string &fileName) {
 	void* defaultRootLocation = malloc(PAGE_SIZE);
 	unsigned rootPageNumber = DEFAULT_ROOT_LOCATION;
 	memcpy(defaultRootLocation, &rootPageNumber, sizeof(unsigned));
-	handle.appendPage(defaultRootLocation);
+	
+	/**
+	 * WRITE, DO NOT APPEND!!!
+	 * Appending screws everything up by adding an offset of 12 bytes!
+	 * (All of our reads wind up skewed by 12 bytes)
+	 */
+	handle.writePage(0, defaultRootLocation);
 
 	//write the root on page 1
-	void* rootPage = malloc(PAGE_SIZE);
+	unsigned char* rootPage = new unsigned char[PAGE_SIZE];
 
 	//set the page's type to non-leaf
 	setPageType(rootPage, NonLeafPage);
@@ -958,7 +971,7 @@ IndexManager::createFile(const string &fileName) {
 	//write the header
 	NonLeafPageHeader rootHeader;
 	rootHeader.recordsNumber = 0;
-	rootHeader.freeSpaceOffset = sizeof(PageType) + sizeof(NonLeafPageHeader) + sizeof(unsigned);
+	rootHeader.freeSpaceOffset = (sizeof(PageType) + sizeof(NonLeafPageHeader) + sizeof(unsigned));
 	setNonLeafPageHeader(rootPage, rootHeader);
 
 	unsigned linkOffset = rootHeader.freeSpaceOffset - sizeof(unsigned);
@@ -968,10 +981,10 @@ IndexManager::createFile(const string &fileName) {
 	 * this is the first pointer
 	 * after this pointer, we write (key, pointer) pairs
 	 */
-	unsigned firstLeafNumber = 2;
-	memcpy((char*)rootPage + linkOffset, &firstLeafNumber, sizeof(unsigned));
+	rootPage[linkOffset] = 0x2;
 
 	handle.appendPage(rootPage);
+	if(DEBUG) { debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE); }
 
 	//write the first non-leaf page
 	unsigned char* firstLeaf = new unsigned char[PAGE_SIZE];
