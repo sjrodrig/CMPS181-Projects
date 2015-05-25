@@ -10,6 +10,7 @@
 
 #define DEFAULT_ROOT_LOCATION 1
 #define LEAF_DATA_START (sizeof(PageType) + sizeof(LeafPageHeader))
+#define NON_LEAF_FIRST_KEY 12
 #define B1 256
 #define B2 65536
 #define B3 16777216
@@ -346,12 +347,36 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
+	cout << "insert on ID: " << pageID << endl;
+
 	// Allocate & Read-in the desired page
 	void* pageData = malloc(PAGE_SIZE);
 	if (fileHandle.readPage(pageID, pageData) != SUCCESS) {
 		cout << "ERROR insert(): Failed to read page " << pageID << "." << endl;
+		free(pageData);
 		return ERROR_PFM_READPAGE;
 	}
+
+	//test if the page is the root index
+	if(pageID == 0) {
+		unsigned newID;
+		unsigned char* rootLoc = new unsigned char[PAGE_SIZE];
+		memcpy(rootLoc, pageData, PAGE_SIZE);
+		newID = rootLoc[0];
+		newID += (rootLoc[1] * B1);
+		newID += (rootLoc[2] * B1);
+		newID += (rootLoc[3] * B1);
+
+		delete[] rootLoc;
+		pageID = newID;
+
+		if (fileHandle.readPage(pageID, pageData) != SUCCESS) {
+			cout << "ERROR insert(): Failed to read page " << pageID << "." << endl;
+			free(pageData);
+			return ERROR_PFM_READPAGE;
+		}
+	}
+	cout << "insert(fix) on ID: " << pageID << endl;
 
 	// Check the page type
 	if(isLeafPage(pageData)) {
@@ -416,6 +441,14 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 		}
 	} else {
 		unsigned targetPageID = getSonPageID(attribute, key, pageData);
+
+		//Because the non-leaf page is empty
+		if(targetPageID == 0) {
+
+			/****/
+
+		}
+
 		int insert_return = insert(attribute, key, rid, fileHandle, targetPageID, newChildEntry);
 		if (insert_return != SUCCESS){
 			cout << "ERROR insert(): Failed to recursivly call method. (" << insert_return << ")" << endl;
@@ -661,6 +694,8 @@ int
 IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, const void * key, unsigned currentPageID, unsigned &returnPageID) {
 	void * pageData = malloc(PAGE_SIZE);
 
+//cout << "searching tree" << endl;
+
 	// Gets the current page.
 	if (fileHandle.readPage(currentPageID, pageData) != SUCCESS) {
 		return ERROR_PFM_READPAGE;
@@ -675,6 +710,8 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 
 	// Otherwise, we go one level below (towards the correct son page) and call the method again.
 	unsigned sonPageID = getSonPageID(attribute, key, pageData);
+
+//cout << "sonPageID: " << sonPageID << endl;
 
 	free(pageData);
 	return treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
@@ -890,8 +927,11 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 	//the length of the key in bytes
 	int keyLen = getKeyLength(attribute,key);
 	int valSize = keyLen + 4; //take the unsigned int into account
+	//debugTool.fprintNBytes("gspid.dump", ucPage, PAGE_SIZE);
 
-	for(int keyIndex = 16; true; keyIndex += valSize) {
+	for(int keyIndex = NON_LEAF_FIRST_KEY; true; keyIndex += valSize) {
+		//cout << "keyIndex is: " << keyIndex << endl;
+
 		unsigned char* oldChildEntryKey = new unsigned char[keyLen];
 
 		int loadIndex;
@@ -899,6 +939,8 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 		for(loadIndex = 0; loadIndex < keyLen; loadIndex++) {
 			oldChildEntryKey[loadIndex] = ucPage[keyIndex+loadIndex];
 		}
+		
+		loadIndex -= 4;
 
 		if(compareKeys(attribute, key, oldChildEntryKey) < 0) {
 			continue;
@@ -911,7 +953,7 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 				mult *= 256;
 			}
 			
-			cout << "(1) getSonPageID() Return Value = " << retVal << endl;
+			//cout << "(1) getSonPageID() Return Value = " << retVal << endl;
 
 			delete[] oldChildEntryKey;
 			return retVal;
@@ -919,7 +961,7 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 		delete[] oldChildEntryKey;
 	}
 
-	cout << "(2) getSonPageID() Return Value = " << retVal << endl;
+	//cout << "(2) getSonPageID() Return Value = " << retVal << endl;
 	delete[] ucPage;
 	return retVal;
 }

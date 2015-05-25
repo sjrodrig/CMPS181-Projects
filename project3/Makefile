@@ -59,6 +59,7 @@ purge:
 	rm -f sizes_file
 	rm -f *.tab
 	rm -f *.dump
+	rm -f Age_idx
 	clear
 
 remake1:
