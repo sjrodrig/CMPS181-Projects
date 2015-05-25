@@ -294,6 +294,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	if (recordExistsInLeafPage(attribute, key, rid, pageData)) { return ERROR_RECORD_EXISTS; }
 cout << "in insert leaf" << endl;
 	unsigned keyLength = getKeyLength(attribute, key);
+cout << "keyLength is: " << keyLength << endl;
 
 	// Fetch the page header
 	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
@@ -302,17 +303,17 @@ cout << "in insert leaf" << endl;
 	unsigned char* oldUCKey = new unsigned char[keyLength];
 	unsigned char* ucdata = new unsigned char[PAGE_SIZE];
 	memcpy(ucdata, pageData, PAGE_SIZE);
-	memcpy(newUCKey, key, PAGE_SIZE);
+	memcpy(newUCKey, key, keyLength);
 
 debugTool.printNBytes(newUCKey, keyLength);
-debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
+//debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
 
 	// Make sure Leaf has space for given key
 	if (PAGE_SIZE - pageHeader.freeSpaceOffset < keyLength + sizeof(RID)) {
 		return ERROR_NO_FREE_SPACE;
 	}
 
-cout << "records: " << pageHeader.recordsNumber << endl;
+//cout << "records: " << pageHeader.recordsNumber << endl;
 
 	// Cycle existing records until the appropriate space is found for the new one
 	unsigned offset = LEAF_DATA_START;
@@ -332,22 +333,25 @@ cout << "records: " << pageHeader.recordsNumber << endl;
 		offset += (keyLength + 8);
 	}
 
+//cout << f0 << endl;
+
 	// Make space for the new record
 	memmove(ucdata + offset + keyLength + sizeof(RID), ucdata + offset, keyLength + sizeof(RID));
-
+//cout << f1 << endl;
 	// Copy new data into free'd space
-	memcpy(ucdata + offset, &key, keyLength);
+	memcpy(ucdata + offset, &newUCKey, keyLength);
 	memcpy(ucdata + offset + keyLength, &rid, sizeof(RID));
-
+//cout << f2 << endl;
 	// Update the page header
 	pageHeader.recordsNumber++;
 	pageHeader.freeSpaceOffset += (keyLength + 8);
 	setLeafPageHeader(ucdata, pageHeader);
-
+//cout << f3 << endl;
 	memcpy(pageData, ucdata, PAGE_SIZE);
-	debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
+	//debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
+	//deleting newUCKey breaks the program, no idea why.
 
-	//delete[] newUCKey;
+	delete[] newUCKey;
 	delete[] oldUCKey;
 	delete[] ucdata;
 	return SUCCESS;
@@ -428,6 +432,10 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 	if(isLeafPage(pageData)) {
 		// Attempt to insert new leaf record
 		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageData);
+cout << f0 << endl;
+//string pauser;
+//getline(cin, pauser);
+
 		if (insert_return == SUCCESS){
 			if (fileHandle.writePage(pageID, pageData) != SUCCESS) {
 				cout << "ERROR insert(): Failed to write page " << pageID << "." << endl;
