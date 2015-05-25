@@ -15,6 +15,18 @@
 #define B2 65536
 #define B3 16777216
 
+#define f0 "flag #0"
+#define f1 "flag #1"
+#define f2 "flag #2"
+#define f3 "flag #3"
+#define f4 "flag #4"
+#define f5 "flag #5"
+#define f6 "flag #6"
+#define f7 "flag #7"
+#define f8 "flag #8"
+#define f9 "flag #9"
+#define fA "flag #A"
+
 /**
  * CMPS 181 - Project 3
  * Author: Paolo Di Febbo
@@ -272,37 +284,72 @@ IndexManager::compareKeys(const Attribute attribute, const void * key1, const vo
 	return SUCCESS;
 }
 
-// Given a record entry (<key, RID>), writes it into the correct position within the leaf page "pageData".
+/**
+ * (I do what I do with unsigned char*s for a reason, please don't mess with this)
+ * Given a record entry (<key, RID>), writes it into the correct position within the leaf page "pageData".
+ */
 int
 IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, const RID &rid, void* pageData) {
 	// Check if record is already present
 	if (recordExistsInLeafPage(attribute, key, rid, pageData)) { return ERROR_RECORD_EXISTS; }
+cout << "in insert leaf" << endl;
+	unsigned keyLength = getKeyLength(attribute, key);
 
 	// Fetch the page header
 	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
 
+	unsigned char* newUCKey = new unsigned char[keyLength];
+	unsigned char* oldUCKey = new unsigned char[keyLength];
+	unsigned char* ucdata = new unsigned char[PAGE_SIZE];
+	memcpy(ucdata, pageData, PAGE_SIZE);
+	memcpy(newUCKey, key, PAGE_SIZE);
+
+debugTool.printNBytes(newUCKey, keyLength);
+debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
+
 	// Make sure Leaf has space for given key
-	unsigned keyLength = getKeyLength(attribute, key);
-	if (PAGE_SIZE - pageHeader.freeSpaceOffset < keyLength + sizeof(RID)){
+	if (PAGE_SIZE - pageHeader.freeSpaceOffset < keyLength + sizeof(RID)) {
 		return ERROR_NO_FREE_SPACE;
 	}
 
+cout << "records: " << pageHeader.recordsNumber << endl;
+
 	// Cycle existing records until the appropriate space is found for the new one
-	unsigned offset = sizeof(PageType) + sizeof(LeafPageHeader);
-	for(unsigned i = 0; i < pageHeader.recordsNumber; i++) {
-		if (compareKeys(attribute, key, pageData + offset) < 0) { break; }
-		offset += getKeyLength(attribute, pageData + offset) + sizeof(RID);
+	unsigned offset = LEAF_DATA_START;
+
+	for(unsigned currentRecordNum = 0; currentRecordNum < pageHeader.recordsNumber; currentRecordNum++) {
+		
+		for(unsigned loadIndex = 0; loadIndex < keyLength; loadIndex++) {
+			oldUCKey[loadIndex] = ucdata[offset+loadIndex];
+		}
+
+		/**
+		 * Negative: Second key is larger
+		 * Zero: Keys are equal
+		 * Positive: First key is larger
+		 */
+		if (compareKeys(attribute, newUCKey, oldUCKey) < 0) { break; }
+		offset += (keyLength + 8);
 	}
 
 	// Make space for the new record
-	memmove((char *) pageData + offset + keyLength + sizeof(RID), (char *)pageData + offset, keyLength + sizeof(RID));
+	memmove(ucdata + offset + keyLength + sizeof(RID), ucdata + offset, keyLength + sizeof(RID));
 
 	// Copy new data into free'd space
-	memcpy((char *) pageData + offset, &key, keyLength);
-	memcpy((char *) pageData + offset + keyLength, &rid, sizeof(RID));
+	memcpy(ucdata + offset, &key, keyLength);
+	memcpy(ucdata + offset + keyLength, &rid, sizeof(RID));
 
 	// Update the page header
-	setLeafPageHeader(pageData, pageHeader);
+	pageHeader.recordsNumber++;
+	pageHeader.freeSpaceOffset += (keyLength + 8);
+	setLeafPageHeader(ucdata, pageHeader);
+
+	memcpy(pageData, ucdata, PAGE_SIZE);
+	debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
+
+	//delete[] newUCKey;
+	delete[] oldUCKey;
+	delete[] ucdata;
 	return SUCCESS;
 }
 
@@ -376,7 +423,6 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			return ERROR_PFM_READPAGE;
 		}
 	}
-	cout << "insert(fix) on ID: " << pageID << endl;
 
 	// Check the page type
 	if(isLeafPage(pageData)) {
@@ -441,13 +487,6 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 		}
 	} else {
 		unsigned targetPageID = getSonPageID(attribute, key, pageData);
-
-		//Because the non-leaf page is empty
-		if(targetPageID == 0) {
-
-			/****/
-
-		}
 
 		int insert_return = insert(attribute, key, rid, fileHandle, targetPageID, newChildEntry);
 		if (insert_return != SUCCESS){
@@ -568,7 +607,14 @@ IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, c
 	unsigned char* indexKey = new unsigned char[keyLength]; 
 	RID indexRID;
 
-	for(int pageIndex = LEAF_DATA_START; true; pageIndex += keyRIDPairLength) {
+	unsigned char* debugkey = new unsigned char[keyLength];
+	memcpy(debugkey, key, keyLength);
+
+//debugTool.fprintNBytes("delpage.dump", ucdata, PAGE_SIZE);
+//debugTool.printNBytes(debugkey, keyLength);
+
+	for(int pageIndex = LEAF_DATA_START; pageIndex < PAGE_SIZE; pageIndex += keyRIDPairLength) {
+cout << "pageIndex: " << pageIndex << endl;
 		int keyDataIndex;
 
 		//load the key
@@ -694,8 +740,6 @@ int
 IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, const void * key, unsigned currentPageID, unsigned &returnPageID) {
 	void * pageData = malloc(PAGE_SIZE);
 
-//cout << "searching tree" << endl;
-
 	// Gets the current page.
 	if (fileHandle.readPage(currentPageID, pageData) != SUCCESS) {
 		return ERROR_PFM_READPAGE;
@@ -710,8 +754,6 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 
 	// Otherwise, we go one level below (towards the correct son page) and call the method again.
 	unsigned sonPageID = getSonPageID(attribute, key, pageData);
-
-//cout << "sonPageID: " << sonPageID << endl;
 
 	free(pageData);
 	return treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
@@ -736,24 +778,32 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	//the location of the root
 	unsigned rootLoc;
 	unsigned char* page0 = new unsigned char[PAGE_SIZE];
+cout << f0 << endl;
 
 	retVal = fileHandle.readPage(0, page0);
+cout << f1 << endl;
+
 	if (retVal != SUCCESS) {
 		cerr << "Error: Page 0 (zero) could not be read: Thus, the root could not be found." << endl;
 		return retVal;
 	}
-
+cout << f1 << endl;
 	rootLoc = page0[0];
 	rootLoc += (page0[1] * B1);
 	rootLoc += (page0[2] * B2);
 	rootLoc += (page0[3] * B3);
+cout << f2 << endl;
 
 	unsigned pageToRead;
+
 	retVal = treeSearch(fileHandle, attribute, lowKey, rootLoc, pageToRead);
+cout << f3 << endl;
 	if(retVal == ERROR_PFM_READPAGE) {
 		cerr << "Page Read Error." << endl;
 		return retVal;
 	}
+
+cout << fA << endl;
 
 	//start getting ready to read the (RID, key) pairs, one at a time.
 	unsigned char* curPage = new unsigned char[PAGE_SIZE];

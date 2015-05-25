@@ -116,7 +116,9 @@ int testCase_2(const string &indexFileName, const Attribute &attribute)
     // insert entry
     for(unsigned i = 0; i < numOfTuples; i++)
     {
+	cout << "looping: " << i << endl;
         rc = indexManager->insertEntry(fileHandle, attribute, &age, rid);
+	cout << "inserted" << endl;
         if(rc != success)
         {
             cout << "Failed Inserting Entry..." << endl;
@@ -194,6 +196,7 @@ int testCase_3(const string &indexFileName, const Attribute &attribute)
     }
 
     // open scan
+	cout << "prepare to scan" << endl;
     rc = indexManager->scan(fileHandle, attribute, NULL, NULL, true, true, ix_ScanIterator);
     if(rc == success)
     {
