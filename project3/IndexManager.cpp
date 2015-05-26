@@ -368,36 +368,6 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	return SUCCESS;
 }
 
-/*
-	IS NODE A PARENT (NON-LEAF)? getPageType(pageData)
-		TRUE
-			Find i? Cycle tree using key info? getSonPageID()
-			Call insert recursivly
-			IS newChildEntry == null
-				TRUE
-					Return;
-				FALSE
-					Does parent page have space?
-						TRUE
-							insert newChildEntry
-							set newChildEntry = null
-							Return;
-						FALSE
-							Split page? 
-							Dont forget to setPageType()
-		FALSE
-			Does leaf page have space? (using page header and its space offset)
-				TRUE
-					Insert Key & RID?
-					Set newChildEntry to null
-				FALSE
-					Split page in half
-					setPageType() of new page
-					Insert into first or second half?
-					Set newChildEntry to middle value being copied up
-*/
-			
-
 /**
  * Recursive insert of the record <key, rid> into the (current) page "pageID".
  * newChildEntry will store the return information of the "child" insert call.
@@ -409,7 +379,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-cout << f0 << endl;
+//cout << f0 << endl;
 	// Allocate & Read-in the desired page
 	void* pageData = malloc(PAGE_SIZE);
 	if (fileHandle.readPage(pageID, pageData) != SUCCESS) {
@@ -417,7 +387,7 @@ cout << f0 << endl;
 		free(pageData);
 		return ERROR_PFM_READPAGE;
 	}
-cout << f1 << endl;
+//cout << f1 << endl;
 	//test if the page is the root index
 	if(pageID == 0) {
 		unsigned newID;
@@ -437,12 +407,12 @@ cout << f1 << endl;
 			return ERROR_PFM_READPAGE;
 		}
 	}
-cout << f2 << endl;
+//cout << f2 << endl;
 	// Check the page type
 	if(isLeafPage(pageData)) {
 		// Attempt to insert new leaf record
 		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageData);
-cout << f3 << endl;
+//cout << f3 << endl;
 		if (insert_return == SUCCESS){
 	//cout << "insert on ID: " << pageID << endl;
 			if (fileHandle.writePage(pageID, pageData) != SUCCESS) {
@@ -504,10 +474,10 @@ cout << f3 << endl;
 			return -1;
 		}
 	} else {
-cout << f4 << endl;
+//cout << f4 << endl;
 		unsigned targetPageID = getSonPageID(attribute, key, pageData);
 
-cout << "targetPageID: " << targetPageID << endl;
+//cout << "targetPageID: " << targetPageID << endl;
 
 		int insert_return = insert(attribute, key, rid, fileHandle, targetPageID, newChildEntry);
 		if (insert_return != SUCCESS){
@@ -518,9 +488,9 @@ cout << "targetPageID: " << targetPageID << endl;
 
 		if(newChildEntry.key == NULL){
 			free(pageData);
-cout << f5 << endl;
+//cout << f5 << endl;
 		} else {
-cout << f6 << endl;
+//cout << f6 << endl;
 			// Insert the new child entry returned
 			insert_return = insertNonLeafRecord(attribute, newChildEntry, pageData);
 			if (insert_return == SUCCESS) {
@@ -860,7 +830,7 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 		return retVal;
 	}
 
-cout << fA << endl;
+//cout << fA << endl;
 
 	//start getting ready to read the (RID, key) pairs, one at a time.
 	unsigned char* curPage = new unsigned char[PAGE_SIZE];
@@ -1034,42 +1004,41 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 	//the length of the key in bytes
 	int keyLen = getKeyLength(attribute,key);
 	int valSize = keyLen + 4; //take the unsigned int into account
+	unsigned char* oldChildEntryKey = new unsigned char[keyLen];
 	debugTool.fprintNBytes("gspid.dump", ucPage, PAGE_SIZE);
 
-	for(int keyIndex = NON_LEAF_FIRST_KEY; true; keyIndex += valSize) {
+	for(int keyIndex = NON_LEAF_FIRST_KEY; keyIndex < PAGE_SIZE; keyIndex += valSize) {
+		//cout << "keyIndex is: " << keyIndex << endl;
 
-		//if(keyIndex < 100) {
-			cout << "keyIndex is: " << keyIndex << endl;
-		//}
-
-		unsigned char* oldChildEntryKey = new unsigned char[keyLen];
-
+		int mult = 1;
 		int loadIndex;
+		for(int aa = 0; aa < 4; aa++) {
+			retVal += (mult * ucPage[keyIndex+aa]);
+			//cout << "retVal is: " << retVal << endl;
+			loadIndex++;
+			mult *= 256;
+		}
+
+		//move past the keys
+		loadIndex += 4;
+
 		//load the key from the file into "oldChildEntryData" to compare it
 		for(loadIndex = 0; loadIndex < keyLen; loadIndex++) {
 			oldChildEntryKey[loadIndex] = ucPage[keyIndex+loadIndex];
 		}
-		
-		loadIndex -= 4;
 
+		//compare the keys
 		if(compareKeys(attribute, key, oldChildEntryKey) > 0) {
-			int mult = 1;
-			for(int aa = 0; aa < 4; aa++) {
-				retVal += (mult * ucPage[keyIndex+loadIndex+aa]);
-				cout << "retVal is: " << retVal << endl;
-				loadIndex++;
-				mult *= 256;
-			}
-			
 			//cout << "(1) getSonPageID() Return Value = " << retVal << endl;
-
 			delete[] oldChildEntryKey;
+			delete[] ucPage;
 			return retVal;
 		}
-		delete[] oldChildEntryKey;
+
 	}
 
 	//cout << "(2) getSonPageID() Return Value = " << retVal << endl;
+	delete[] oldChildEntryKey;
 	delete[] ucPage;
 	return retVal;
 }
