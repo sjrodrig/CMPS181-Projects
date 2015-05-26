@@ -359,7 +359,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
 	pageHeader.freeSpaceOffset += (keyLength + 8);
 	setLeafPageHeader(ucdata, pageHeader);
 
-	debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
+	//debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
 	memcpy(pageData, ucdata, PAGE_SIZE);
 
 	delete[] newUCKey;
@@ -409,8 +409,7 @@ IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, cons
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-	//cout << "insert on ID: " << pageID << endl;
-
+cout << f0 << endl;
 	// Allocate & Read-in the desired page
 	void* pageData = malloc(PAGE_SIZE);
 	if (fileHandle.readPage(pageID, pageData) != SUCCESS) {
@@ -418,7 +417,7 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 		free(pageData);
 		return ERROR_PFM_READPAGE;
 	}
-
+cout << f1 << endl;
 	//test if the page is the root index
 	if(pageID == 0) {
 		unsigned newID;
@@ -438,22 +437,21 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			return ERROR_PFM_READPAGE;
 		}
 	}
-
+cout << f2 << endl;
 	// Check the page type
 	if(isLeafPage(pageData)) {
 		// Attempt to insert new leaf record
 		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageData);
-
+cout << f3 << endl;
 		if (insert_return == SUCCESS){
-			//unsigned char* ucdata2 = new unsigned char[PAGE_SIZE];
-			//memcpy(ucdata2, pageData, PAGE_SIZE);
-			//debugTool.fprintNBytes("ilpage2.dump", ucdata2, PAGE_SIZE);
-
+	//cout << "insert on ID: " << pageID << endl;
 			if (fileHandle.writePage(pageID, pageData) != SUCCESS) {
 				cout << "ERROR insert(): Failed to write page " << pageID << "." << endl;
 				return ERROR_PFM_WRITEPAGE;
 			}
 			free(pageData);
+			return SUCCESS;
+
 		} else if (insert_return == ERROR_NO_FREE_SPACE){
 			// Allocate space for a second page
 			void* new_pageData = malloc(PAGE_SIZE);
@@ -506,7 +504,10 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			return -1;
 		}
 	} else {
+cout << f4 << endl;
 		unsigned targetPageID = getSonPageID(attribute, key, pageData);
+
+cout << "targetPageID: " << targetPageID << endl;
 
 		int insert_return = insert(attribute, key, rid, fileHandle, targetPageID, newChildEntry);
 		if (insert_return != SUCCESS){
@@ -517,10 +518,12 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 
 		if(newChildEntry.key == NULL){
 			free(pageData);
+cout << f5 << endl;
 		} else {
+cout << f6 << endl;
 			// Insert the new child entry returned
 			insert_return = insertNonLeafRecord(attribute, newChildEntry, pageData);
-			if (insert_return == SUCCESS){
+			if (insert_return == SUCCESS) {
 				free(newChildEntry.key);
 				newChildEntry.key = NULL;
 			} else if (insert_return == ERROR_NO_FREE_SPACE){
@@ -576,6 +579,8 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 			}
 		}
 	}
+
+
 	return SUCCESS;
 }
 
@@ -760,12 +765,16 @@ IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, co
 		return retVal;
 	}
 
+	//cout << "targetPageID: " << targetPageID << endl;
+
 	if (fileHandle.readPage(targetPageID, targetPage) != SUCCESS) {
 		cout << "Error Searching: Couldn't read page " << targetPageID << "." << endl;
 		return ERROR_PFM_READPAGE;
 	}
 
+	//debugTool.fprintNBytes("delpage0.dump", targetPage, PAGE_SIZE);
 	retVal = deleteEntryFromLeaf(attribute, key, rid, targetPage);
+
 	//write the page to the file.
 	fileHandle.writePage(targetPageID, targetPage);
 
@@ -813,12 +822,18 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	vector<int> dataVectorSizes;
 	vector<void*> dataVector;
 
+//string pause;
+//getline(cin, pause);
+
 	//the location of the root
 	unsigned rootLoc;
 	unsigned char* page0 = new unsigned char[PAGE_SIZE];
 cout << f0 << endl;
 
-	retVal = fileHandle.readPage(0, page0);
+	FileHandle substituteHandle;
+	substituteHandle.setFileDescriptor(fileHandle.getFileDescriptor());
+
+	retVal = substituteHandle.readPage(0, page0);
 cout << f1 << endl;
 
 	if (retVal != SUCCESS) {
@@ -1015,10 +1030,13 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 	//the length of the key in bytes
 	int keyLen = getKeyLength(attribute,key);
 	int valSize = keyLen + 4; //take the unsigned int into account
-	//debugTool.fprintNBytes("gspid.dump", ucPage, PAGE_SIZE);
+	debugTool.fprintNBytes("gspid.dump", ucPage, PAGE_SIZE);
 
 	for(int keyIndex = NON_LEAF_FIRST_KEY; true; keyIndex += valSize) {
-		//cout << "keyIndex is: " << keyIndex << endl;
+
+		//if(keyIndex < 100) {
+			cout << "keyIndex is: " << keyIndex << endl;
+		//}
 
 		unsigned char* oldChildEntryKey = new unsigned char[keyLen];
 
@@ -1030,13 +1048,11 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 		
 		loadIndex -= 4;
 
-		if(compareKeys(attribute, key, oldChildEntryKey) < 0) {
-			continue;
-		} else { //read the value
-
+		if(compareKeys(attribute, key, oldChildEntryKey) > 0) {
 			int mult = 1;
 			for(int aa = 0; aa < 4; aa++) {
-				retVal += (mult * ucPage[keyIndex+loadIndex]);
+				retVal += (mult * ucPage[keyIndex+loadIndex+aa]);
+				//cout << "retVal is: " << retVal << endl;
 				loadIndex++;
 				mult *= 256;
 			}
@@ -1112,6 +1128,9 @@ IndexManager::createFile(const string &fileName) {
 	 * after this pointer, we write (key, pointer) pairs
 	 */
 	rootPage[linkOffset] = 0x2;
+	rootPage[linkOffset+1] = 0x0;
+	rootPage[linkOffset+2] = 0x0;
+	rootPage[linkOffset+3] = 0x0;
 
 	handle.appendPage(rootPage);
 	if(DEBUG) { debugTool.fprintNBytes("meta.dump", rootPage, PAGE_SIZE); }

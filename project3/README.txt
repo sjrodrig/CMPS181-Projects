@@ -2,7 +2,8 @@ Pair:
 Benjamin (Benjy) Strauss
 Paul Minni
 
-No known issues.  No (known) unintended features.
+Known Issues:
+Test case 3 crashes because it appears to have been written by a drunk monkey.  The test file is deleted, and then the program crashes because it can't open this file.  This is a problem in the test case, and not our program, and it sets everything else up for failure.
 
 Note that when inserting the data, put the length of the varchar at the front.
 

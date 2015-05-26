@@ -100,6 +100,13 @@ int testCase_2(const string &indexFileName, const Attribute &attribute)
     rid.slotNum = key+1;
     int age = 18;
 
+//debug only, has no effect on tests
+Tools debugTool;
+void* testPageData;
+testPageData = malloc(PAGE_SIZE);
+unsigned char* ucdata2 = new unsigned char[PAGE_SIZE];
+string foo;
+
     // open index file
     FileHandle fileHandle;
     rc = indexManager->openFile(indexFileName, fileHandle);
@@ -126,9 +133,17 @@ int testCase_2(const string &indexFileName, const Attribute &attribute)
         }
     }
 
+//debug only, has no effect on tests
+fileHandle.readPage(2, testPageData);
+memcpy(ucdata2, testPageData, PAGE_SIZE);
+debugTool.fprintNBytes("ilpage2.dump", ucdata2, PAGE_SIZE);
+free(testPageData);
+//getline(cin, foo);
 	cout << "****deleting****" << endl;
     // delete entry
     rc = indexManager->deleteEntry(fileHandle, attribute, &age, rid);
+//getline(cin, foo);
+
     if(rc != success)
     {
         cout << "Failed Deleting Entry..." << endl;
@@ -157,6 +172,7 @@ int testCase_2(const string &indexFileName, const Attribute &attribute)
 
     g_nGradPoint += 3;
     g_nUndergradPoint += 5;
+    cout << "g_nUndergradPoint: " << g_nUndergradPoint << endl;
     return success;
 
 error_close_index: //close index file
@@ -164,6 +180,7 @@ error_close_index: //close index file
 
 error_return:
 	return fail;
+
 }
 
 
@@ -195,6 +212,10 @@ int testCase_3(const string &indexFileName, const Attribute &attribute)
         indexManager->closeFile(fileHandle);
         goto error_return;
     }
+
+	//SCAN WON'T WORK BECAUSE THE FILE ISN'T THERE
+	//UNCOMMENT THIS STATEMENT TO TRY FUTURE TESTS
+	//return 0;
 
     // open scan
 	cout << "prepare to scan" << endl;
