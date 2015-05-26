@@ -779,9 +779,14 @@ cout << "currentPageID is: " << currentPageID << endl;
 cout << "f1.5" << endl;
 	// Otherwise, we go one level below (towards the correct son page) and call the method again.
 	unsigned sonPageID = getSonPageID(attribute, key, pageData);
+
+unsigned char* ucdata = new unsigned char[PAGE_SIZE];
+memcpy(ucdata, pageData, PAGE_SIZE);
+debugTool.fprintNBytes("treeSearchPage.dump", ucdata, PAGE_SIZE);
 cout << "f1.6" << endl;
 	free(pageData);
 	retVal = treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
+	delete[] ucdata;
 	return retVal;
 }
 
@@ -791,10 +796,12 @@ cout << "f1.6" << endl;
 int
 IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const void *lowKey, const void *highKey, bool lowKeyInclusive, bool highKeyInclusive, IX_ScanIterator &ix_ScanIterator) {
 	int retVal = -1;
+	void* _highKey;
 	string pause;
 
 	//get the size (all of the keys that are the same size)
 	int keySize = getKeyLength(attribute, lowKey);
+	_highKey = malloc(keySize);
 
 	//going to nest this iterator in the IX_ScanIterator
 	RBFM_ScanIterator nestMe;
@@ -835,15 +842,22 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	}
 
 	if(highKey == NULL) {
-		highKey = malloc(keySize);
+		unsigned char* ucKey = new unsigned char[keySize];
+		for(int aa = 0; aa < keySize; aa++) {
+			ucKey[aa] = 255;
+		}
+		memcpy(_highKey, ucKey, keySize);
+
+		delete[] ucKey;
+	} else {
+		memcpy(_highKey, highKey, keySize);
 	}
 
 	unsigned pageToRead;
-//cout << "f1.1" << endl;
+
 	retVal = treeSearch(fileHandle, attribute, lowKey, rootLoc, pageToRead);
-//cout << "f1.2" << endl;
 	if(retVal == ERROR_PFM_READPAGE) {
-		cerr << "Page Read Error." << endl;
+		cerr << "Page Read Error (" << pageToRead << ")" << endl;
 		return retVal;
 	}
 
@@ -868,6 +882,12 @@ cout << f3 << endl;
 		if(endOfPage == true) {
 			//read the page
 			retVal = fileHandle.readPage(pageToRead, curPage);
+
+			if (retVal != SUCCESS) {
+				cerr << "Error: Page " << pageToRead << " could not be read." << endl;
+				break;
+			}
+
 			pageReadOffset = LEAF_DATA_START;
 
 			//set the next leaf page to be read
@@ -887,10 +907,7 @@ cout << f3 << endl;
 			recordsNumber += (curPage[10] * B2);
 			recordsNumber += (curPage[11] * B3);
 
-			if (retVal != SUCCESS) {
-				cerr << "Error: Page " << pageToRead << " could not be read." << endl;
-				return retVal;
-			}
+			
 			endOfPage = false;
 		}
 
@@ -914,7 +931,7 @@ cout << f3 << endl;
 		 * @Return: Positive: First key is larger
 		 */
 		int lowKeyComp = compareKeys(attribute, lowKey, keyRead);
-		int highKeyComp = compareKeys(attribute, highKey, keyRead);
+		int highKeyComp = compareKeys(attribute, _highKey, keyRead);
 
 		//equals low key and lowKeyInclusive
 		if(lowKeyComp == 0 && lowKeyInclusive == true) {
@@ -947,7 +964,7 @@ cout << f3 << endl;
 			dataVectorSizes.push_back(keySize);
 			dataVector.push_back(pureKey);
 		//within the range
-		} else if (highKeyComp > 0 && lowKeyInclusive < true) {
+		} else if (highKeyComp > 0 && lowKeyComp < 0) {
 			rIDRead.pageNum = keyRead[keySize];
 			rIDRead.pageNum += (curPage[keySize+1] * B1);
 			rIDRead.pageNum += (curPage[keySize+2] * B2);
@@ -961,6 +978,8 @@ cout << f3 << endl;
 			rids.push_back(rIDRead);
 			dataVectorSizes.push_back(keySize);
 			dataVector.push_back(pureKey);
+		} else if (highKeyComp < 0) {
+			break;
 		}
 
 		pageReadOffset += (keySize+8);
@@ -971,7 +990,7 @@ cout << f3 << endl;
 			pageToRead = nextPage;
 			readRecNum = 0;
 		}
-	} while(compareKeys(attribute, highKey, keyRead) > 0);
+	} while(compareKeys(attribute, _highKey, keyRead) > 0);
 cout << f4 << endl;
 	//set the vectors of the RBFM_ScanIterator
 	nestMe.setVectors(rids, dataVectorSizes, dataVector);

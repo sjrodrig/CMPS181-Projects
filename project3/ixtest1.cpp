@@ -297,7 +297,7 @@ int testCase_4A(const string &indexFileName, const Attribute &attribute)
         inRidPageNumSum += rid.pageNum;
     }
 
-	cout << "***" << endl;
+	cout << "Starting Scan" << endl;
     // Scan
     rc = indexManager->scan(fileHandle, attribute, NULL, NULL, true, true, ix_ScanIterator);
     if(rc == success)
@@ -386,6 +386,7 @@ int main()
     test();
     cout << "grad-point: " << g_nGradPoint << "\t grad-extra-point: " << g_nGradExtraPoint << endl;
     cout << "undergrad-point: " << g_nUndergradPoint << "\t undergrad-extra-point: " << g_nUndergradExtraPoint << endl;
+    cout << "****ERROR CODE 509: INSUFFIECIENT TIME FOR PROJECT COMPLETION****" << endl;
     return 0;
 }
 
