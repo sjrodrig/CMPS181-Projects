@@ -292,9 +292,9 @@ int
 IndexManager::insertLeafRecord(const Attribute &attribute, const void *key, const RID &rid, void* pageData) {
 	// Check if record is already present
 	if (recordExistsInLeafPage(attribute, key, rid, pageData)) { return ERROR_RECORD_EXISTS; }
-cout << "in insert leaf" << endl;
+//cout << "in insert leaf" << endl;
 	unsigned keyLength = getKeyLength(attribute, key);
-cout << "keyLength is: " << keyLength << endl;
+//cout << "keyLength is: " << keyLength << endl;
 
 	// Fetch the page header
 	LeafPageHeader pageHeader = getLeafPageHeader(pageData);
@@ -305,7 +305,7 @@ cout << "keyLength is: " << keyLength << endl;
 	memcpy(ucdata, pageData, PAGE_SIZE);
 	memcpy(newUCKey, key, keyLength);
 
-debugTool.printNBytes(newUCKey, keyLength);
+//debugTool.printNBytes(newUCKey, keyLength);
 //debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
 
 	// Make sure Leaf has space for given key
@@ -333,23 +333,34 @@ debugTool.printNBytes(newUCKey, keyLength);
 		offset += (keyLength + 8);
 	}
 
-//cout << f0 << endl;
-
 	// Make space for the new record
-	memmove(ucdata + offset + keyLength + sizeof(RID), ucdata + offset, keyLength + sizeof(RID));
-//cout << f1 << endl;
-	// Copy new data into free'd space
-	memcpy(ucdata + offset, &newUCKey, keyLength);
-	memcpy(ucdata + offset + keyLength, &rid, sizeof(RID));
-//cout << f2 << endl;
+	int target = offset + keyLength + 8;
+
+	memmove(ucdata + target, ucdata + offset, (keyLength + 8));
+
+	// Copy new data into freed space
+	// NOTE: MEMCPY DOESN'T WORK FOR THIS FOR SOME REASON!
+	for(int keyPosition = 0; keyPosition < keyLength; keyPosition++) {
+		ucdata[offset+keyPosition] = newUCKey[keyPosition];
+	}
+
+	ucdata[offset+keyLength] = rid.pageNum % B1;
+	ucdata[offset+keyLength+1] = (rid.pageNum % B2) / B1;
+	ucdata[offset+keyLength+2] = (rid.pageNum % B3) / B2;
+	ucdata[offset+keyLength+3] = rid.pageNum / B3;
+
+	ucdata[offset+keyLength+4] = rid.slotNum % B1;
+	ucdata[offset+keyLength+5] = (rid.slotNum % B2) / B1;
+	ucdata[offset+keyLength+6] = (rid.slotNum % B3) / B2;
+	ucdata[offset+keyLength+7] = rid.slotNum / B3;
+
 	// Update the page header
 	pageHeader.recordsNumber++;
 	pageHeader.freeSpaceOffset += (keyLength + 8);
 	setLeafPageHeader(ucdata, pageHeader);
-//cout << f3 << endl;
+
+	debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
 	memcpy(pageData, ucdata, PAGE_SIZE);
-	//debugTool.fprintNBytes("ilpage.dump", ucdata, PAGE_SIZE);
-	//deleting newUCKey breaks the program, no idea why.
 
 	delete[] newUCKey;
 	delete[] oldUCKey;
@@ -398,7 +409,7 @@ debugTool.printNBytes(newUCKey, keyLength);
  */
 int
 IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid, FileHandle &fileHandle, unsigned pageID, ChildEntry &newChildEntry) {
-	cout << "insert on ID: " << pageID << endl;
+	//cout << "insert on ID: " << pageID << endl;
 
 	// Allocate & Read-in the desired page
 	void* pageData = malloc(PAGE_SIZE);
@@ -432,11 +443,12 @@ IndexManager::insert(const Attribute &attribute, const void *key, const RID &rid
 	if(isLeafPage(pageData)) {
 		// Attempt to insert new leaf record
 		unsigned insert_return = insertLeafRecord(attribute, key, rid, pageData);
-cout << f0 << endl;
-//string pauser;
-//getline(cin, pauser);
 
 		if (insert_return == SUCCESS){
+			//unsigned char* ucdata2 = new unsigned char[PAGE_SIZE];
+			//memcpy(ucdata2, pageData, PAGE_SIZE);
+			//debugTool.fprintNBytes("ilpage2.dump", ucdata2, PAGE_SIZE);
+
 			if (fileHandle.writePage(pageID, pageData) != SUCCESS) {
 				cout << "ERROR insert(): Failed to write page " << pageID << "." << endl;
 				return ERROR_PFM_WRITEPAGE;
@@ -615,20 +627,34 @@ IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, c
 	unsigned char* indexKey = new unsigned char[keyLength]; 
 	RID indexRID;
 
-	unsigned char* debugkey = new unsigned char[keyLength];
-	memcpy(debugkey, key, keyLength);
+	unsigned char* debugKey = new unsigned char[keyLength];
+	memcpy(debugKey, key, keyLength);
+
+cout << "given key: " << endl;
+debugTool.printNBytes(debugKey, keyLength);
+debugTool.fprintNBytes("delpage.dump", ucdata, PAGE_SIZE);
+
+cout << "given: " << rid.pageNum << endl;
+cout << "given: " << rid.slotNum << endl;
 
 //debugTool.fprintNBytes("delpage.dump", ucdata, PAGE_SIZE);
 //debugTool.printNBytes(debugkey, keyLength);
 
 	for(int pageIndex = LEAF_DATA_START; pageIndex < PAGE_SIZE; pageIndex += keyRIDPairLength) {
-cout << "pageIndex: " << pageIndex << endl;
+		cout << "pageIndex: " << pageIndex << endl;
 		int keyDataIndex;
 
 		//load the key
-		for(keyDataIndex = 0; keyDataIndex < keyLength; keyLength++) {
+		for(keyDataIndex = 0; keyDataIndex < keyLength; keyDataIndex++) {
+			//cout << "keyDataIndex: " << keyDataIndex << endl;
 			indexKey[keyDataIndex] = ucdata[pageIndex + keyDataIndex];
 		}
+
+		cout << "found key: " << endl;
+		debugTool.printNBytes(indexKey, keyLength);
+
+//string foo;
+//getline(cin, foo);
 
 		if(compareKeys(attribute, indexKey, key) > 0) {
 			//haven't found the place yet
@@ -646,6 +672,9 @@ cout << "pageIndex: " << pageIndex << endl;
 			indexRID.slotNum += (ucdata[pageIndex + keyDataIndex + 5] * B1);
 			indexRID.slotNum += (ucdata[pageIndex + keyDataIndex + 6] * B2);
 			indexRID.slotNum += (ucdata[pageIndex + keyDataIndex + 7] * B3);
+			cout << "found: " << indexRID.pageNum << endl;
+			cout << "found: " << indexRID.slotNum << endl;
+
 
 			//if the RIDs match, then it's the record we want to delete
 			if(indexRID.pageNum == rid.pageNum && indexRID.slotNum == rid.slotNum) {
@@ -694,6 +723,7 @@ cout << "pageIndex: " << pageIndex << endl;
 		}
 	}
 
+	delete[] debugKey;
 	delete[] indexKey;
 	delete[] ucdata;
 	return retVal;

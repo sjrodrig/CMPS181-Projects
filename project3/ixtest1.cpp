@@ -126,6 +126,7 @@ int testCase_2(const string &indexFileName, const Attribute &attribute)
         }
     }
 
+	cout << "****deleting****" << endl;
     // delete entry
     rc = indexManager->deleteEntry(fileHandle, attribute, &age, rid);
     if(rc != success)
