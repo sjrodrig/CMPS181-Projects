@@ -812,6 +812,7 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 int
 IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const void *lowKey, const void *highKey, bool lowKeyInclusive, bool highKeyInclusive, IX_ScanIterator &ix_ScanIterator) {
 	int retVal = -1;
+	string pause;
 
 	//get the size (all of the keys that are the same size)
 	int keySize = getKeyLength(attribute, lowKey);
@@ -828,29 +829,32 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	//the location of the root
 	unsigned rootLoc;
 	unsigned char* page0 = new unsigned char[PAGE_SIZE];
-cout << f0 << endl;
+//cout << f0 << endl;
 
-	FileHandle substituteHandle;
-	substituteHandle.setFileDescriptor(fileHandle.getFileDescriptor());
+	FILE* nullTest = fileHandle.getFileDescriptor();
+	if(nullTest == NULL) {
+		cerr << "Error: Invalid File." << endl;
+		return retVal;
+	}
 
-	retVal = substituteHandle.readPage(0, page0);
-cout << f1 << endl;
+	retVal = fileHandle.readPage(0, page0);
+//cout << f1 << endl;
 
 	if (retVal != SUCCESS) {
 		cerr << "Error: Page 0 (zero) could not be read: Thus, the root could not be found." << endl;
 		return retVal;
 	}
-cout << f1 << endl;
+
 	rootLoc = page0[0];
 	rootLoc += (page0[1] * B1);
 	rootLoc += (page0[2] * B2);
 	rootLoc += (page0[3] * B3);
-cout << f2 << endl;
+
 
 	unsigned pageToRead;
 
 	retVal = treeSearch(fileHandle, attribute, lowKey, rootLoc, pageToRead);
-cout << f3 << endl;
+
 	if(retVal == ERROR_PFM_READPAGE) {
 		cerr << "Page Read Error." << endl;
 		return retVal;
@@ -1052,7 +1056,7 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 			int mult = 1;
 			for(int aa = 0; aa < 4; aa++) {
 				retVal += (mult * ucPage[keyIndex+loadIndex+aa]);
-				//cout << "retVal is: " << retVal << endl;
+				cout << "retVal is: " << retVal << endl;
 				loadIndex++;
 				mult *= 256;
 			}

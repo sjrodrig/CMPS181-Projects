@@ -220,6 +220,8 @@ int testCase_3(const string &indexFileName, const Attribute &attribute)
     // open scan
 	cout << "prepare to scan" << endl;
     rc = indexManager->scan(fileHandle, attribute, NULL, NULL, true, true, ix_ScanIterator);
+	cout << "rc is: " << rc << endl;
+
     if(rc == success)
     {
         cout << "Scan opened again...failure" << endl;
