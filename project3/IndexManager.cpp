@@ -100,10 +100,10 @@ IndexManager::insertNonLeafRecord(const Attribute &attribute, ChildEntry &newChi
 	newChildEntryData[childSize-2] = (newChildEntry.childPageNumber % B3) / B2;
 	newChildEntryData[childSize-1] = newChildEntry.childPageNumber / B3;
 
-	for(int ucIndex = 0; ucIndex < childSize; ucIndex++) {
+	/*for(int ucIndex = 0; ucIndex < childSize; ucIndex++) {
 		cout << "ucIndex: " << ucIndex << endl;
 		cout << (bitset<8>) newChildEntryData[ucIndex] << endl;
-	}
+	}*/
 
 	int keyIndex;
 	for(keyIndex = 16; keyIndex < freeSpaceStart; keyIndex += childSize) {
@@ -242,6 +242,7 @@ IndexManager::compareKeys(const Attribute attribute, const void * key1, const vo
 		case TypeInt:
 			int key_int_1;
 			int key_int_2;
+			//segfault on this line in odd cases
 			memcpy(&key_int_1, key1, INT_SIZE);
 			memcpy(&key_int_2, key2, INT_SIZE);
 			if (key_int_1 > key_int_2){
@@ -277,7 +278,6 @@ IndexManager::compareKeys(const Attribute attribute, const void * key1, const vo
 			char* key_string_2;
 			memcpy(key_string_1, key1 + VARCHAR_LENGTH_SIZE, key_size_1);
 			memcpy(key_string_2, key2 + VARCHAR_LENGTH_SIZE, key_size_2);
-
 			// Compare the retreived values
 			return strcmp(key_string_1, key_string_2);
 	}
@@ -605,12 +605,12 @@ IndexManager::deleteEntryFromLeaf(const Attribute &attribute, const void *key, c
 	unsigned char* debugKey = new unsigned char[keyLength];
 	memcpy(debugKey, key, keyLength);
 
-cout << "given key: " << endl;
-debugTool.printNBytes(debugKey, keyLength);
-debugTool.fprintNBytes("delpage.dump", ucdata, PAGE_SIZE);
+//cout << "given key: " << endl;
+//debugTool.printNBytes(debugKey, keyLength);
+//debugTool.fprintNBytes("delpage.dump", ucdata, PAGE_SIZE);
 
-cout << "given: " << rid.pageNum << endl;
-cout << "given: " << rid.slotNum << endl;
+//cout << "given: " << rid.pageNum << endl;
+//cout << "given: " << rid.slotNum << endl;
 
 //debugTool.fprintNBytes("delpage.dump", ucdata, PAGE_SIZE);
 //debugTool.printNBytes(debugkey, keyLength);
@@ -755,7 +755,15 @@ IndexManager::deleteEntry(FileHandle &fileHandle, const Attribute &attribute, co
 // Recursive search through the tree, returning the page ID of the leaf page that should contain the input key.
 int
 IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, const void * key, unsigned currentPageID, unsigned &returnPageID) {
+	int retVal;
 	void * pageData = malloc(PAGE_SIZE);
+
+cout << "currentPageID is: " << currentPageID << endl;
+
+	if(key == NULL) {
+		cout << "ERROR: NULL KEY" << endl;
+		return -42;
+	}
 
 	// Gets the current page.
 	if (fileHandle.readPage(currentPageID, pageData) != SUCCESS) {
@@ -768,12 +776,13 @@ IndexManager::treeSearch(FileHandle &fileHandle, const Attribute attribute, cons
 		free(pageData);
 		return SUCCESS;
 	}
-
+cout << "f1.5" << endl;
 	// Otherwise, we go one level below (towards the correct son page) and call the method again.
 	unsigned sonPageID = getSonPageID(attribute, key, pageData);
-
+cout << "f1.6" << endl;
 	free(pageData);
-	return treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
+	retVal = treeSearch(fileHandle, attribute, key, sonPageID, returnPageID);
+	return retVal;
 }
 
 /**
@@ -820,17 +829,25 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	rootLoc += (page0[2] * B2);
 	rootLoc += (page0[3] * B3);
 
+	//make sure the keys are appropriate
+	if(lowKey == NULL) {
+		lowKey = calloc(keySize, keySize);
+	}
+
+	if(highKey == NULL) {
+		highKey = malloc(keySize);
+	}
 
 	unsigned pageToRead;
-
+//cout << "f1.1" << endl;
 	retVal = treeSearch(fileHandle, attribute, lowKey, rootLoc, pageToRead);
-
+//cout << "f1.2" << endl;
 	if(retVal == ERROR_PFM_READPAGE) {
 		cerr << "Page Read Error." << endl;
 		return retVal;
 	}
 
-//cout << fA << endl;
+cout << f2 << endl;
 
 	//start getting ready to read the (RID, key) pairs, one at a time.
 	unsigned char* curPage = new unsigned char[PAGE_SIZE];
@@ -846,7 +863,7 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 	//how many records on the page we've read
 	unsigned readRecNum;
 	unsigned pageReadOffset;
-
+cout << f3 << endl;
 	do {
 		if(endOfPage == true) {
 			//read the page
@@ -955,7 +972,7 @@ IndexManager::scan(FileHandle &fileHandle, const Attribute &attribute, const voi
 			readRecNum = 0;
 		}
 	} while(compareKeys(attribute, highKey, keyRead) > 0);
-
+cout << f4 << endl;
 	//set the vectors of the RBFM_ScanIterator
 	nestMe.setVectors(rids, dataVectorSizes, dataVector);
 
@@ -996,16 +1013,16 @@ IndexManager::getKeyLength(const Attribute &attribute, const void *key){
 unsigned
 IndexManager::getSonPageID(const Attribute attribute, const void * key, void * pageData) {
 	unsigned retVal = 0;
-
 	//get the page as unsigned chars
 	unsigned char* ucPage = new unsigned char[PAGE_SIZE];
 	memcpy(ucPage, pageData, PAGE_SIZE);
-
 	//the length of the key in bytes
 	int keyLen = getKeyLength(attribute,key);
 	int valSize = keyLen + 4; //take the unsigned int into account
 	unsigned char* oldChildEntryKey = new unsigned char[keyLen];
-	debugTool.fprintNBytes("gspid.dump", ucPage, PAGE_SIZE);
+
+	if(key == NULL) { cout << "NULL KEY" << endl; }
+debugTool.fprintNBytes("gspid.dump", ucPage, PAGE_SIZE);
 
 	for(int keyIndex = NON_LEAF_FIRST_KEY; keyIndex < PAGE_SIZE; keyIndex += valSize) {
 		//cout << "keyIndex is: " << keyIndex << endl;
@@ -1018,7 +1035,6 @@ IndexManager::getSonPageID(const Attribute attribute, const void * key, void * p
 			loadIndex++;
 			mult *= 256;
 		}
-
 		//move past the keys
 		loadIndex += 4;
 
