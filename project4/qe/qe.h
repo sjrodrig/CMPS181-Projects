@@ -175,6 +175,10 @@ public:
 
 // Filter operator
 class Filter : public Iterator {
+private:
+	Iterator* filtIter;
+	Condition filterOn;
+
 public:
 	// Iterator of input R, Selection condition
     Filter(Iterator *input, const Condition &condition);
@@ -187,6 +191,10 @@ public:
 
 // Projection operator
 class Project : public Iterator {
+private:
+	Iterator* projIter;
+	vector<string> attributeNames;
+
 public:
 	/**
 	 * Iterator of input R
@@ -202,6 +210,12 @@ public:
 
 // Nested-Loop join operator
 class NLJoin : public Iterator {
+private:
+	Iterator* left;
+	TableScan* right;
+	Condition joinCondition;
+	unsigned pages;
+
 public:
 	/**
 	 * Iterator of input R
@@ -219,6 +233,12 @@ public:
 
 // Index Nested-Loop join operator
 class INLJoin : public Iterator {
+private:
+	Iterator* left;
+	IndexScan* right;
+	Condition joinCondition;
+	unsigned pages;
+
 public:
 	/**
 	 * Iterator of input R
@@ -236,6 +256,12 @@ public:
 
 // Aggregation operator
 class Aggregate : public Iterator {
+private:
+	Iterator* aggrIter;
+	Attribute aggrAttr;
+	Attribute aggrAttr2;
+	AggregateOp oper;
+
 public:
 	/**
 	 * Iterator of input R
