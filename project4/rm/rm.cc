@@ -14,15 +14,18 @@
 
 RelationManager* RelationManager::_rm = 0;
 RecordBasedFileManager* RelationManager::_rbfm = 0;
+IndexManager* RelationManager::_ixm = 0;
 
 RC RelationManager::createIndex(const string &tableName, const string &attributeName)
 {
+	string index_file_name = tableName + "." + attributeName + INDEX_FILE_EXTENSION;
 	return -1;
 }
 
 RC RelationManager::destroyIndex(const string &tableName, const string &attributeName)
 {
-	return -1;
+	string index_file_name = tableName + "." + attributeName + INDEX_FILE_EXTENSION;
+	return _ixm->destroyFile(index_file_name);
 }
 
 RC RelationManager::indexScan(const string &tableName,
@@ -51,6 +54,7 @@ RelationManager::RelationManager()
 	t_columns = COLUMNS_TABLE_NAME;
 
 	_rbfm = RecordBasedFileManager::instance();
+	_ixm = IndexManager::instance();
 
 	// If a catalog does not exist yet, create it.
 	int tableID;

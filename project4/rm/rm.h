@@ -126,6 +126,7 @@ protected:
 private:
   static RelationManager *_rm;
   static RecordBasedFileManager *_rbfm;
+  static IndexManager *_ixm;
 
   // Defines.
   string t_tables;

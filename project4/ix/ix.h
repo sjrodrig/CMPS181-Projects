@@ -8,6 +8,8 @@
 
 #include "../rbf/rbfm.h"
 
+#define INDEX_FILE_EXTENSION ".ix"
+
 // Used for prevPage in the first page and for nextPage in the last one.
 #define NULL_PAGE_ID					-1
 
