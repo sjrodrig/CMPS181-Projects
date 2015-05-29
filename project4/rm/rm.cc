@@ -19,7 +19,68 @@ IndexManager* RelationManager::_ixm = 0;
 RC RelationManager::createIndex(const string &tableName, const string &attributeName)
 {
 	string index_file_name = tableName + "." + attributeName + INDEX_FILE_EXTENSION;
-	return -1;
+
+	// Attempt to create the index file
+	if (_ixm->createFile(index_file_name) != SUCCESS){
+		return -1;
+	}
+
+	// Attempt to open the newly created index file
+	FileHandle index_file;
+	if (_ixm->openFile(index_file_name, index_file) != SUCCESS){
+		return -2;
+	}
+
+	// Create Vector with desired attribute
+	vector<string> attribute_vec;
+	attribute_vec.push_back(attributeName);
+
+	// RM_ScanIterator Holder
+	RBFM_ScanIterator rbfm_scanner;
+	RM_ScanIterator rm_scanner = RM_ScanIterator(rbfm_scanner);
+
+	// Fetch records
+	if (scan(tableName, attributeName, NO_OP, NULL, attribute_vec, rm_scanner) != SUCCESS){
+		return -3;
+	}
+
+	// For-loop data holders
+	RID cur_RID;
+	void* cur_data = malloc(PAGE_SIZE);
+	Attribute cur_attribute;
+	cur_attribute.name = attributeName;
+
+	// Get the attribute's info
+	vector<Attribute> attrs;
+	Attribute attr_holder;
+	bool found_attr_info = false;
+	if (getAttributes(tableName, attrs) != SUCCESS){
+		return -4;
+	}
+	for (unsigned i = 0; i < attrs.size(); i++){
+		if (cur_attribute.name.compare(attrs[i].name) == 0){
+			cur_attribute.type = attrs[i].type;
+			cur_attribute.length = attrs[i].length;
+			found_attr_info = true;
+		}
+	}
+	if (!found_attr_info) {
+		return -5;
+	}
+		
+
+	// Loop through records and build index
+	while(rm_scanner.getNextTuple(cur_RID, cur_data)){
+		if (_ixm->insertEntry(index_file, cur_attribute, cur_data, cur_RID) != SUCCESS){
+			return -6;
+		}
+	}
+
+	// Clean up
+	rm_scanner.close();
+	free(cur_data);
+
+	return SUCCESS;
 }
 
 RC RelationManager::destroyIndex(const string &tableName, const string &attributeName)
