@@ -53,7 +53,7 @@ Project::getNextTuple(void *data) {
 
 void
 Project::getAttributes(vector<Attribute> &attrs) const {
-	attrs = attrNames;
+	// attrs = attrNames;
 }
 
 NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition, const unsigned numPages) {
@@ -75,10 +75,10 @@ NLJoin::getNextTuple(void *data) {
 
 void
 NLJoin::getAttributes(vector<Attribute> &attrs) const {
-	leftIn->getAttributes(attrs);
+	// leftIn->getAttributes(attrs);
 
 	vector<Attribute> temp;
-	rightIn->getAttributes(temp);
+	// rightIn->getAttributes(temp);
 
 	for(int rightIndex = 0; rightIndex < temp.size(); rightIndex++) {
 		attrs.push_back(temp.at(rightIndex));

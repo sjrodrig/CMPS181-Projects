@@ -97,7 +97,40 @@ RC RelationManager::indexScan(const string &tableName,
                       bool highKeyInclusive,
                       RM_IndexScanIterator &rm_IndexScanIterator)
 {
-	return -1;
+	string index_file_name = tableName + "." + attributeName + INDEX_FILE_EXTENSION;
+
+	// Attempt to open the desired index file
+	FileHandle index_file;
+	if (_ixm->openFile(index_file_name, index_file) != SUCCESS){
+		return -1;
+	}
+
+	// Get the attribute's info
+	Attribute cur_attribute;
+	cur_attribute.name = attributeName;
+	vector<Attribute> attrs;
+	Attribute attr_holder;
+	bool found_attr_info = false;
+	if (getAttributes(tableName, attrs) != SUCCESS){
+		return -2;
+	}
+	for (unsigned i = 0; i < attrs.size(); i++){
+		if (cur_attribute.name.compare(attrs[i].name) == 0){
+			cur_attribute.type = attrs[i].type;
+			cur_attribute.length = attrs[i].length;
+			found_attr_info = true;
+		}
+	}
+	if (!found_attr_info) {
+		return -3;
+	}
+
+	// Call the index file scanner
+	if (_ixm->scan(index_file, attr_holder, lowKey, highKey, lowKeyInclusive, highKeyInclusive, rm_IndexScanIterator) != SUCCESS){
+		return -4;
+	} 
+
+	return SUCCESS;
 }
 
 RelationManager* RelationManager::instance()
