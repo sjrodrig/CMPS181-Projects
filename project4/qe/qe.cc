@@ -48,7 +48,7 @@ Project::~Project() {
 
 int
 Project::getNextTuple(void *data) {
-
+	return QE_EOF;
 }
 
 void
@@ -75,10 +75,10 @@ NLJoin::getNextTuple(void *data) {
 
 void
 NLJoin::getAttributes(vector<Attribute> &attrs) const {
-	// leftIn->getAttributes(attrs);
+	left->getAttributes(attrs);
 
 	vector<Attribute> temp;
-	// rightIn->getAttributes(temp);
+	right->getAttributes(temp);
 
 	for(int rightIndex = 0; rightIndex < temp.size(); rightIndex++) {
 		attrs.push_back(temp.at(rightIndex));
@@ -98,7 +98,7 @@ INLJoin::~INLJoin() {
 
 int
 INLJoin::getNextTuple(void *data) {
-
+	return QE_EOF;
 }
 
 void
