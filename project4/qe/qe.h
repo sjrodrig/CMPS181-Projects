@@ -42,6 +42,25 @@ struct Condition {
     Value rhsValue;       // right-hand side value if bRhsIsAttr = FALSE
 };
 
+
+unsigned
+getAttributeLength(Attribute &attr, void* data);
+unsigned
+getStringLength(void* data);
+void
+getAttributeValue(Attribute &attr, void* data, void* destination);
+
+bool
+compareValues(int dataInt, CompOp compOp, const void * value);
+bool 
+compareValues(float dataFloat, CompOp compOp, const void * value);
+bool 
+compareValues(char * dataString, CompOp compOp, const void * value);
+
+bool
+checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition);
+
+
 // All the relational operators and access methods are iterators.
 class Iterator {
 public:
@@ -178,6 +197,7 @@ class Filter : public Iterator {
 private:
 	Iterator* filtIter;
 	Condition filterOn;
+	vector<Attribute> filterAttributes;
 
 public:
 	// Iterator of input R, Selection condition
