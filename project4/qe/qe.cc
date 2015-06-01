@@ -305,7 +305,7 @@ INLJoin::getAttributes(vector<Attribute> &attrs) const {
 	vector<Attribute> temp;
 	right->getAttributes(temp);
 
-	for(int rightIndex = 0; rightIndex < temp.size(); rightIndex++) {
+	for(unsigned rightIndex = 0; rightIndex < temp.size(); rightIndex++) {
 		attrs.push_back(temp.at(rightIndex));
 	}
 }
