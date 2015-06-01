@@ -103,7 +103,14 @@ INLJoin::getNextTuple(void *data) {
 
 void
 INLJoin::getAttributes(vector<Attribute> &attrs) const {
+	left->getAttributes(attrs);
 
+	vector<Attribute> temp;
+	right->getAttributes(temp);
+
+	for(int rightIndex = 0; rightIndex < temp.size(); rightIndex++) {
+		attrs.push_back(temp.at(rightIndex));
+	}
 }
 
 Aggregate::Aggregate(Iterator *input, Attribute aggAttr, AggregateOp op) {
