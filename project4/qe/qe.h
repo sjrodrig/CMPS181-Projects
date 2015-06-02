@@ -30,36 +30,28 @@ typedef enum{ MIN = 0, MAX, SUM, AVG, COUNT } AggregateOp;
 
 struct Value {
     AttrType type;          // type of value
-    void* data;         // value
+    void* data;         	// value
 };
 
 
 struct Condition {
     string lhsAttr;         // left-hand side attribute
-    CompOp op;             // comparison operator
-    bool bRhsIsAttr;     // TRUE if right-hand side is an attribute and not a value; FALSE, otherwise.
+    CompOp op;              // comparison operator
+    bool bRhsIsAttr;     	// TRUE if right-hand side is an attribute and not a value; FALSE, otherwise.
     string rhsAttr;         // right-hand side attribute if bRhsIsAttr = TRUE
-    Value rhsValue;       // right-hand side value if bRhsIsAttr = FALSE
+    Value rhsValue;       	// right-hand side value if bRhsIsAttr = FALSE
 };
 
-
-unsigned
-getAttributeLength(Attribute &attr, void* data);
-unsigned
-getStringLength(void* data);
-void
-getAttributeValue(Attribute &attr, void* data, void* destination);
-
-bool
-compareValues(int dataInt, CompOp compOp, const void * value);
-bool 
-compareValues(float dataFloat, CompOp compOp, const void * value);
-bool 
-compareValues(char * dataString, CompOp compOp, const void * value);
-
-bool
-checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition);
-
+class Tools {
+public:
+	static unsigned getAttributeLength(Attribute &attr, void* data);
+	static unsigned getStringLength(void* data);
+	static void getAttributeValue(Attribute &attr, void* data, void* destination);
+	static bool compareValues(int dataInt, CompOp compOp, const void * value);
+	static bool compareValues(float dataFloat, CompOp compOp, const void * value);
+	static bool compareValues(const char * dataString, CompOp compOp, const char * value);
+	static bool checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition);
+};
 
 // All the relational operators and access methods are iterators.
 class Iterator {

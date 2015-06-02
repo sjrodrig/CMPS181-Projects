@@ -35,10 +35,11 @@ clean:
 
 purge:
 	make clean
+	-rm *.t *.ix *~
 	clear
 
 remake:
-	make clean
+	make purge
 	make all
 	clear
 

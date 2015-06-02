@@ -389,18 +389,25 @@ int createIndexforRightC() {
 int testCase_1() {
 	RC rc = success;
 	cout << "****In Test Case 1****" << endl;
+
 	rc = createIndexforLeftB();
+	cout << "createIndexforLeftB: " << rc << endl;
 	if (rc != success) {
 		return rc;
 	}
+
 	rc = populateLeftTable();
+	cout << "populateLeftTable: " << rc << endl;
 	if (rc != success) {
 		return rc;
 	}
+
 	rc = createIndexforLeftC();
+	cout << "createIndexforLeftC: " << rc << endl;
 	if (rc != success) {
 		return rc;
 	}
+
 	return rc;
 }
 

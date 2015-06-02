@@ -16,7 +16,7 @@
  */
 
 unsigned
-getAttributeLength(Attribute &attr, void* data){
+Tools::getAttributeLength(Attribute &attr, void* data){
 	switch (attr.type){
 		case TypeInt:
 			return INT_SIZE;
@@ -30,14 +30,14 @@ getAttributeLength(Attribute &attr, void* data){
 }
 
 unsigned
-getStringLength(void* data){
+Tools::getStringLength(void* data){
 	unsigned stringLength;
 	memcpy(&stringLength, data, VARCHAR_LENGTH_SIZE);
 	return stringLength;
 }
 
 void
-getAttributeValue(Attribute &attr, void* data, void* destination){
+Tools::getAttributeValue(Attribute &attr, void* data, void* destination){
 	switch (attr.type){
 		case TypeInt:
 			memcpy(destination, data, INT_SIZE);
@@ -49,7 +49,7 @@ getAttributeValue(Attribute &attr, void* data, void* destination){
 }
 
 bool 
-compareValues(int dataInt, CompOp compOp, const void * value) {
+Tools::compareValues(int dataInt, CompOp compOp, const void * value) {
 	// Checking a condition on an integer is the same as checking it on a float with the same value.
 	int valueInt;
 	memcpy (&valueInt, value, INT_SIZE);
@@ -59,7 +59,7 @@ compareValues(int dataInt, CompOp compOp, const void * value) {
 }
 
 bool 
-compareValues(float dataFloat, CompOp compOp, const void * value) {
+Tools::compareValues(float dataFloat, CompOp compOp, const void * value) {
 	float valueFloat;
 	memcpy (&valueFloat, value, REAL_SIZE);
 
@@ -92,9 +92,9 @@ compareValues(float dataFloat, CompOp compOp, const void * value) {
 }
 
 bool 
-compareValues(const char * dataString, CompOp compOp, const char * value) {
-	switch (compOp)
-	{
+Tools::compareValues(const char * dataString, CompOp compOp, const char * value) {
+	
+	switch (compOp) {
 		case EQ_OP:  // =
 			return strcmp(dataString, value) == 0;
 		break;
@@ -123,7 +123,7 @@ compareValues(const char * dataString, CompOp compOp, const char * value) {
 }
 
 bool
-checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition){
+Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition){
 	// Check that the vector contains information
 	if (attributes->empty()){
 		return false;
@@ -222,7 +222,7 @@ Filter::getNextTuple(void *data) {
 	}
 
 	// If the condition is not met, go to the next tuple recursively 
-	if (!checkCondition(&filterAttributes, data, this->filterOn)){
+	if (!Tools::checkCondition(&filterAttributes, data, this->filterOn)){
 		return this->getNextTuple(data);
 	}
 
@@ -274,12 +274,12 @@ Project::getNextTuple(void *data) {
 		for (unsigned j = 0; j < tuple_attrs.size(); i++){
 			// If it's the desired attribute, grab its value
 			if (attributeNames[i].compare(tuple_attrs[j].name) == 0){
-				getAttributeValue(tuple_attrs[j], (char*) holder + internal_offset, (char*) data + offset);
+				Tools::getAttributeValue(tuple_attrs[j], (char*) holder + internal_offset, (char*) data + offset);
 				found_value = true;
 				// Make sure the for-loop ends if the attribute has been found
 				j = tuple_attrs.size();
 			}
-			value_size = getAttributeLength(tuple_attrs[j], (char*) holder + internal_offset);
+			value_size = Tools::getAttributeLength(tuple_attrs[j], (char*) holder + internal_offset);
 			internal_offset += value_size;
 		}
 

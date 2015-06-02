@@ -1,18 +1,19 @@
+README and Report
 
-- Modify the "CODEROOT" variable in makefile.inc to point to the root of your code base
+Changes to starter code
+(0) Added new makefile targets "purge" and "remake"
+(1) Modified iterator classes to include local variables
+(2) Moved method implementations to "qe.cc"
+(3) Implemented unimplemented methods in qe.cc and rm.cc
+(4) Added helper methods to qe.h and qe.cc
+	()
 
-- Copy your own implementation of rbf, ix, and rm to folder, "rbf", "ix", and "rm", respectively.
+Makefile Targets:
+> remake: recompile
+> purge: clean + clears terminal window
 
-- Implement the extension of Relation Manager (RM) to coordinate data files and the associated indices of the data files.
 
-- Also, implement Query Engine (QE)
 
-   Go to folder "qe" and type in:
 
-    make clean
-    make
-    ./qetest
 
-   The program should work. But it does nothing until you implement the extension of RM and QE.
 
-- By default you should not change those classes defined in rm/rm.h and qe/qe.h. If you think some changes are really necessary, please contact us first.
