@@ -16,8 +16,7 @@ RelationManager* RelationManager::_rm = 0;
 RecordBasedFileManager* RelationManager::_rbfm = 0;
 IndexManager* RelationManager::_ixm = 0;
 
-RC RelationManager::createIndex(const string &tableName, const string &attributeName)
-{
+int RelationManager::createIndex(const string &tableName, const string &attributeName) {
 	string index_file_name = tableName + "." + attributeName + INDEX_FILE_EXTENSION;
 
 	// Attempt to create the index file
@@ -68,12 +67,19 @@ RC RelationManager::createIndex(const string &tableName, const string &attribute
 		return -5;
 	}
 		
+	int debug_successes = 0;
+	int success_val = 0;
 
 	// Loop through records and build index
 	while(rm_scanner.getNextTuple(cur_RID, cur_data)){
-		if (_ixm->insertEntry(index_file, cur_attribute, cur_data, cur_RID) != SUCCESS){
+		success_val = _ixm->insertEntry(index_file, cur_attribute, cur_data, cur_RID);
+		if (success_val != SUCCESS){
+			cout << "failed to insert #" << debug_successes << endl;
+			cout << "insert returned: " << success_val << endl;
+			if(cur_data == NULL) { cout << "Null data" << endl; }
 			return -6;
 		}
+		debug_successes++;
 	}
 
 	// Clean up

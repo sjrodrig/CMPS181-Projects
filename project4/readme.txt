@@ -9,8 +9,8 @@ Changes to starter code
 	()
 
 Makefile Targets:
-> remake: recompile
-> purge: clean + clears terminal window
+> remake: recompile as if the program has never run
+> purge: clean, clear all generated files
 
 
 

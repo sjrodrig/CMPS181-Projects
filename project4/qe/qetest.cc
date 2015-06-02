@@ -370,6 +370,7 @@ clean_up:
 	return rc;
 }
 
+//Doesn't work, returns -6
 int createIndexforLeftB() {
 	return rm->createIndex("left", "B");
 }
