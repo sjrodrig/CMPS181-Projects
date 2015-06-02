@@ -245,12 +245,74 @@ Project::~Project() {
 
 int
 Project::getNextTuple(void *data) {
-	return QE_EOF;
+	void* holder = malloc(PAGE_SIZE);
+
+	// Fetch next tuple
+	if (projIter->getNextTuple(holder) == QE_EOF){
+		free(holder);
+		return QE_EOF;
+	}
+
+	// If no attributes were given, just end here (failsafe)
+	if (attributeNames.empty()){
+		free(holder);
+		return SUCCESS;
+	}
+
+	// Get the tuple's attributes
+	vector<Attribute> tuple_attrs;
+	projIter->getAttributes(tuple_attrs);
+
+	// Go through the desired attributes
+	unsigned offset = 0;
+	for(unsigned i = 0; i < attributeNames.size(); i++){
+		bool found_value = false;
+		unsigned value_size = 0;
+		unsigned internal_offset = 0;
+
+		// Go through all the attributes in the record
+		for (unsigned j = 0; j < tuple_attrs.size(); i++){
+			// If it's the desired attribute, grab its value
+			if (attributeNames[i].compare(tuple_attrs[j].name) == 0){
+				getAttributeValue(tuple_attrs[j], (char*) holder + internal_offset, (char*) data + offset);
+				found_value = true;
+				// Make sure the for-loop ends if the attribute has been found
+				j = tuple_attrs.size();
+			}
+			value_size = getAttributeLength(tuple_attrs[j], (char*) holder + internal_offset);
+			internal_offset += value_size;
+		}
+
+		if (found_value){
+			offset += value_size;
+		}
+	}
+
+	free(holder);
+	return SUCCESS;
 }
 
 void
 Project::getAttributes(vector<Attribute> &attrs) const {
-	// attrs = attributeNames;
+	// Make sure the vector is clean
+	attrs.clear();
+
+	// Get the iterator's attributes
+	vector<Attribute> iter_attrs;
+	projIter->getAttributes(iter_attrs);
+
+	// Go through the desired attributes
+	for(unsigned i = 0; i < attributeNames.size(); i++){
+		// Go through all the attributes in the iterator
+		for (unsigned j = 0; j < iter_attrs.size(); i++){
+			// If it's the desired attribute, push it onto the vector
+			if (attributeNames[i].compare(iter_attrs[j].name) == 0){
+				attrs.push_back(iter_attrs[j]);
+				// Make sure the for-loop ends if the attribute has been found
+				j = iter_attrs.size();
+			}
+		}
+	}
 }
 
 NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition, const unsigned numPages) {
