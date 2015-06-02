@@ -48,7 +48,7 @@ public:
 		return rbfm_SI.getNextRecord(rid, data);
 	}
 	int close() {
-		return rbfm_SI.close()
+		return rbfm_SI.close();
 	}
 };
 
