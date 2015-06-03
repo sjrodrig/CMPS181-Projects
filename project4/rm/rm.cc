@@ -1,6 +1,8 @@
-// CMPS 181 - Project 2
-// Author:				Paolo Di Febbo
-// File description:	Relation Manager implementation.
+/**
+ * CMPS 181 - Project 2
+ * Author:				Paolo Di Febbo
+ * File description:	Relation Manager implementation.
+ */
 
 #include <iostream>
 #include <string>
@@ -11,6 +13,12 @@
 #include <algorithm>
 
 #include "rm.h"
+
+/**
+ * @Modifier: Paul Minni
+ * @Debug: Benjy Strauss
+ *
+ */
 
 RelationManager* RelationManager::_rm = 0;
 RecordBasedFileManager* RelationManager::_rbfm = 0;
@@ -36,10 +44,10 @@ int RelationManager::createIndex(const string &tableName, const string &attribut
 
 	// RM_ScanIterator Holder
 	RBFM_ScanIterator rbfm_scanner;
-	RM_ScanIterator rm_scanner = RM_ScanIterator(rbfm_scanner);
+	RM_ScanIterator rm_scanner;
 
 	// Fetch records
-	if (scan(tableName, attributeName, NO_OP, NULL, attribute_vec, rm_scanner) != SUCCESS){
+	if (scan(tableName, "", NO_OP, NULL, attribute_vec, rm_scanner) != SUCCESS){
 		return -3;
 	}
 
@@ -53,7 +61,7 @@ int RelationManager::createIndex(const string &tableName, const string &attribut
 	vector<Attribute> attrs;
 	Attribute attr_holder;
 	bool found_attr_info = false;
-	if (getAttributes(tableName, attrs) != SUCCESS){
+	if (getAttributes(tableName, attrs) != SUCCESS) {
 		return -4;
 	}
 	for (unsigned i = 0; i < attrs.size(); i++){
@@ -67,19 +75,19 @@ int RelationManager::createIndex(const string &tableName, const string &attribut
 		return -5;
 	}
 		
-	int debug_successes = 0;
 	int success_val = 0;
 
+	// 9 = ERROR_RECORD_EXISTS
 	// Loop through records and build index
-	while(rm_scanner.getNextTuple(cur_RID, cur_data)){
+	for(int debug_successes = 0; rm_scanner.getNextTuple(cur_RID, cur_data) != RBFM_EOF; debug_successes++){
 		success_val = _ixm->insertEntry(index_file, cur_attribute, cur_data, cur_RID);
+
 		if (success_val != SUCCESS){
 			cout << "failed to insert #" << debug_successes << endl;
 			cout << "insert returned: " << success_val << endl;
 			if(cur_data == NULL) { cout << "Null data" << endl; }
 			return -6;
 		}
-		debug_successes++;
 	}
 
 	// Clean up
