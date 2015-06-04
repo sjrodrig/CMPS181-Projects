@@ -481,24 +481,17 @@ int testCase_3() {
 		memset(data, 0, bufSize);
 		++actualResultCnt;
 	}
-cout << "Flag 00" << endl;
+
 	if (expectedResultCnt != actualResultCnt) {
 		rc = fail;
 	}
-cout << "Flag 01" << endl;
+
 clean_up:
 	delete filter;
-cout << "Flag 02" << endl;
-//segfaults on the line below *!*
-if(ts != NULL) { cout << "Not null" << ts << endl; } else { cout << "NULL" << endl; }
+	delete ts;
 
-	//delete ts;
-
-cout << "Flag 03" << endl;
 	free(value.data);
-cout << "Flag 04" << endl;
 	free(data);
-cout << "Flag 05" << endl;
 	return rc;
 }
 

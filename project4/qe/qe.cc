@@ -216,7 +216,7 @@ Filter::Filter(Iterator* input, const Condition &condition) {
 }
 
 Filter::~Filter() {
-	delete filtIter;
+
 }
 
 int
@@ -251,7 +251,7 @@ Project::Project(Iterator *input, const vector<string> &attrNames) {
 }
 
 Project::~Project() {
-	//delete projIter;
+
 }
 
 int
@@ -335,8 +335,7 @@ NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition,
 }
 
 NLJoin::~NLJoin() {
-	delete left;
-	delete right;
+
 }
 
 int
@@ -401,7 +400,7 @@ Aggregate::Aggregate(Iterator *input, Attribute aggAttr, Attribute gAttr, Aggreg
 }
 
 Aggregate::~Aggregate() {
-	delete aggrIter;
+
 }
 
 int

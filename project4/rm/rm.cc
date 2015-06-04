@@ -628,18 +628,20 @@ RC RelationManager::updateTuple(const string &tableName, const void *data, const
 
 RC RelationManager::readTuple(const string &tableName, const RID &rid, void *data)
 {
+cout << "RelationManager::readTuple" << endl;
 	// Open the table file.
 	FileHandle fileHandle;
 	if (_rbfm->openFile(tableName+TABLE_FILE_EXTENSION, fileHandle) != SUCCESS)
 		return 1;
 
+cout << "f*1" << endl;
 	// Gets the record descriptor of the table.
 	vector<Attribute> recordDescriptor;
 	getAttributes(tableName, recordDescriptor);
-
+cout << "f*2" << endl;
 	// Reads the record.
 	RC result = _rbfm->readRecord(fileHandle, recordDescriptor, rid, data);
-
+cout << "f*3" << endl;
 	// Close the table file.
 	_rbfm->closeFile(fileHandle);
 
