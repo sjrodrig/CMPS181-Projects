@@ -528,6 +528,7 @@ RC RelationManager::getAttributes(const string &tableName, vector<Attribute> &at
 		attrs.push_back(attr);
 	}
 	rbfm_si.close();
+	//added line: free(returnedData);
 
 	_rbfm->closeFile(fileHandle);
 	return 0;

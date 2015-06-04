@@ -434,7 +434,7 @@ int testCase_3() {
 	// Functions Tested;
 	// 1. Filter -- TableScan as input, on Integer Attribute
 	cout << "****In Test Case 3****" << endl;
-	RC rc = success;
+	int rc = success;
 
 	TableScan *ts = new TableScan(*rm, "left");
 	int compVal = 25;
@@ -456,11 +456,11 @@ int testCase_3() {
 
 	// Create Filter
 	Filter *filter = new Filter(ts, cond);
-
 	// Go over the data through iterator
 	void *data = malloc(bufSize);
 	while (filter->getNextTuple(data) != QE_EOF) {
 		int offset = 0;
+
 		// Print left.A
 		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
@@ -481,16 +481,24 @@ int testCase_3() {
 		memset(data, 0, bufSize);
 		++actualResultCnt;
 	}
-
+cout << "Flag 00" << endl;
 	if (expectedResultCnt != actualResultCnt) {
 		rc = fail;
 	}
-
+cout << "Flag 01" << endl;
 clean_up:
 	delete filter;
-	delete ts;
+cout << "Flag 02" << endl;
+//segfaults on the line below *!*
+if(ts != NULL) { cout << "Not null" << ts << endl; } else { cout << "NULL" << endl; }
+
+	//delete ts;
+
+cout << "Flag 03" << endl;
 	free(value.data);
+cout << "Flag 04" << endl;
 	free(data);
+cout << "Flag 05" << endl;
 	return rc;
 }
 
@@ -498,7 +506,7 @@ int testCase_4() {
 	RC rc = success;
 	// Functions Tested
 	// 1. Filter -- IndexScan as input, on TypeReal attribute
-	cout << "****In Test Case 3****" << endl;
+	cout << "****In Test Case 4****" << endl;
 
 	IndexScan *is = new IndexScan(*rm, "right", "C");
 	float compVal = 100.0;
@@ -523,6 +531,7 @@ int testCase_4() {
 
 	// Go over the data through iterator
 	void *data = malloc(bufSize);
+cout << "Flag NQ" << endl;
 	while (filter->getNextTuple(data) != QE_EOF) {
 		int offset = 0;
 		// Print right.B

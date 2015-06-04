@@ -136,8 +136,8 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 	unsigned offset = 0;
 
 	// Value Holders
-	void* lhsValue = malloc(PAGE_SIZE);
-	void* rhsValue = malloc(PAGE_SIZE); 
+	void* lhsValue; //= malloc(PAGE_SIZE);
+	void* rhsValue; //= malloc(PAGE_SIZE); 
 
 	// Make it easier to access vector's elements
 	vector<Attribute>& attributes_ref = *attributes;
@@ -148,17 +148,20 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 
 		// Retrieve the values for the desired attributes
 		if (condition.lhsAttr.compare(attributes_ref[i].name) == 0){
-			getAttributeValue(attributes_ref[i], (char*) data + offset, lhsValue);
+			//getAttributeValue(attributes_ref[i], (char*) data + offset, lhsValue);
+			lhsValue = (char*) data + offset;
 			lhsAttr_type = attributes_ref[i].type;
 			found_lhsAttr = i;
 		} else if (condition.bRhsIsAttr && condition.rhsAttr.compare(attributes_ref[i].name) == 0){
-			getAttributeValue(attributes_ref[i], (char*) data + offset, rhsValue);
+			// getAttributeValue(attributes_ref[i], (char*) data + offset, rhsValue);
+			rhsValue = (char*) data + offset;
 			rhsAttr_type = attributes_ref[i].type;
 			found_rhsAttr = i;
 		}
 		
 		offset += current_attr_length;
 	}
+
 	if (found_lhsAttr == -1){
 		return false;
 	} else if (condition.bRhsIsAttr && found_rhsAttr == -1){
@@ -167,6 +170,7 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 
 	// If a value is provided for the RHS, grab it
 	if (!condition.bRhsIsAttr){
+		//cout << "!" << endl;
 		rhsValue = condition.rhsValue.data;
 		rhsAttr_type = condition.rhsValue.type;
 	}
@@ -183,21 +187,22 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 			int lhsValue_int;
 			memcpy(&lhsValue_int, lhsValue, INT_SIZE);
 			result = compareValues(lhsValue_int, condition.op, rhsValue);
+			break;
 		case TypeReal:
 			float lhsValue_real;
 			memcpy(&lhsValue_real, lhsValue, REAL_SIZE);
 			result = compareValues(lhsValue_real, condition.op, rhsValue);
+			break;
 		case TypeVarChar:
 			unsigned lhsValue_string_length = 0;
 			string lhsValue_string;
 			memcpy(&lhsValue_string_length, lhsValue, VARCHAR_LENGTH_SIZE);
 			memcpy(&lhsValue_string, (char*) lhsValue + VARCHAR_LENGTH_SIZE, lhsValue_string_length);
 			result = compareValues(lhsValue_string.c_str(), condition.op, (char*) rhsValue + VARCHAR_LENGTH_SIZE);
+			break;
 	}
 
 	// Clean up & return
-	free(lhsValue);
-	free(rhsValue);
 	return result;
 }
 
@@ -216,15 +221,21 @@ Filter::~Filter() {
 
 int
 Filter::getNextTuple(void *data) {
+cout << "Filter::getNextTuple" << endl;
+	if(data == NULL) { cout << "ND" << endl; }
+	if(filtIter == NULL) { cout << "NF" << endl; }
+
 	// Fetch next tuple
 	if (filtIter->getNextTuple(data) == QE_EOF) {
 		return QE_EOF;
 	}
+cout << "Flag A" << endl;
 
 	// If the condition is not met, go to the next tuple recursively 
 	if (!Tools::checkCondition(&filterAttributes, data, this->filterOn)){
 		return this->getNextTuple(data);
 	}
+//cout << "Flag B" << endl;
 
 	return SUCCESS;
 }
@@ -240,11 +251,12 @@ Project::Project(Iterator *input, const vector<string> &attrNames) {
 }
 
 Project::~Project() {
-	delete projIter;
+	//delete projIter;
 }
 
 int
 Project::getNextTuple(void *data) {
+	cout << "Project::getNextTuple" << endl;
 	void* holder = malloc(PAGE_SIZE);
 
 	// Fetch next tuple
@@ -329,6 +341,7 @@ NLJoin::~NLJoin() {
 
 int
 NLJoin::getNextTuple(void *data) {
+	cout << "unimplemented" << endl;
 	return QE_EOF;
 }
 

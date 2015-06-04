@@ -102,6 +102,7 @@ public:
     }
 
     int getNextTuple(void *data) {
+cout << "TableScan::getNextTuple" << endl;
         return iter->getNextTuple(rid, data);
     }
 
@@ -118,7 +119,13 @@ public:
             attrs[i].name = tmp;
          }
      }
-	~TableScan() { iter->close(); }
+
+	~TableScan() {
+		cout << "deconstructing" << endl;
+		if(iter == NULL) { cout << "NI" << endl; }
+
+		iter->close();
+	}
 };
 
 /**
@@ -160,7 +167,9 @@ public:
     }
 
 	int getNextTuple(void *data) {
+cout << "IndexScan::getNextTuple" << endl;
 		int rc = iter->getNextEntry(rid, key);
+cout << "getNextEntry success" << endl;
         if(rc == 0) {
             rc = rm.readTuple(tableName.c_str(), rid, data);
         }
