@@ -281,8 +281,9 @@ Project::getNextTuple(void *data) {
 		unsigned internal_offset = 0;
 
 		// Go through all the attributes in the record
-		for (unsigned j = 0; j < tuple_attrs.size(); i++){
+		for (unsigned j = 0; j < tuple_attrs.size(); j++){
 			// If it's the desired attribute, grab its value
+
 			if (attributeNames[i].compare(tuple_attrs[j].name) == 0){
 				Tools::getAttributeValue(tuple_attrs[j], (char*) holder + internal_offset, (char*) data + offset);
 				found_value = true;

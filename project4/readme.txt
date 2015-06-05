@@ -13,7 +13,7 @@ Makefile Targets:
 > purge: clean, clear all generated files
 
 Bugs and Unintended Features:
-	Crashes on test 4
+	Crashes on test 4 unless run inside Valgrind.  Inside Valgrind, this crash does not occur.
 
 How it works:
 	The model we used involves the concept of pipelining.  Each iterator takes an iterator as input, and then it is input into another iterator.  Each iterator performs tasks on the data (projection/selection/join) like people in an assembly line, so once all the iterators have touched the data, the data has the result of all of the opperations.

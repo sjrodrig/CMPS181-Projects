@@ -408,7 +408,7 @@ int testCase_1() {
 	if (rc != success) {
 		return rc;
 	}
-
+	cout << "test-1-success" << endl;
 	return rc;
 }
 
@@ -427,6 +427,7 @@ int testCase_2() {
 	if (rc != success) {
 		return rc;
 	}
+	cout << "test-2-success" << endl;
 	return rc;
 }
 
@@ -483,6 +484,7 @@ int testCase_3() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-3-fail" << endl;
 		rc = fail;
 	}
 
@@ -548,6 +550,7 @@ cout << "Flag NQ" << endl;
 		++actualResultCnt;
 	}
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-4-fail" << endl;
 		rc = fail;
 	}
 
@@ -580,6 +583,7 @@ int testCase_5() {
 
 	// Go over the data through iterator
 	void *data = malloc(bufSize);
+	cout << "test-5-starting-loop" << endl;
 	while (project->getNextTuple(data) != QE_EOF) {
 		int offset = 0;
 
