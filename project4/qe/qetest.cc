@@ -605,6 +605,7 @@ int testCase_5() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-5-fail" << endl;
 		rc = fail;
 	}
 
@@ -678,6 +679,7 @@ int testCase_6() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-6-fail" << endl;
 		rc = fail;
 	}
 
@@ -751,6 +753,7 @@ int testCase_7() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-7-fail" << endl;
 		rc = fail;
 	}
 
@@ -841,6 +844,7 @@ int testCase_8() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-8-fail" << endl;
 		rc = fail;
 	}
 
@@ -938,6 +942,7 @@ int testCase_9_Grad() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-9-grad-fail" << endl;
 		rc = fail;
 	}
 
@@ -1036,6 +1041,7 @@ int testCase_9_Undergrad() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-9-ugrad-fail" << endl;
 		rc = fail;
 	}
 
@@ -1106,6 +1112,7 @@ int testCase_10() {
 	}
 
 	if (expectedResultcnt != actualResultCnt) {
+		cout << "test-10-fail" << endl;
 		rc = fail;
 	}
 
@@ -1170,6 +1177,7 @@ int testCase_11() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-11-fail" << endl;
 		rc = fail;
 	}
 
@@ -1243,6 +1251,7 @@ int testCase_12() {
 	}
 
 	if (expectedResultCnt != actualResultCnt) {
+		cout << "test-12-fail" << endl;
 		rc = fail;
 	}
 
@@ -1282,6 +1291,7 @@ int extraTestCase_1()
     }
 
     if (maxVal != 109) {
+		cout << "test-extra-1-fail" << endl;
     	rc = fail;
     }
 
@@ -1320,6 +1330,7 @@ int extraTestCase_2()
     }
 
     if (average != 69.5) {
+		cout << "test-extra-2-fail" << endl;
     	rc = fail;
     }
 
@@ -1381,6 +1392,7 @@ int extraTestCase_3()
     }
 
     if (expectedResultCnt != actualResultCnt) {
+		cout << "test-extra-3-fail" << endl;
     	rc = fail;
     }
 
@@ -1444,6 +1456,7 @@ int extraTestCase_4()
     }
 
     if (expectedResultCnt != actualResultCnt) {
+		cout << "test-extra-4-fail" << endl;
     	rc = fail;
     }
 
