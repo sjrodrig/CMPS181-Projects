@@ -249,6 +249,7 @@ RC RelationManager::getTableID(const string &tableName, int &tableID)
 	if (_rbfm->closeFile(fileHandle) != SUCCESS)
 		return 3;
 
+	free(returnedData);
 	return 0;
 }
 
@@ -404,6 +405,8 @@ RC RelationManager::createTable(const string &tableName, const vector<Attribute>
 	}
 	_rbfm->closeFile(fileHandle);
 
+/*BENJY'S ADDED LINE 4-BYTE FIX*/
+	free(returnedData);
 	free(newTableData);
 	free(newColumnData);
 
@@ -526,9 +529,12 @@ RC RelationManager::getAttributes(const string &tableName, vector<Attribute> &at
 		offset += INT_SIZE;
 
 		attrs.push_back(attr);
+		free(attrName);
 	}
 	rbfm_si.close();
 	//added line: free(returnedData);
+
+	free(returnedData);
 
 	_rbfm->closeFile(fileHandle);
 	return 0;
@@ -628,20 +634,21 @@ RC RelationManager::updateTuple(const string &tableName, const void *data, const
 
 RC RelationManager::readTuple(const string &tableName, const RID &rid, void *data)
 {
-cout << "RelationManager::readTuple" << endl;
+//cout << "RelationManager::readTuple" << endl;
 	// Open the table file.
 	FileHandle fileHandle;
-	if (_rbfm->openFile(tableName+TABLE_FILE_EXTENSION, fileHandle) != SUCCESS)
-		return 1;
+	int meta;
+	meta = _rbfm->openFile(tableName+TABLE_FILE_EXTENSION, fileHandle);
 
-cout << "f*1" << endl;
+	if (meta != SUCCESS) {
+		return 1;
+	}
+
 	// Gets the record descriptor of the table.
 	vector<Attribute> recordDescriptor;
 	getAttributes(tableName, recordDescriptor);
-cout << "f*2" << endl;
 	// Reads the record.
 	RC result = _rbfm->readRecord(fileHandle, recordDescriptor, rid, data);
-cout << "f*3" << endl;
 	// Close the table file.
 	_rbfm->closeFile(fileHandle);
 

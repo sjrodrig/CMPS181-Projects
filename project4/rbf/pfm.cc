@@ -73,6 +73,7 @@ RC PagedFileManager::destroyFile(const char *fileName)
 
 RC PagedFileManager::openFile(const char *fileName, FileHandle &fileHandle)
 {
+//cout << "opening file" << endl;
 	// Checks if fileHandle is already an handle for an open file.
 	if (fileHandle.getFileDescriptor() != NULL)
 		return 1;

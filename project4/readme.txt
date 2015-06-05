@@ -6,13 +6,17 @@ Changes to starter code
 (2) Moved method implementations to "qe.cc"
 (3) Implemented unimplemented methods in qe.cc and rm.cc
 (4) Added helper methods to qe.h and qe.cc
-	()
+	(Specifically those in the Tools.h class)
 
 Makefile Targets:
 > remake: recompile as if the program has never run
 > purge: clean, clear all generated files
 
+Bugs and Unintended Features:
+	Crashes on test 4
 
+How it works:
+	The model we used involves the concept of pipelining.  Each iterator takes an iterator as input, and then it is input into another iterator.  Each iterator performs tasks on the data (projection/selection/join) like people in an assembly line, so once all the iterators have touched the data, the data has the result of all of the opperations.
 
 
 

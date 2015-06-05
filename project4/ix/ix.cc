@@ -806,8 +806,8 @@ RC IndexManager::scan(FileHandle &fileHandle,
 				includeCurrentRecord = true;
 
 				RID returnRid;
-				void * keyData;
 
+				void * keyData;
 				keyVectorSizes.push_back(currentKeyLength);
 
 				keyData = malloc(currentKeyLength);

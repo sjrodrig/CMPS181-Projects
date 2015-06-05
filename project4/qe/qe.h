@@ -121,9 +121,6 @@ cout << "TableScan::getNextTuple" << endl;
      }
 
 	~TableScan() {
-		cout << "deconstructing" << endl;
-		if(iter == NULL) { cout << "NI" << endl; }
-
 		iter->close();
 	}
 };

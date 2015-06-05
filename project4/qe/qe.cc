@@ -222,20 +222,18 @@ Filter::~Filter() {
 int
 Filter::getNextTuple(void *data) {
 cout << "Filter::getNextTuple" << endl;
-	if(data == NULL) { cout << "ND" << endl; }
-	if(filtIter == NULL) { cout << "NF" << endl; }
+	int retVal = -1;
 
 	// Fetch next tuple
 	if (filtIter->getNextTuple(data) == QE_EOF) {
 		return QE_EOF;
 	}
-cout << "Flag A" << endl;
 
 	// If the condition is not met, go to the next tuple recursively 
 	if (!Tools::checkCondition(&filterAttributes, data, this->filterOn)){
-		return this->getNextTuple(data);
+		retVal = filtIter->getNextTuple(data);
+		return retVal;
 	}
-//cout << "Flag B" << endl;
 
 	return SUCCESS;
 }
