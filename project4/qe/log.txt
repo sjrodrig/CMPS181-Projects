@@ -1,1553 +1,629 @@
-==2922== Memcheck, a memory error detector
-==2922== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
-==2922== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
-==2922== Command: ./qetest
-==2922== Parent PID: 32067
-==2922== 
-==2922== Syscall param write(buf) points to uninitialised byte(s)
-==2922==    at 0x543C870: __write_nocancel (syscall-template.S:81)
-==2922==    by 0x53CA002: _IO_file_write@@GLIBC_2.2.5 (fileops.c:1261)
-==2922==    by 0x53CA79E: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:538)
-==2922==    by 0x53BFE6C: fwrite (iofwrite.c:43)
-==2922==    by 0x41785C: FileHandle::appendPage(void const*) (pfm.cc:199)
-==2922==    by 0x417AAB: RecordBasedFileManager::createFile(std::string const&) (rbfm.cc:64)
-==2922==    by 0x4145AE: RelationManager::RelationManager() (rm.cc:175)
-==2922==    by 0x414491: RelationManager::instance() (rm.cc:153)
-==2922==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
-==2922==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
-==2922==    by 0x41B4EC: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
-==2922==    by 0x5372E54: (below main) (libc-start.c:246)
-==2922==  Address 0x5a1c688 is 8 bytes inside a block of size 4,096 alloc'd
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x417A50: RecordBasedFileManager::createFile(std::string const&) (rbfm.cc:58)
-==2922==    by 0x4145AE: RelationManager::RelationManager() (rm.cc:175)
-==2922==    by 0x414491: RelationManager::instance() (rm.cc:153)
-==2922==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
-==2922==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
-==2922==    by 0x41B4EC: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
-==2922==    by 0x5372E54: (below main) (libc-start.c:246)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40DE32: IndexManager::getKeyLength(Attribute const&, void const*) (ix.cc:169)
-==2922==    by 0x40F959: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:790)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40DE37: IndexManager::getKeyLength(Attribute const&, void const*) (ix.cc:169)
-==2922==    by 0x40F959: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:790)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40DE3B: IndexManager::getKeyLength(Attribute const&, void const*) (ix.cc:169)
-==2922==    by 0x40F959: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:790)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2AB2D: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FB99: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:813)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F6BE: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F973: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F727: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F80B: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F830: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7BF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7EF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7F9: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x40FC00: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:817)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40DC8B: IndexManager::compareKeys(Attribute, void const*, void const*) (ix.cc:99)
-==2922==    by 0x40FA98: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:800)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F6C7: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F730: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F81C: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F741: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F747: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F776: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F790: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F793: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F79E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7AB: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F7E3: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F950: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F953: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F95E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7B5: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F7E0: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F6BE: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F6DA: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F727: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F776: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F79E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7AB: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7BF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F7E3: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7EF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F7F9: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F950: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x4C2F953: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x4C2F95E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
-==2922==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
-==2922==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
-==2922==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== Invalid read of size 4
-==2922==    at 0x40BAF8: Tools::getAttributeLength(Attribute&, void*) (qe.cc:20)
-==2922==    by 0x40C5F1: Project::getNextTuple(void*) (qe.cc:293)
-==2922==    by 0x403CB4: testCase_5() (qetest.cc:587)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922==  Address 0x61bff08 is 8 bytes after a block of size 48 alloc'd
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40B237: __gnu_cxx::new_allocator<Attribute>::allocate(unsigned long, void const*) (new_allocator.h:104)
-==2922==    by 0x40AB10: std::_Vector_base<Attribute, std::allocator<Attribute> >::_M_allocate(unsigned long) (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
-==2922==    by 0x409FA3: Attribute* std::vector<Attribute, std::allocator<Attribute> >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<Attribute const*, std::vector<Attribute, std::allocator<Attribute> > > >(unsigned long, __gnu_cxx::__normal_iterator<Attribute const*, std::vector<Attribute, std::allocator<Attribute> > >, __gnu_cxx::__normal_iterator<Attribute const*, std::vector<Attribute, std::allocator<Attribute> > >) (stl_vector.h:1138)
-==2922==    by 0x409344: std::vector<Attribute, std::allocator<Attribute> >::operator=(std::vector<Attribute, std::allocator<Attribute> > const&) (vector.tcc:188)
-==2922==    by 0x4085CF: TableScan::getAttributes(std::vector<Attribute, std::allocator<Attribute> >&) const (qe.h:111)
-==2922==    by 0x40C510: Project::getNextTuple(void*) (qe.cc:274)
-==2922==    by 0x403CB4: testCase_5() (qetest.cc:587)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x40FC00: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:817)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x404408: testCase_7() (qetest.cc:702)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x405014: testCase_9_Grad() (qetest.cc:871)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
-==2922==    by 0x4050E9: testCase_9_Grad() (qetest.cc:885)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== Use of uninitialised value of size 8
-==2922==    at 0x40FC00: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:817)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x405951: testCase_9_Undergrad() (qetest.cc:970)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== Conditional jump or move depends on uninitialised value(s)
-==2922==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
-==2922==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
-==2922==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
-==2922==    by 0x405A26: testCase_9_Undergrad() (qetest.cc:984)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== Invalid free() / delete / delete[] / realloc()
-==2922==    at 0x4C2C2BC: operator delete(void*) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF14DE: std::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x40C04D: Tools::checkCondition(std::vector<Attribute, std::allocator<Attribute> >*, void*, Condition const&) (qe.cc:202)
-==2922==    by 0x40C29A: Filter::getNextTuple(void*) (qe.cc:233)
-==2922==    by 0x4068C3: testCase_11() (qetest.cc:1157)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922==  Address 0x513a349 is in the BSS segment of /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19
-==2922== 
-==2922== 
-==2922== Process terminating with default action of signal 11 (SIGSEGV)
-==2922==  Bad permissions for mapped region at address 0x5636363
-==2922==    at 0x4C2F1B1: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40BCFB: Tools::compareValues(char const*, CompOp, char const*) (qe.cc:99)
-==2922==    by 0x40C03D: Tools::checkCondition(std::vector<Attribute, std::allocator<Attribute> >*, void*, Condition const&) (qe.cc:201)
-==2922==    by 0x40C29A: Filter::getNextTuple(void*) (qe.cc:233)
-==2922==    by 0x4068C3: testCase_11() (qetest.cc:1157)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== HEAP SUMMARY:
-==2922==     in use at exit: 225,710 bytes in 20,967 blocks
-==2922==   total heap usage: 271,589 allocs, 250,623 frees, 40,502,022 bytes allocated
-==2922== 
-==2922== 4 bytes in 2 blocks are definitely lost in loss record 4 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4066A2: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 4 bytes in 2 blocks are definitely lost in loss record 5 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4066A2: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 6 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x402DA6: createIndexforLeftB() (qetest.cc:375)
-==2922==    by 0x403119: testCase_1() (qetest.cc:394)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 7 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x402DA6: createIndexforLeftB() (qetest.cc:375)
-==2922==    by 0x403119: testCase_1() (qetest.cc:394)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 8 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x402E90: createIndexforLeftC() (qetest.cc:379)
-==2922==    by 0x403194: testCase_1() (qetest.cc:406)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 9 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x402E90: createIndexforLeftC() (qetest.cc:379)
-==2922==    by 0x403194: testCase_1() (qetest.cc:406)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 10 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x402F7A: createIndexforRightB() (qetest.cc:383)
-==2922==    by 0x40321C: testCase_2() (qetest.cc:418)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 11 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x402F7A: createIndexforRightB() (qetest.cc:383)
-==2922==    by 0x40321C: testCase_2() (qetest.cc:418)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 12 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x403064: createIndexforRightC() (qetest.cc:387)
-==2922==    by 0x403242: testCase_2() (qetest.cc:426)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 13 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x403064: createIndexforRightC() (qetest.cc:387)
-==2922==    by 0x403242: testCase_2() (qetest.cc:426)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 14 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4032EB: testCase_3() (qetest.cc:440)
-==2922==    by 0x407C7D: main (qetest.cc:1500)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 15 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4032EB: testCase_3() (qetest.cc:440)
-==2922==    by 0x407C7D: main (qetest.cc:1500)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 16 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 17 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 18 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416B89: RelationManager::readTuple(std::string const&, R const&, void*) (rm.cc:649)
-==2922==    by 0x408AEA: IndexScan::getNextTuple(void*) (qe.h:171)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 19 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416B89: RelationManager::readTuple(std::string const&, R const&, void*) (rm.cc:649)
-==2922==    by 0x408AEA: IndexScan::getNextTuple(void*) (qe.h:171)
-==2922==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 20 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x403AA6: testCase_5() (qetest.cc:571)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 21 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x403AA6: testCase_5() (qetest.cc:571)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 22 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x403E77: testCase_6() (qetest.cc:626)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 23 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x403E77: testCase_6() (qetest.cc:626)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 24 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x403EDF: testCase_6() (qetest.cc:627)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 25 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x403EDF: testCase_6() (qetest.cc:627)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 26 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x40436B: testCase_7() (qetest.cc:701)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 27 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x40436B: testCase_7() (qetest.cc:701)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 28 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x404408: testCase_7() (qetest.cc:702)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 29 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x404408: testCase_7() (qetest.cc:702)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 30 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x40494D: testCase_8() (qetest.cc:776)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 31 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x40494D: testCase_8() (qetest.cc:776)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 32 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4049B8: testCase_8() (qetest.cc:777)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 33 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4049B8: testCase_8() (qetest.cc:777)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 34 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x405014: testCase_9_Grad() (qetest.cc:871)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 35 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x405014: testCase_9_Grad() (qetest.cc:871)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 36 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
-==2922==    by 0x4050E9: testCase_9_Grad() (qetest.cc:885)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 37 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 38 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 39 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x405951: testCase_9_Undergrad() (qetest.cc:970)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 40 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x405951: testCase_9_Undergrad() (qetest.cc:970)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 41 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
-==2922==    by 0x405A26: testCase_9_Undergrad() (qetest.cc:984)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 42 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x405BE7: testCase_9_Undergrad() (qetest.cc:1002)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 43 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x405BE7: testCase_9_Undergrad() (qetest.cc:1002)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 44 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4061D8: testCase_10() (qetest.cc:1066)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 45 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4061D8: testCase_10() (qetest.cc:1066)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 46 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x406240: testCase_10() (qetest.cc:1067)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 6 bytes in 3 blocks are definitely lost in loss record 47 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x406240: testCase_10() (qetest.cc:1067)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 27 bytes in 4 blocks are definitely lost in loss record 50 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x402DA6: createIndexforLeftB() (qetest.cc:375)
-==2922==    by 0x403119: testCase_1() (qetest.cc:394)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 27 bytes in 4 blocks are definitely lost in loss record 51 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x402DA6: createIndexforLeftB() (qetest.cc:375)
-==2922==    by 0x403119: testCase_1() (qetest.cc:394)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 27 bytes in 4 blocks are definitely lost in loss record 52 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x402E90: createIndexforLeftC() (qetest.cc:379)
-==2922==    by 0x403194: testCase_1() (qetest.cc:406)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 27 bytes in 4 blocks are definitely lost in loss record 53 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x402E90: createIndexforLeftC() (qetest.cc:379)
-==2922==    by 0x403194: testCase_1() (qetest.cc:406)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 31 bytes in 1 blocks are possibly lost in loss record 54 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1545: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1AED: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x41450A: RelationManager::RelationManager() (rm.cc:161)
-==2922==    by 0x414491: RelationManager::instance() (rm.cc:153)
-==2922==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
-==2922==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
-==2922==    by 0x41B4EC: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
-==2922==    by 0x5372E54: (below main) (libc-start.c:246)
-==2922== 
-==2922== 32 bytes in 1 blocks are possibly lost in loss record 57 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1545: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1AED: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x414522: RelationManager::RelationManager() (rm.cc:162)
-==2922==    by 0x414491: RelationManager::instance() (rm.cc:153)
-==2922==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
-==2922==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
-==2922==    by 0x41B4EC: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
-==2922==    by 0x5372E54: (below main) (libc-start.c:246)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 58 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4032EB: testCase_3() (qetest.cc:440)
-==2922==    by 0x407C7D: main (qetest.cc:1500)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 59 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4032EB: testCase_3() (qetest.cc:440)
-==2922==    by 0x407C7D: main (qetest.cc:1500)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 60 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x403E77: testCase_6() (qetest.cc:626)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 61 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x403E77: testCase_6() (qetest.cc:626)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 62 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x40436B: testCase_7() (qetest.cc:701)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 63 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x40436B: testCase_7() (qetest.cc:701)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 64 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x40494D: testCase_8() (qetest.cc:776)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 65 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x40494D: testCase_8() (qetest.cc:776)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 66 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x405014: testCase_9_Grad() (qetest.cc:871)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 67 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x405014: testCase_9_Grad() (qetest.cc:871)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 68 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
-==2922==    by 0x4050E9: testCase_9_Grad() (qetest.cc:885)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 69 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x405951: testCase_9_Undergrad() (qetest.cc:970)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 70 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x405951: testCase_9_Undergrad() (qetest.cc:970)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 71 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
-==2922==    by 0x405A26: testCase_9_Undergrad() (qetest.cc:984)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 72 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4061D8: testCase_10() (qetest.cc:1066)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 33 bytes in 5 blocks are definitely lost in loss record 73 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4061D8: testCase_10() (qetest.cc:1066)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 34 bytes in 4 blocks are definitely lost in loss record 74 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x415499: RelationManager::createTable(std::string const&, std::vector<Attribute, std::allocator<Attribute> > const&) (rm.cc:375)
-==2922==    by 0x401BEA: createLeftTable() (qetest.cc:58)
-==2922==    by 0x407C21: main (qetest.cc:1479)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 75 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x402F7A: createIndexforRightB() (qetest.cc:383)
-==2922==    by 0x40321C: testCase_2() (qetest.cc:418)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 76 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x402F7A: createIndexforRightB() (qetest.cc:383)
-==2922==    by 0x40321C: testCase_2() (qetest.cc:418)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 77 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x413B9E: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:50)
-==2922==    by 0x403064: createIndexforRightC() (qetest.cc:387)
-==2922==    by 0x403242: testCase_2() (qetest.cc:426)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 78 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x413C4D: RelationManager::createIndex(std::string const&, std::string const&) (rm.cc:64)
-==2922==    by 0x403064: createIndexforRightC() (qetest.cc:387)
-==2922==    by 0x403242: testCase_2() (qetest.cc:426)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 79 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 80 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 81 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416B89: RelationManager::readTuple(std::string const&, R const&, void*) (rm.cc:649)
-==2922==    by 0x408AEA: IndexScan::getNextTuple(void*) (qe.h:171)
-==2922==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 82 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416B89: RelationManager::readTuple(std::string const&, R const&, void*) (rm.cc:649)
-==2922==    by 0x408AEA: IndexScan::getNextTuple(void*) (qe.h:171)
-==2922==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
-==2922==    by 0x4038EA: testCase_4() (qetest.cc:530)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 83 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x403AA6: testCase_5() (qetest.cc:571)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 84 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x403AA6: testCase_5() (qetest.cc:571)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 85 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x403EDF: testCase_6() (qetest.cc:627)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 86 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x403EDF: testCase_6() (qetest.cc:627)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 87 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x404408: testCase_7() (qetest.cc:702)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 88 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x404408: testCase_7() (qetest.cc:702)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 89 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4049B8: testCase_8() (qetest.cc:777)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 90 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4049B8: testCase_8() (qetest.cc:777)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 91 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x408852: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:148)
-==2922==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 92 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x414263: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:128)
-==2922==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
-==2922==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 93 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x405BE7: testCase_9_Undergrad() (qetest.cc:1002)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 94 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x405BE7: testCase_9_Undergrad() (qetest.cc:1002)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 95 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x406240: testCase_10() (qetest.cc:1067)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 34 bytes in 5 blocks are definitely lost in loss record 96 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x406240: testCase_10() (qetest.cc:1067)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 36 bytes in 1 blocks are possibly lost in loss record 97 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF2AE0: char* std::string::_S_construct<char const*>(char const*, char const*, std::allocator<char> const&, std::forward_iterator_tag) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF2EF7: std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x406677: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 38 bytes in 1 blocks are possibly lost in loss record 98 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1545: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1AED: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4066DB: testCase_11() (qetest.cc:1136)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 46 bytes in 6 blocks are definitely lost in loss record 99 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x415499: RelationManager::createTable(std::string const&, std::vector<Attribute, std::allocator<Attribute> > const&) (rm.cc:375)
-==2922==    by 0x401F34: createRightTable() (qetest.cc:113)
-==2922==    by 0x407C4F: main (qetest.cc:1490)
-==2922== 
-==2922== 52 bytes in 2 blocks are possibly lost in loss record 100 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF2AE0: char* std::string::_S_construct<char const*>(char const*, char const*, std::allocator<char> const&, std::forward_iterator_tag) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF2EF7: std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4162BD: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:520)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4066A2: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 60 bytes in 8 blocks are definitely lost in loss record 101 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x415499: RelationManager::createTable(std::string const&, std::vector<Attribute, std::allocator<Attribute> > const&) (rm.cc:375)
-==2922==    by 0x401D76: createLeftVarCharTable() (qetest.cc:83)
-==2922==    by 0x407D43: main (qetest.cc:1546)
-==2922== 
-==2922== 65 bytes in 7 blocks are definitely lost in loss record 103 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
-==2922==    by 0x4066A2: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 65 bytes in 7 blocks are definitely lost in loss record 104 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416FAA: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:712)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4066A2: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 80 bytes in 1 blocks are definitely lost in loss record 107 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408998: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:162)
-==2922==    by 0x4050E9: testCase_9_Grad() (qetest.cc:885)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 80 bytes in 1 blocks are definitely lost in loss record 108 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408998: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:162)
-==2922==    by 0x405A26: testCase_9_Undergrad() (qetest.cc:984)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 86 bytes in 10 blocks are definitely lost in loss record 109 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x415499: RelationManager::createTable(std::string const&, std::vector<Attribute, std::allocator<Attribute> > const&) (rm.cc:375)
-==2922==    by 0x4020C0: createRightVarCharTable() (qetest.cc:138)
-==2922==    by 0x407D69: main (qetest.cc:1554)
-==2922== 
-==2922== 94 bytes in 2 blocks are possibly lost in loss record 111 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF1F7A: std::string::_Rep::_M_clone(std::allocator<char> const&, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF2013: std::string::reserve(unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x4EF225E: std::string::append(char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
-==2922==    by 0x408600: TableScan::getAttributes(std::vector<Attribute, std::allocator<Attribute> >&) const (qe.h:117)
-==2922==    by 0x40C110: Filter::Filter(Iterator*, Condition const&) (qe.cc:215)
-==2922==    by 0x40676B: testCase_11() (qetest.cc:1150)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 600 bytes in 300 blocks are definitely lost in loss record 139 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x402604: populateLeftTable() (qetest.cc:245)
-==2922==    by 0x403158: testCase_1() (qetest.cc:400)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 600 bytes in 300 blocks are definitely lost in loss record 140 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x40272E: populateRightTable() (qetest.cc:273)
-==2922==    by 0x40322F: testCase_2() (qetest.cc:422)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 168 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x403EDF: testCase_6() (qetest.cc:627)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 2,082 (80 direct, 2,002 indirect) bytes in 1 blocks are definitely lost in loss record 169 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40885C: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:151)
-==2922==    by 0x404408: testCase_7() (qetest.cc:702)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 2,096 (80 direct, 2,016 indirect) bytes in 1 blocks are definitely lost in loss record 170 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40885C: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:151)
-==2922==    by 0x40369C: testCase_4() (qetest.cc:506)
-==2922==    by 0x407C93: main (qetest.cc:1505)
-==2922== 
-==2922== 2,120 (80 direct, 2,040 indirect) bytes in 1 blocks are definitely lost in loss record 171 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x4032EB: testCase_3() (qetest.cc:440)
-==2922==    by 0x407C7D: main (qetest.cc:1500)
-==2922== 
-==2922== 2,124 (80 direct, 2,044 indirect) bytes in 1 blocks are definitely lost in loss record 172 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x406240: testCase_10() (qetest.cc:1067)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 2,131 (80 direct, 2,051 indirect) bytes in 1 blocks are definitely lost in loss record 173 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x40885C: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:151)
-==2922==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
-==2922==    by 0x407D01: main (qetest.cc:1530)
-==2922== 
-==2922== 2,148 (80 direct, 2,068 indirect) bytes in 1 blocks are definitely lost in loss record 174 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x4049B8: testCase_8() (qetest.cc:777)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 2,181 (80 direct, 2,101 indirect) bytes in 1 blocks are definitely lost in loss record 175 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x405BE7: testCase_9_Undergrad() (qetest.cc:1002)
-==2922==    by 0x407D17: main (qetest.cc:1535)
-==2922== 
-==2922== 2,220 (80 direct, 2,140 indirect) bytes in 1 blocks are definitely lost in loss record 176 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x403E77: testCase_6() (qetest.cc:626)
-==2922==    by 0x407CBF: main (qetest.cc:1515)
-==2922== 
-==2922== 2,220 (80 direct, 2,140 indirect) bytes in 1 blocks are definitely lost in loss record 177 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x40494D: testCase_8() (qetest.cc:776)
-==2922==    by 0x407CEB: main (qetest.cc:1525)
-==2922== 
-==2922== 2,239 (80 direct, 2,159 indirect) bytes in 1 blocks are definitely lost in loss record 178 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x40436B: testCase_7() (qetest.cc:701)
-==2922==    by 0x407CD5: main (qetest.cc:1520)
-==2922== 
-==2922== 2,248 (80 direct, 2,168 indirect) bytes in 1 blocks are definitely lost in loss record 179 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x4061D8: testCase_10() (qetest.cc:1066)
-==2922==    by 0x407D2D: main (qetest.cc:1540)
-==2922== 
-==2922== 2,286 (80 direct, 2,206 indirect) bytes in 1 blocks are definitely lost in loss record 180 of 191
-==2922==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
-==2922==    by 0x403AA6: testCase_5() (qetest.cc:571)
-==2922==    by 0x407CA9: main (qetest.cc:1510)
-==2922== 
-==2922== 2,700 bytes in 400 blocks are definitely lost in loss record 181 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x402604: populateLeftTable() (qetest.cc:245)
-==2922==    by 0x403158: testCase_1() (qetest.cc:400)
-==2922==    by 0x407C34: main (qetest.cc:1483)
-==2922== 
-==2922== 3,400 bytes in 500 blocks are definitely lost in loss record 182 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x40272E: populateRightTable() (qetest.cc:273)
-==2922==    by 0x40322F: testCase_2() (qetest.cc:422)
-==2922==    by 0x407C62: main (qetest.cc:1494)
-==2922== 
-==2922== 3,938 bytes in 1,969 blocks are definitely lost in loss record 183 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x402B0B: populateRightVarCharTable() (qetest.cc:335)
-==2922==    by 0x407D7C: main (qetest.cc:1558)
-==2922== 
-==2922== 4,000 bytes in 2,000 blocks are definitely lost in loss record 185 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x4161BA: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:497)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x4028E8: populateLeftVarCharTable() (qetest.cc:304)
-==2922==    by 0x407D56: main (qetest.cc:1550)
-==2922== 
-==2922== 14,416 bytes in 1,000 blocks are definitely lost in loss record 188 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x417002: RelationManager::scan(std::string const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RM_ScanIterator&) (rm.cc:716)
-==2922==    by 0x40847A: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:90)
-==2922==    by 0x4066A2: testCase_11() (qetest.cc:1132)
-==2922==    by 0x407D8F: main (qetest.cc:1562)
-==2922== 
-==2922== 52,000 bytes in 6,000 blocks are definitely lost in loss record 190 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x4028E8: populateLeftVarCharTable() (qetest.cc:304)
-==2922==    by 0x407D56: main (qetest.cc:1550)
-==2922== 
-==2922== 64,927 bytes in 6,888 blocks are definitely lost in loss record 191 of 191
-==2922==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
-==2922==    by 0x418FDA: RecordBasedFileManager::scan(FileHandle&, std::vector<Attribute, std::allocator<Attribute> > const&, std::string const&, CompOp, void const*, std::vector<std::string, std::allocator<std::string> > const&, RBFM_ScanIterator&) (rbfm.cc:699)
-==2922==    by 0x414CD8: RelationManager::getTableID(std::string const&, int&) (rm.cc:236)
-==2922==    by 0x415FA9: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:484)
-==2922==    by 0x416635: RelationManager::insertTuple(std::string const&, void const*, R&) (rm.cc:556)
-==2922==    by 0x402B0B: populateRightVarCharTable() (qetest.cc:335)
-==2922==    by 0x407D7C: main (qetest.cc:1558)
-==2922== 
-==2922== LEAK SUMMARY:
-==2922==    definitely lost: 149,781 bytes in 19,750 blocks
-==2922==    indirectly lost: 27,135 bytes in 182 blocks
-==2922==      possibly lost: 283 bytes in 8 blocks
-==2922==    still reachable: 48,511 bytes in 1,027 blocks
-==2922==         suppressed: 0 bytes in 0 blocks
-==2922== Reachable blocks (those to which a pointer was found) are not shown.
-==2922== To see them, rerun with: --leak-check=full --show-leak-kinds=all
-==2922== 
-==2922== For counts of detected and suppressed errors, rerun with: -v
-==2922== Use --track-origins=yes to see where uninitialised values come from
-==2922== ERROR SUMMARY: 9155 errors from 174 contexts (suppressed: 0 from 0)
+==5494== Memcheck, a memory error detector
+==5494== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==5494== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
+==5494== Command: ./qetest
+==5494== Parent PID: 32067
+==5494== 
+==5494== Syscall param write(buf) points to uninitialised byte(s)
+==5494==    at 0x543C870: __write_nocancel (syscall-template.S:81)
+==5494==    by 0x53CA002: _IO_file_write@@GLIBC_2.2.5 (fileops.c:1261)
+==5494==    by 0x53CA79E: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:538)
+==5494==    by 0x53BFE6C: fwrite (iofwrite.c:43)
+==5494==    by 0x41785C: FileHandle::appendPage(void const*) (pfm.cc:199)
+==5494==    by 0x417AAB: RecordBasedFileManager::createFile(std::string const&) (rbfm.cc:64)
+==5494==    by 0x4145AE: RelationManager::RelationManager() (rm.cc:175)
+==5494==    by 0x414491: RelationManager::instance() (rm.cc:153)
+==5494==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
+==5494==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
+==5494==    by 0x41B50C: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
+==5494==    by 0x5372E54: (below main) (libc-start.c:246)
+==5494==  Address 0x5a1c688 is 8 bytes inside a block of size 4,096 alloc'd
+==5494==    at 0x4C2AB80: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x417A50: RecordBasedFileManager::createFile(std::string const&) (rbfm.cc:58)
+==5494==    by 0x4145AE: RelationManager::RelationManager() (rm.cc:175)
+==5494==    by 0x414491: RelationManager::instance() (rm.cc:153)
+==5494==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
+==5494==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
+==5494==    by 0x41B50C: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
+==5494==    by 0x5372E54: (below main) (libc-start.c:246)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40DE32: IndexManager::getKeyLength(Attribute const&, void const*) (ix.cc:169)
+==5494==    by 0x40F959: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:790)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40DE37: IndexManager::getKeyLength(Attribute const&, void const*) (ix.cc:169)
+==5494==    by 0x40F959: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:790)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40DE3B: IndexManager::getKeyLength(Attribute const&, void const*) (ix.cc:169)
+==5494==    by 0x40F959: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:790)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2AB2D: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FB99: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:813)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F6BE: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F973: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F727: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F80B: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F830: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7BF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7EF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7F9: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x40FC00: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:817)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40DC8B: IndexManager::compareKeys(Attribute, void const*, void const*) (ix.cc:99)
+==5494==    by 0x40FA98: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:800)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F6C7: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F730: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F81C: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F741: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F747: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F776: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F790: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F793: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F79E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7AB: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F7E3: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F950: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F953: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F95E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7B5: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F7E0: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40FBCB: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:814)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F6BE: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F6DA: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F727: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F776: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F79E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7AB: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7BF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F7E3: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7EF: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F7F9: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C26A: Filter::getNextTuple(void*) (qe.cc:228)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F950: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x4C2F953: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x4C2F95E: memcpy@@GLIBC_2.14 (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4080F9: RBFM_ScanIterator::getNextRecord(R&, void*) (rbfm.h:130)
+==5494==    by 0x40820E: IX_ScanIterator::getNextEntry(R&, void*) (ix.h:143)
+==5494==    by 0x408A6A: IndexScan::getNextTuple(void*) (qe.h:168)
+==5494==    by 0x40C2C3: Filter::getNextTuple(void*) (qe.cc:234)
+==5494==    by 0x4038EA: testCase_4() (qetest.cc:530)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== Invalid read of size 4
+==5494==    at 0x40BAF8: Tools::getAttributeLength(Attribute&, void*) (qe.cc:20)
+==5494==    by 0x40C5F1: Project::getNextTuple(void*) (qe.cc:293)
+==5494==    by 0x403CB4: testCase_5() (qetest.cc:587)
+==5494==    by 0x407CA9: main (qetest.cc:1510)
+==5494==  Address 0x61bff08 is 8 bytes after a block of size 48 alloc'd
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40B237: __gnu_cxx::new_allocator<Attribute>::allocate(unsigned long, void const*) (new_allocator.h:104)
+==5494==    by 0x40AB10: std::_Vector_base<Attribute, std::allocator<Attribute> >::_M_allocate(unsigned long) (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
+==5494==    by 0x409FA3: Attribute* std::vector<Attribute, std::allocator<Attribute> >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<Attribute const*, std::vector<Attribute, std::allocator<Attribute> > > >(unsigned long, __gnu_cxx::__normal_iterator<Attribute const*, std::vector<Attribute, std::allocator<Attribute> > >, __gnu_cxx::__normal_iterator<Attribute const*, std::vector<Attribute, std::allocator<Attribute> > >) (stl_vector.h:1138)
+==5494==    by 0x409344: std::vector<Attribute, std::allocator<Attribute> >::operator=(std::vector<Attribute, std::allocator<Attribute> > const&) (vector.tcc:188)
+==5494==    by 0x4085CF: TableScan::getAttributes(std::vector<Attribute, std::allocator<Attribute> >&) const (qe.h:111)
+==5494==    by 0x40C510: Project::getNextTuple(void*) (qe.cc:274)
+==5494==    by 0x403CB4: testCase_5() (qetest.cc:587)
+==5494==    by 0x407CA9: main (qetest.cc:1510)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x40FC00: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:817)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x404408: testCase_7() (qetest.cc:702)
+==5494==    by 0x407CD5: main (qetest.cc:1520)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x405014: testCase_9_Grad() (qetest.cc:871)
+==5494==    by 0x407D01: main (qetest.cc:1530)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
+==5494==    by 0x4050E9: testCase_9_Grad() (qetest.cc:885)
+==5494==    by 0x407D01: main (qetest.cc:1530)
+==5494== 
+==5494== Use of uninitialised value of size 8
+==5494==    at 0x40FC00: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:817)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
+==5494==    by 0x407D01: main (qetest.cc:1530)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4088A8: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:152)
+==5494==    by 0x405951: testCase_9_Undergrad() (qetest.cc:970)
+==5494==    by 0x407D17: main (qetest.cc:1535)
+==5494== 
+==5494== Conditional jump or move depends on uninitialised value(s)
+==5494==    at 0x40FC53: IndexManager::scan(FileHandle&, Attribute const&, void const*, void const*, bool, bool, IX_ScanIterator&) (ix.cc:826)
+==5494==    by 0x414352: RelationManager::indexScan(std::string const&, std::string const&, void const*, void const*, bool, bool, IX_ScanIterator&) (rm.cc:143)
+==5494==    by 0x4089F5: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:163)
+==5494==    by 0x405A26: testCase_9_Undergrad() (qetest.cc:984)
+==5494==    by 0x407D17: main (qetest.cc:1535)
+==5494== 
+==5494== Invalid free() / delete / delete[] / realloc()
+==5494==    at 0x4C2C2BC: operator delete(void*) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF14DE: std::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string() (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x40C04D: Tools::checkCondition(std::vector<Attribute, std::allocator<Attribute> >*, void*, Condition const&) (qe.cc:202)
+==5494==    by 0x40C29A: Filter::getNextTuple(void*) (qe.cc:233)
+==5494==    by 0x4068C3: testCase_11() (qetest.cc:1157)
+==5494==    by 0x407D8F: main (qetest.cc:1562)
+==5494==  Address 0x513a349 is in the BSS segment of /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19
+==5494== 
+==5494== 
+==5494== Process terminating with default action of signal 11 (SIGSEGV)
+==5494==  Bad permissions for mapped region at address 0x5636363
+==5494==    at 0x4C2F1B1: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40BCFB: Tools::compareValues(char const*, CompOp, char const*) (qe.cc:99)
+==5494==    by 0x40C03D: Tools::checkCondition(std::vector<Attribute, std::allocator<Attribute> >*, void*, Condition const&) (qe.cc:201)
+==5494==    by 0x40C29A: Filter::getNextTuple(void*) (qe.cc:233)
+==5494==    by 0x4068C3: testCase_11() (qetest.cc:1157)
+==5494==    by 0x407D8F: main (qetest.cc:1562)
+==5494== 
+==5494== HEAP SUMMARY:
+==5494==     in use at exit: 75,994 bytes in 1,089 blocks
+==5494==   total heap usage: 271,589 allocs, 270,501 frees, 40,502,022 bytes allocated
+==5494== 
+==5494== 31 bytes in 1 blocks are possibly lost in loss record 6 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1545: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1AED: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x41450A: RelationManager::RelationManager() (rm.cc:161)
+==5494==    by 0x414491: RelationManager::instance() (rm.cc:153)
+==5494==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
+==5494==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
+==5494==    by 0x41B50C: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
+==5494==    by 0x5372E54: (below main) (libc-start.c:246)
+==5494== 
+==5494== 32 bytes in 1 blocks are possibly lost in loss record 9 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1545: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1AED: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x414522: RelationManager::RelationManager() (rm.cc:162)
+==5494==    by 0x414491: RelationManager::instance() (rm.cc:153)
+==5494==    by 0x407EFB: __static_initialization_and_destruction_0(int, int) (qetest.cc:23)
+==5494==    by 0x407F23: _GLOBAL__sub_I_rm (qetest.cc:1610)
+==5494==    by 0x41B50C: __libc_csu_init (in /home/benjy/Desktop/Benjy/UCSC/CMPS181/asg4/qe/qetest)
+==5494==    by 0x5372E54: (below main) (libc-start.c:246)
+==5494== 
+==5494== 36 bytes in 1 blocks are possibly lost in loss record 10 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF2AE0: char* std::string::_S_construct<char const*>(char const*, char const*, std::allocator<char> const&, std::forward_iterator_tag) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF2EF7: std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x406677: testCase_11() (qetest.cc:1132)
+==5494==    by 0x407D8F: main (qetest.cc:1562)
+==5494== 
+==5494== 38 bytes in 1 blocks are possibly lost in loss record 11 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1545: std::string::_M_mutate(unsigned long, unsigned long, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1AED: std::string::_M_replace_safe(unsigned long, unsigned long, char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4066DB: testCase_11() (qetest.cc:1136)
+==5494==    by 0x407D8F: main (qetest.cc:1562)
+==5494== 
+==5494== 52 bytes in 2 blocks are possibly lost in loss record 12 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF2AE0: char* std::string::_S_construct<char const*>(char const*, char const*, std::allocator<char> const&, std::forward_iterator_tag) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF2EF7: std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4162BD: RelationManager::getAttributes(std::string const&, std::vector<Attribute, std::allocator<Attribute> >&) (rm.cc:520)
+==5494==    by 0x4083B3: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:79)
+==5494==    by 0x4066A2: testCase_11() (qetest.cc:1132)
+==5494==    by 0x407D8F: main (qetest.cc:1562)
+==5494== 
+==5494== 80 bytes in 1 blocks are definitely lost in loss record 15 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408998: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:162)
+==5494==    by 0x4050E9: testCase_9_Grad() (qetest.cc:885)
+==5494==    by 0x407D01: main (qetest.cc:1530)
+==5494== 
+==5494== 80 bytes in 1 blocks are definitely lost in loss record 16 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408998: IndexScan::setIterator(void*, void*, bool, bool) (qe.h:162)
+==5494==    by 0x405A26: testCase_9_Undergrad() (qetest.cc:984)
+==5494==    by 0x407D17: main (qetest.cc:1535)
+==5494== 
+==5494== 94 bytes in 2 blocks are possibly lost in loss record 18 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x4EF13B8: std::string::_Rep::_S_create(unsigned long, unsigned long, std::allocator<char> const&) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF1F7A: std::string::_Rep::_M_clone(std::allocator<char> const&, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF2013: std::string::reserve(unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x4EF225E: std::string::append(char const*, unsigned long) (in /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19)
+==5494==    by 0x408600: TableScan::getAttributes(std::vector<Attribute, std::allocator<Attribute> >&) const (qe.h:117)
+==5494==    by 0x40C110: Filter::Filter(Iterator*, Condition const&) (qe.cc:215)
+==5494==    by 0x40676B: testCase_11() (qetest.cc:1150)
+==5494==    by 0x407D8F: main (qetest.cc:1562)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 72 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x4032EB: testCase_3() (qetest.cc:440)
+==5494==    by 0x407C7D: main (qetest.cc:1500)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 73 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40885C: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:151)
+==5494==    by 0x40369C: testCase_4() (qetest.cc:506)
+==5494==    by 0x407C93: main (qetest.cc:1505)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 74 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x403AA6: testCase_5() (qetest.cc:571)
+==5494==    by 0x407CA9: main (qetest.cc:1510)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 75 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x403E77: testCase_6() (qetest.cc:626)
+==5494==    by 0x407CBF: main (qetest.cc:1515)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 76 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x403EDF: testCase_6() (qetest.cc:627)
+==5494==    by 0x407CBF: main (qetest.cc:1515)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 77 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x40436B: testCase_7() (qetest.cc:701)
+==5494==    by 0x407CD5: main (qetest.cc:1520)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 78 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40885C: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:151)
+==5494==    by 0x404408: testCase_7() (qetest.cc:702)
+==5494==    by 0x407CD5: main (qetest.cc:1520)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 79 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x40494D: testCase_8() (qetest.cc:776)
+==5494==    by 0x407CEB: main (qetest.cc:1525)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 80 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x4049B8: testCase_8() (qetest.cc:777)
+==5494==    by 0x407CEB: main (qetest.cc:1525)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 81 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x40885C: IndexScan::IndexScan(RelationManager&, std::string const&, std::string const&, char const*) (qe.h:151)
+==5494==    by 0x4052DF: testCase_9_Grad() (qetest.cc:903)
+==5494==    by 0x407D01: main (qetest.cc:1530)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 82 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x405BE7: testCase_9_Undergrad() (qetest.cc:1002)
+==5494==    by 0x407D17: main (qetest.cc:1535)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 83 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x4061D8: testCase_10() (qetest.cc:1066)
+==5494==    by 0x407D2D: main (qetest.cc:1540)
+==5494== 
+==5494== 2,080 (80 direct, 2,000 indirect) bytes in 1 blocks are definitely lost in loss record 84 of 88
+==5494==    at 0x4C2B0E0: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==5494==    by 0x408410: TableScan::TableScan(RelationManager&, std::string const&, char const*) (qe.h:89)
+==5494==    by 0x406240: testCase_10() (qetest.cc:1067)
+==5494==    by 0x407D2D: main (qetest.cc:1540)
+==5494== 
+==5494== LEAK SUMMARY:
+==5494==    definitely lost: 1,200 bytes in 15 blocks
+==5494==    indirectly lost: 26,000 bytes in 39 blocks
+==5494==      possibly lost: 283 bytes in 8 blocks
+==5494==    still reachable: 48,511 bytes in 1,027 blocks
+==5494==         suppressed: 0 bytes in 0 blocks
+==5494== Reachable blocks (those to which a pointer was found) are not shown.
+==5494== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==5494== 
+==5494== For counts of detected and suppressed errors, rerun with: -v
+==5494== Use --track-origins=yes to see where uninitialised values come from
+==5494== ERROR SUMMARY: 9054 errors from 73 contexts (suppressed: 0 from 0)

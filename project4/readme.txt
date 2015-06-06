@@ -12,6 +12,12 @@ Makefile Targets:
 > remake: recompile as if the program has never run
 > purge: clean, clear all generated files
 
+Edits to Provided Code:
+
+Line 700: rbfm.cc: (fix leaks)
+free(dataString);
+
+
 Bugs and Unintended Features:
 	Crashes on test 4 unless run inside Valgrind.  Inside Valgrind, this crash does not occur.
 	Tests 1-3 always pass.  Test 4 always passes inside valgrind.

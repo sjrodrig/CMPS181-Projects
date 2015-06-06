@@ -599,8 +599,7 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
       const CompOp compOp,                  // comparision type such as "<" and "="
       const void *value,                    // used in the comparison
       const vector<string> &attributeNames, // a list of projected attributes
-      RBFM_ScanIterator &rbfm_ScanIterator)
-{
+      RBFM_ScanIterator &rbfm_ScanIterator) {
 
 	void * recordData;				// Retrieved complete record data.
 	int recordDataOffset;
@@ -622,18 +621,17 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 	void * pageData = malloc(PAGE_SIZE);
 	SlotDirectoryHeader header;
 	SlotDirectoryRecordEntry recordEntry;
-	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++)
-	{
-		if (fileHandle.readPage(i, pageData) != SUCCESS)
+	for (unsigned i = 0; i < fileHandle.getNumberOfPages(); i++) {
+		if (fileHandle.readPage(i, pageData) != SUCCESS) {
+			free(pageData);
 			return 1;
+		}
 
 		// Cycles through all the "alive" record entries within the page.
 		header = getSlotDirectoryHeader(pageData);
-		for (unsigned j = 0; j < header.recordEntriesNumber; j++)
-		{
+		for (unsigned j = 0; j < header.recordEntriesNumber; j++) {
 			recordEntry = getSlotDirectoryRecordEntry(pageData, j);
-			if (recordEntry.recordEntryType == Alive)
-			{
+			if (recordEntry.recordEntryType == Alive) {
 				// Retrieve the actual record data.
 				recordData = malloc(recordEntry.length);
 				recordDataOffset = 0;
@@ -648,16 +646,14 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 				// 2. Check if we have to exclude this whole record entry according to the scan condition.
 				// 3. If the attribute is requested in the output projection, append it into recordOutputData variable.
 				bool excludeThisRecord = false;
-				for (unsigned k = 0; k < (unsigned) recordDescriptor.size() && !excludeThisRecord; k++)
-				{
+				for (unsigned k = 0; k < (unsigned) recordDescriptor.size() && !excludeThisRecord; k++) {
 					// An attribute is projected into the output data if its name appears in the attributeNames string vector.
 					bool includeThisAttribute = (find(attributeNames.begin(), attributeNames.end(), recordDescriptor[k].name) != attributeNames.end());
 
 					// Checks if this attribute is the condition attribute.
 					bool isConditionAttribute = (recordDescriptor[k].name.compare(conditionAttribute) == 0);
 
-					switch (recordDescriptor[k].type)
-					{
+					switch (recordDescriptor[k].type) {
 						case TypeInt:
 							// 1.
 							memcpy(&dataInteger, (char*) recordData + recordDataOffset, INT_SIZE);
@@ -666,8 +662,7 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 							excludeThisRecord = isConditionAttribute && !checkScanCondition(dataInteger, compOp, value);
 
 							// 3.
-							if (includeThisAttribute)
-							{
+							if (includeThisAttribute) {
 								memcpy((char*) recordOutputData + recordOutputDataOffset, (char*) recordData + recordDataOffset, INT_SIZE);
 								recordOutputDataOffset += INT_SIZE;
 							}
@@ -682,8 +677,7 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 							excludeThisRecord = isConditionAttribute && !checkScanCondition(dataReal, compOp, value);
 
 							// 3.
-							if (includeThisAttribute)
-							{
+							if (includeThisAttribute) {
 								memcpy((char*) recordOutputData + recordOutputDataOffset, (char*) recordData + recordDataOffset, REAL_SIZE);
 								recordOutputDataOffset += REAL_SIZE;
 							}
@@ -702,10 +696,10 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 
 							// 2.
 							excludeThisRecord = isConditionAttribute && !checkScanCondition(dataString, compOp, value);
-
+							/*ADDED BY BENJY--FREE AS WE DON'T NEED THIS ANYMORE*/
+							free(dataString);
 							// 3.
-							if (includeThisAttribute)
-							{
+							if (includeThisAttribute) {
 								memcpy((char*) recordOutputData + recordOutputDataOffset, (char*) recordData + recordDataOffset, VARCHAR_LENGTH_SIZE + stringLength);
 								recordOutputDataOffset += VARCHAR_LENGTH_SIZE + stringLength;
 							}
@@ -716,8 +710,7 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 				}
 
 				// If this record is not excluded by the condition, include it in the output result vector.
-				if (!excludeThisRecord)
-				{
+				if (!excludeThisRecord) {
 					RID returnRid;
 					returnRid.pageNum = i;
 					returnRid.slotNum = j;
@@ -726,14 +719,14 @@ RC RecordBasedFileManager::scan(FileHandle &fileHandle,
 					dataVectorSizes.push_back(recordOutputDataOffset);
 					dataVector.push_back(recordOutputData);
 				}
-				else
+				else {
 					free(recordOutputData);
+				}
 
 				free (recordData);
 			}
 		}
 	}
-
 	// Returns the result set through the iterator.
 	rbfm_ScanIterator.setVectors(rids, dataVectorSizes, dataVector);
 
