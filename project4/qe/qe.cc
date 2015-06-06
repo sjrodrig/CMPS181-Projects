@@ -326,23 +326,80 @@ Project::getAttributes(vector<Attribute> &attrs) const {
 	}
 }
 
+/*******************************************************************/
 NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition, const unsigned numPages) {
 	left = leftIn;
 	right = rightIn;
 	joinCondition = condition;
 	pages = numPages;
+
+	//Depending on the implementation of NLJoin being used...
+	if(method == 2) {
+		//Load everything into the right Vector
+		void* data;
+		rvIndex = 0;
+		justStarted = true;
+		leftData = NULL;
+		while(right->getNextTuple(data) == 0) {
+			rightVect.push_back(data);
+		}
+	}
 }
 
 NLJoin::~NLJoin() {
-
+	free(leftData);
 }
 
 int
 NLJoin::getNextTuple(void *data) {
-	cout << "unimplemented" << endl;
-	return QE_EOF;
-}
+	//check the method being used
+	if(method != 2) {
+		cout << "unimplemented method" << endl;
+		return QE_EOF;
+	}
 
+	//-121 to be unique for debugging purposes
+	int retVal = -121;
+
+	//if we were just created 
+	if(justStarted == true) {
+		retVal = left->getNextTuple(leftData);
+		if(retVal != 0) {
+			cout << "No tuples in left iterator." << endl;
+			return retVal;
+		}
+		justStarted = false;
+	}
+
+loopToMatch:
+	for(; rvIndex < rightVect.size(); rvIndex++ ) {
+
+		void* matchMe = rightVect.at(rvIndex);
+
+
+/*
+get the data from the iterator
+search the table until a match is found
+
+keep going until another match is found.
+if we complete the table, get another data piece from the vector*/
+
+
+
+
+	}
+
+	retVal = left->getNextTuple(leftData);
+	if(retVal != 0) {
+		//means we are done
+		return retVal;
+	}
+
+	//run look for another match
+	goto loopToMatch;
+	return retVal;
+}
+/*******************************************************************/
 void
 NLJoin::getAttributes(vector<Attribute> &attrs) const {
 	left->getAttributes(attrs);
@@ -354,7 +411,7 @@ NLJoin::getAttributes(vector<Attribute> &attrs) const {
 		attrs.push_back(temp.at(rightIndex));
 	}
 }
-
+/*******************************************************************/
 INLJoin::INLJoin(Iterator *leftIn, IndexScan *rightIn, const Condition &condition, const unsigned numPages) {
 	left = leftIn;
 	right = rightIn;

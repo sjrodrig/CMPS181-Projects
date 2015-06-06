@@ -7,7 +7,8 @@
 #include "../rm/rm.h"
 #include "../ix/ix.h"
 
-# define QE_EOF (-1)  // end of the index scan
+#define QE_EOF (-1)  // end of the index scan
+#define method 2
 
 /**
  * QueryEngine header
@@ -234,6 +235,11 @@ private:
 	Condition joinCondition;
 	unsigned pages;
 
+	//Special Fields added by Benjy
+	vector<void*> rightVect;
+	void* leftData;
+	unsigned rvIndex;
+	bool justStarted;
 public:
 	/**
 	 * Iterator of input R
