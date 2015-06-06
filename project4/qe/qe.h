@@ -237,7 +237,7 @@ private:
 	Condition joinCondition;
 	unsigned pages;
 
-	//Special Fields added by Benjy
+	//Special Fields for Benjy's implementation of getNextTuple()
 	vector<void*> rightVect;
 	void* leftData;
 	int rvIndex;

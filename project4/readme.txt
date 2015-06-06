@@ -26,6 +26,57 @@ Bugs and Unintended Features:
 How it works:
 	The model we used involves the concept of pipelining.  Each iterator takes an iterator as input, and then it is input into another iterator.  Each iterator performs tasks on the data (projection/selection/join) like people in an assembly line, so once all the iterators have touched the data, the data has the result of all of the operations.  (Full pipelining is not used in NLJoin however, for simplicity of implementation)
 
+------------------------------------------------------------------------------------------------------------
+cout << "NLJoin::getNextTuple()" << endl;
+	//check the method being used
+	if(method != 2) {
+		cout << "unimplemented method" << endl;
+		return QE_EOF;
+	}
 
+	cout << "<><>NLJoin::getNextTuple()<><>" << endl;
+	//-121 to be unique for debugging purposes
+	int retVal = -121;
 
+	//if we were just created 
+	if(justStarted == true) {
+		//get the data from the iterator
+		retVal = left->getNextTuple(leftData);
+		if(retVal != 0) {
+			cout << "No tuples in left iterator!" << endl;
+			return retVal;
+		}
+		justStarted = false;
+	}
+
+	vector<Attribute> l_atts;
+	left->getAttributes(l_atts);
+	vector<Attribute> r_atts;
+	right->getAttributes(r_atts);
+
+	//increment rvIndex to start to make sure we don't return the same tuple twice
+loopToMatch:
+	for(rvIndex++; rvIndex < rightVect.size(); rvIndex++ ) {
+		void* matchMe = rightVect.at(rvIndex);
+
+		bool leftPass = Tools::checkCondition(&l_atts, leftData, joinCondition);
+		bool rightPass = Tools::checkCondition(&r_atts, matchMe, joinCondition);
+
+		if(leftPass == true && rightPass == true) {
+			data = Tools::mergeVoidStars(leftData, matchMe, l_atts, r_atts);
+
+			return SUCCESS;
+		}
+	}
+
+	retVal = left->getNextTuple(leftData);
+	if(retVal != 0) {
+		//means we are done
+		return retVal;
+	}
+
+	rvIndex = -1;
+	//look for another match
+	goto loopToMatch;
+	return retVal;
 

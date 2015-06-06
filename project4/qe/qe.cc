@@ -374,56 +374,8 @@ NLJoin::~NLJoin() {
 //UNTESTED
 int
 NLJoin::getNextTuple(void *data) {
-	//check the method being used
-	if(method != 2) {
-		cout << "unimplemented method" << endl;
-		return QE_EOF;
-	}
-
-	//-121 to be unique for debugging purposes
-	int retVal = -121;
-
-	//if we were just created 
-	if(justStarted == true) {
-		//get the data from the iterator
-		retVal = left->getNextTuple(leftData);
-		if(retVal != 0) {
-			cout << "No tuples in left iterator." << endl;
-			return retVal;
-		}
-		justStarted = false;
-	}
-
-	vector<Attribute> l_atts;
-	left->getAttributes(l_atts);
-	vector<Attribute> r_atts;
-	right->getAttributes(r_atts);
-
-	//increment rvIndex to start to make sure we don't return the same tuple twice
-loopToMatch:
-	for(rvIndex++; rvIndex < rightVect.size(); rvIndex++ ) {
-		void* matchMe = rightVect.at(rvIndex);
-
-		bool leftPass = Tools::checkCondition(&l_atts, leftData, joinCondition);
-		bool rightPass = Tools::checkCondition(&r_atts, matchMe, joinCondition);
-
-		if(leftPass == true && rightPass == true) {
-			data = Tools::mergeVoidStars(leftData, matchMe, l_atts, r_atts);
-
-			return SUCCESS;
-		}
-	}
-
-	retVal = left->getNextTuple(leftData);
-	if(retVal != 0) {
-		//means we are done
-		return retVal;
-	}
-
-	rvIndex = -1;
-	//look for another match
-	goto loopToMatch;
-	return retVal;
+	cout << "unimplemented" << endl;
+	return QE_EOF;
 }
 /*******************************************************************/
 void
