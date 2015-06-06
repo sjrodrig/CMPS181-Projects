@@ -52,6 +52,8 @@ public:
 	static bool compareValues(float dataFloat, CompOp compOp, const void * value);
 	static bool compareValues(const char * dataString, CompOp compOp, const char * value);
 	static bool checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition);
+
+	static void* mergeVoidStars(void* left, void* right, vector<Attribute> lattrs, vector<Attribute> rattrs);
 };
 
 // All the relational operators and access methods are iterators.
@@ -238,7 +240,7 @@ private:
 	//Special Fields added by Benjy
 	vector<void*> rightVect;
 	void* leftData;
-	unsigned rvIndex;
+	int rvIndex;
 	bool justStarted;
 public:
 	/**

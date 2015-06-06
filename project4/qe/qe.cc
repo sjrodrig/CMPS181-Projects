@@ -122,6 +122,27 @@ Tools::compareValues(const char * dataString, CompOp compOp, const char * value)
 	return false;
 }
 
+void*
+Tools::mergeVoidStars(void* left, void* right, vector<Attribute> lattrs, vector<Attribute> rattrs) {
+	unsigned leftSize = 0;
+	unsigned rightSize = 0;
+	void* retVal;
+
+	for(unsigned index = 0; index < lattrs.size(); index++) {
+		leftSize += lattrs.at(index).length;
+	}
+
+	for(unsigned index = 0; index < rattrs.size(); index++) {
+		rightSize += rattrs.at(index).length;
+	}
+
+	unsigned totalSize = leftSize + rightSize;
+	retVal = malloc(totalSize);
+	memcpy(retVal, left, leftSize);
+	memcpy(retVal+leftSize, right, rightSize);
+	return retVal;
+}
+
 bool
 Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition){
 	// Check that the vector contains information
@@ -337,7 +358,7 @@ NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition,
 	if(method == 2) {
 		//Load everything into the right Vector
 		void* data;
-		rvIndex = 0;
+		rvIndex = -1;
 		justStarted = true;
 		leftData = NULL;
 		while(right->getNextTuple(data) == 0) {
@@ -350,6 +371,7 @@ NLJoin::~NLJoin() {
 	free(leftData);
 }
 
+//UNTESTED
 int
 NLJoin::getNextTuple(void *data) {
 	//check the method being used
@@ -363,6 +385,7 @@ NLJoin::getNextTuple(void *data) {
 
 	//if we were just created 
 	if(justStarted == true) {
+		//get the data from the iterator
 		retVal = left->getNextTuple(leftData);
 		if(retVal != 0) {
 			cout << "No tuples in left iterator." << endl;
@@ -371,22 +394,24 @@ NLJoin::getNextTuple(void *data) {
 		justStarted = false;
 	}
 
-loopToMatch:
-	for(; rvIndex < rightVect.size(); rvIndex++ ) {
+	vector<Attribute> l_atts;
+	left->getAttributes(l_atts);
+	vector<Attribute> r_atts;
+	right->getAttributes(r_atts);
 
+	//increment rvIndex to start to make sure we don't return the same tuple twice
+loopToMatch:
+	for(rvIndex++; rvIndex < rightVect.size(); rvIndex++ ) {
 		void* matchMe = rightVect.at(rvIndex);
 
+		bool leftPass = Tools::checkCondition(&l_atts, leftData, joinCondition);
+		bool rightPass = Tools::checkCondition(&r_atts, matchMe, joinCondition);
 
-/*
-get the data from the iterator
-search the table until a match is found
+		if(leftPass == true && rightPass == true) {
+			data = Tools::mergeVoidStars(leftData, matchMe, l_atts, r_atts);
 
-keep going until another match is found.
-if we complete the table, get another data piece from the vector*/
-
-
-
-
+			return SUCCESS;
+		}
 	}
 
 	retVal = left->getNextTuple(leftData);
@@ -395,7 +420,8 @@ if we complete the table, get another data piece from the vector*/
 		return retVal;
 	}
 
-	//run look for another match
+	rvIndex = -1;
+	//look for another match
 	goto loopToMatch;
 	return retVal;
 }
