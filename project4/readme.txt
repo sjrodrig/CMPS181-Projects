@@ -80,3 +80,27 @@ loopToMatch:
 	goto loopToMatch;
 	return retVal;
 
+
+------------------------------------------------------------------------------------------------------------
+void*
+Tools::mergeVoidStars(void* left, void* right, vector<Attribute> lattrs, vector<Attribute> rattrs) {
+	unsigned leftSize = 0;
+	unsigned rightSize = 0;
+	void* retVal;
+
+	for(unsigned index = 0; index < lattrs.size(); index++) {
+		leftSize += lattrs.at(index).length;
+	}
+
+	for(unsigned index = 0; index < rattrs.size(); index++) {
+		rightSize += rattrs.at(index).length;
+	}
+
+	unsigned totalSize = leftSize + rightSize;
+	retVal = malloc(totalSize);
+	memcpy(retVal, left, leftSize);
+	memcpy(retVal+leftSize, right, rightSize);
+	return retVal;
+}
+------------------------------------------------------------------------------------------------------------
+

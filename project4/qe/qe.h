@@ -45,6 +45,7 @@ struct Condition {
 
 class Tools {
 public:
+    static int setConditionToValue(void* data, vector<Attribute> &attributes, const Condition &old_condition, Condition &new_condition);
 	static unsigned getAttributeLength(Attribute &attr, void* data);
 	static unsigned getStringLength(void* data);
 	static void getAttributeValue(Attribute &attr, void* data, void* destination);
@@ -236,12 +237,15 @@ private:
 	TableScan* right;
 	Condition joinCondition;
 	unsigned pages;
+    bool getNextLeft;
+    vector<Attribute> left_attrs;
+    vector<Attribute> right_attrs;
 
 	//Special Fields for Benjy's implementation of getNextTuple()
-	vector<void*> rightVect;
-	void* leftData;
-	int rvIndex;
-	bool justStarted;
+	// vector<void*> rightVect;
+	// void* leftData;
+	// int rvIndex;
+	// bool justStarted;
 public:
 	/**
 	 * Iterator of input R

@@ -15,6 +15,44 @@
  *
  */
 
+int 
+Tools::setConditionToValue(void* data, vector<Attribute> &attributes, const Condition &old_condition, Condition &new_condition){
+    // Set the new condition's base information
+    new_condition.lhsAttr = old_condition.lhsAttr;
+    new_condition.op = old_condition.op;
+    new_condition.bRhsIsAttr = false;
+    
+    // Make sure the attribute's vector is not empty
+    if (attributes.empty()){
+        return -1;
+    }
+    
+    Value value_info;
+    int found_attr = -1;
+    unsigned offset = 0;
+    // Go through each attribute in the record
+    for (unsigned i = 0; i < attributes.size(); i++){
+        unsigned current_attr_length = getAttributeLength(attributes[i], (char*) data + offset);
+        // If it's the desired record, grab its information
+        if (old_condition.rhsAttr.compare(attributes[i].name) == 0){
+            found_attr = i;
+            value_info.type = attributes[i].type;
+            value_info.data = (char*) data + offset;
+
+            // Force end of loop if found
+            i = attributes.size();
+        }
+        offset += current_attr_length;
+    }
+
+    if (found_attr == -1){
+        return -2;
+    }
+
+    new_condition.rhsValue = value_info;
+    return SUCCESS;
+}
+
 unsigned
 Tools::getAttributeLength(Attribute &attr, void* data){
 	switch (attr.type){
@@ -122,27 +160,6 @@ Tools::compareValues(const char * dataString, CompOp compOp, const char * value)
 	return false;
 }
 
-void*
-Tools::mergeVoidStars(void* left, void* right, vector<Attribute> lattrs, vector<Attribute> rattrs) {
-	unsigned leftSize = 0;
-	unsigned rightSize = 0;
-	void* retVal;
-
-	for(unsigned index = 0; index < lattrs.size(); index++) {
-		leftSize += lattrs.at(index).length;
-	}
-
-	for(unsigned index = 0; index < rattrs.size(); index++) {
-		rightSize += rattrs.at(index).length;
-	}
-
-	unsigned totalSize = leftSize + rightSize;
-	retVal = malloc(totalSize);
-	memcpy(retVal, left, leftSize);
-	memcpy(retVal+leftSize, right, rightSize);
-	return retVal;
-}
-
 bool
 Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition){
 	// Check that the vector contains information
@@ -157,8 +174,8 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 	unsigned offset = 0;
 
 	// Value Holders
-	void* lhsValue; //= malloc(PAGE_SIZE);
-	void* rhsValue; //= malloc(PAGE_SIZE); 
+	void* lhsValue;
+	void* rhsValue; 
 
 	// Make it easier to access vector's elements
 	vector<Attribute>& attributes_ref = *attributes;
@@ -169,12 +186,10 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 
 		// Retrieve the values for the desired attributes
 		if (condition.lhsAttr.compare(attributes_ref[i].name) == 0){
-			//getAttributeValue(attributes_ref[i], (char*) data + offset, lhsValue);
 			lhsValue = (char*) data + offset;
 			lhsAttr_type = attributes_ref[i].type;
 			found_lhsAttr = i;
 		} else if (condition.bRhsIsAttr && condition.rhsAttr.compare(attributes_ref[i].name) == 0){
-			// getAttributeValue(attributes_ref[i], (char*) data + offset, rhsValue);
 			rhsValue = (char*) data + offset;
 			rhsAttr_type = attributes_ref[i].type;
 			found_rhsAttr = i;
@@ -182,7 +197,6 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 		
 		offset += current_attr_length;
 	}
-
 	if (found_lhsAttr == -1){
 		return false;
 	} else if (condition.bRhsIsAttr && found_rhsAttr == -1){
@@ -191,7 +205,6 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 
 	// If a value is provided for the RHS, grab it
 	if (!condition.bRhsIsAttr){
-		//cout << "!" << endl;
 		rhsValue = condition.rhsValue.data;
 		rhsAttr_type = condition.rhsValue.type;
 	}
@@ -223,7 +236,6 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 			break;
 	}
 
-	// Clean up & return
 	return result;
 }
 
@@ -242,9 +254,6 @@ Filter::~Filter() {
 
 int
 Filter::getNextTuple(void *data) {
-cout << "Filter::getNextTuple" << endl;
-	int retVal = -1;
-
 	// Fetch next tuple
 	if (filtIter->getNextTuple(data) == QE_EOF) {
 		return QE_EOF;
@@ -252,8 +261,7 @@ cout << "Filter::getNextTuple" << endl;
 
 	// If the condition is not met, go to the next tuple recursively 
 	if (!Tools::checkCondition(&filterAttributes, data, this->filterOn)){
-		retVal = filtIter->getNextTuple(data);
-		return retVal;
+		return this->getNextTuple(data);
 	}
 
 	return SUCCESS;
@@ -275,7 +283,6 @@ Project::~Project() {
 
 int
 Project::getNextTuple(void *data) {
-	cout << "Project::getNextTuple" << endl;
 	void* holder = malloc(PAGE_SIZE);
 
 	// Fetch next tuple
@@ -304,7 +311,6 @@ Project::getNextTuple(void *data) {
 		// Go through all the attributes in the record
 		for (unsigned j = 0; j < tuple_attrs.size(); j++){
 			// If it's the desired attribute, grab its value
-
 			if (attributeNames[i].compare(tuple_attrs[j].name) == 0){
 				Tools::getAttributeValue(tuple_attrs[j], (char*) holder + internal_offset, (char*) data + offset);
 				found_value = true;
@@ -347,37 +353,81 @@ Project::getAttributes(vector<Attribute> &attrs) const {
 	}
 }
 
-/*******************************************************************/
 NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition, const unsigned numPages) {
 	left = leftIn;
+    left->getAttributes(left_attrs);
 	right = rightIn;
+    right->setIterator();
+    right->getAttributes(right_attrs);
 	joinCondition = condition;
 	pages = numPages;
+    getNextLeft = true;
 
-	//Depending on the implementation of NLJoin being used...
-	if(method == 2) {
-		//Load everything into the right Vector
-		void* data;
-		rvIndex = -1;
-		justStarted = true;
-		leftData = NULL;
-		while(right->getNextTuple(data) == 0) {
-			rightVect.push_back(data);
-		}
-	}
+
+    //Depending on the implementation of NLJoin being used...
+	// if(method == 2) {
+	// 	//Load everything into the right Vector
+	// 	void* data;
+	// 	rvIndex = -1;
+	// 	justStarted = true;
+	// 	leftData = NULL;
+	// 	while(right->getNextTuple(data) == 0) {
+	// 		rightVect.push_back(data);
+	// 	}
+	// }
 }
 
 NLJoin::~NLJoin() {
-	free(leftData);
+	// free(leftData);
 }
 
-//UNTESTED
 int
 NLJoin::getNextTuple(void *data) {
-	cout << "unimplemented" << endl;
-	return QE_EOF;
+    void* holder_left = malloc(PAGE_SIZE);
+    void* holder_right = malloc(PAGE_SIZE);
+
+    // Fetch next left tuple if neccessary 
+    if (getNextLeft){
+	    if (left->getNextTuple(holder_left) == QE_EOF){
+		    free(holder_left);
+            free(holder_right);
+		    return QE_EOF;
+	    }
+        getNextLeft = false;
+    }
+
+    // Fetch next right tuple
+    if(right->getNextTuple(holder_right) == QE_EOF){
+        right->setIterator(); 
+        getNextLeft = true;
+        return this->getNextTuple(data);
+    }   
+    
+    // Make custom condition using value for the desired attribute in the right tuple
+    Condition new_condition;
+    if (this->joinCondition.bRhsIsAttr){
+        if (Tools::setConditionToValue(holder_right, this->right_attrs, this->joinCondition, new_condition) != SUCCESS){
+            return -1;
+        }
+    } else {
+    	new_condition = this->joinCondition;
+    }
+
+    // Evaluate the custom condition
+    if(!Tools::checkCondition(&left_attrs, holder_left, new_condition)){
+        return this->getNextTuple(data);
+    }
+
+    unsigned left_size = RecordBasedFileManager::getRecordSize(left_attrs, holder_left);
+    unsigned right_size = RecordBasedFileManager::getRecordSize(right_attrs, holder_right);
+    memcpy(data, holder_left, left_size);
+    memcpy((char*) data + left_size, holder_right, right_size);
+
+    free(holder_left);
+    free(holder_right);
+	return SUCCESS;
 }
-/*******************************************************************/
+
 void
 NLJoin::getAttributes(vector<Attribute> &attrs) const {
 	left->getAttributes(attrs);
@@ -389,7 +439,11 @@ NLJoin::getAttributes(vector<Attribute> &attrs) const {
 		attrs.push_back(temp.at(rightIndex));
 	}
 }
-/*******************************************************************/
+
+/**
+ * EXTRA CREDIT
+ */
+
 INLJoin::INLJoin(Iterator *leftIn, IndexScan *rightIn, const Condition &condition, const unsigned numPages) {
 	left = leftIn;
 	right = rightIn;

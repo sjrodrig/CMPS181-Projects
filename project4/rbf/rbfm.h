@@ -205,6 +205,8 @@ public:
 
   RC reorganizeFile(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor);
 
+  static unsigned getRecordSize(const vector<Attribute> &recordDescriptor, const void *data);
+
 
 protected:
   RecordBasedFileManager();
@@ -225,7 +227,6 @@ private:
   void setSlotDirectoryRecordEntry(void * page, unsigned recordEntryNumber, SlotDirectoryRecordEntry recordEntry);
 
   unsigned getPageFreeSpaceSize(void * page);
-  unsigned getRecordSize(const vector<Attribute> &recordDescriptor, const void *data);
 
   static bool sortLabeledRecordEntriesByOffsetDescComparer(const LabeledSlotDirectoryRecordEntry &recordEntry1, const LabeledSlotDirectoryRecordEntry &recordEntry2);
 
