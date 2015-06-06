@@ -8,7 +8,7 @@
 #include "../ix/ix.h"
 
 #define QE_EOF (-1)  // end of the index scan
-#define method 2
+#define METHOD 1
 
 /**
  * QueryEngine header
@@ -53,8 +53,6 @@ public:
 	static bool compareValues(float dataFloat, CompOp compOp, const void * value);
 	static bool compareValues(const char * dataString, CompOp compOp, const char * value);
 	static bool checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition);
-
-	static void* mergeVoidStars(void* left, void* right, vector<Attribute> lattrs, vector<Attribute> rattrs);
 };
 
 // All the relational operators and access methods are iterators.

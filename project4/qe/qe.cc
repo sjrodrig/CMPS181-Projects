@@ -362,19 +362,6 @@ NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition,
 	joinCondition = condition;
 	pages = numPages;
     getNextLeft = true;
-
-
-    //Depending on the implementation of NLJoin being used...
-	// if(method == 2) {
-	// 	//Load everything into the right Vector
-	// 	void* data;
-	// 	rvIndex = -1;
-	// 	justStarted = true;
-	// 	leftData = NULL;
-	// 	while(right->getNextTuple(data) == 0) {
-	// 		rightVect.push_back(data);
-	// 	}
-	// }
 }
 
 NLJoin::~NLJoin() {
@@ -383,6 +370,7 @@ NLJoin::~NLJoin() {
 
 int
 NLJoin::getNextTuple(void *data) {
+	int tempRetVal = -2;
     void* holder_left = malloc(PAGE_SIZE);
     void* holder_right = malloc(PAGE_SIZE);
 
@@ -400,13 +388,18 @@ NLJoin::getNextTuple(void *data) {
     if(right->getNextTuple(holder_right) == QE_EOF){
         right->setIterator(); 
         getNextLeft = true;
-        return this->getNextTuple(data);
+		tempRetVal = this->getNextTuple(data);
+   		free(holder_left);
+    	free(holder_right);
+        return tempRetVal;
     }   
     
     // Make custom condition using value for the desired attribute in the right tuple
     Condition new_condition;
     if (this->joinCondition.bRhsIsAttr){
-        if (Tools::setConditionToValue(holder_right, this->right_attrs, this->joinCondition, new_condition) != SUCCESS){
+        if (Tools::setConditionToValue(holder_right, this->right_attrs, this->joinCondition, new_condition) != SUCCESS) {
+   			free(holder_left);
+    		free(holder_right);
             return -1;
         }
     } else {
@@ -415,7 +408,10 @@ NLJoin::getNextTuple(void *data) {
 
     // Evaluate the custom condition
     if(!Tools::checkCondition(&left_attrs, holder_left, new_condition)){
-        return this->getNextTuple(data);
+		tempRetVal = this->getNextTuple(data);
+   		free(holder_left);
+    	free(holder_right);
+        return tempRetVal;
     }
 
     unsigned left_size = RecordBasedFileManager::getRecordSize(left_attrs, holder_left);

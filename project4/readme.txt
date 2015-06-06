@@ -24,9 +24,22 @@ Bugs and Unintended Features:
 	Test cases 3-10 have been slightly modified to print a line saying they fail if they fail
 
 How it works:
-	The model we used involves the concept of pipelining.  Each iterator takes an iterator as input, and then it is input into another iterator.  Each iterator performs tasks on the data (projection/selection/join) like people in an assembly line, so once all the iterators have touched the data, the data has the result of all of the operations.  (Full pipelining is not used in NLJoin however, for simplicity of implementation)
+	The model we used involves the concept of pipelining.  Each iterator takes an iterator as input, and then it is input into another iterator.  Each iterator performs tasks on the data (projection/selection/join) like people in an assembly line, so once all the iterators have touched the data, the data has the result of all of the operations.
 
 ------------------------------------------------------------------------------------------------------------
+    //Depending on the implementation of NLJoin being used...
+	//Won't be called, since METHOD = 1 now, don't comment out 
+	if(METHOD == 2) {
+		//Load everything into the right Vector
+		void* data;
+		rvIndex = -1;
+		justStarted = true;
+		leftData = NULL;
+		while(right->getNextTuple(data) == 0) {
+	 		rightVect.push_back(data);
+	 	}
+	}
+
 cout << "NLJoin::getNextTuple()" << endl;
 	//check the method being used
 	if(method != 2) {
