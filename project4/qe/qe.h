@@ -104,7 +104,7 @@ public:
     }
 
     int getNextTuple(void *data) {
-cout << "TableScan::getNextTuple" << endl;
+//cout << "TableScan::getNextTuple" << endl;
         return iter->getNextTuple(rid, data);
     }
 

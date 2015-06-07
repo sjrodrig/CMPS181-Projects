@@ -1114,6 +1114,8 @@ int testCase_10() {
 	if (expectedResultcnt != actualResultCnt) {
 		cout << "test-10-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-10-pass" << endl;
 	}
 
 	delete nlJoin;
