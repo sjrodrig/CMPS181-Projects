@@ -17,15 +17,19 @@ Edits to Provided Code:
 Line 700: rbfm.cc: (fix leaks)
 free(dataString);
 
-
 Bugs and Unintended Features:
 	Crashes on test 4 unless run inside Valgrind.  Inside Valgrind, this crash does not occur.
-	Tests 1-3 always pass.  Test 4 always passes inside valgrind.
-	Test cases 3-10 have been slightly modified to print a line saying they fail if they fail
+	Tests Passed: 1, 2, 3, 5, 6, 8, 10, 11, 12
+	Tests Failed: 4, 7, 9g, 9u, 1e, 2e, 3e, 4e
+	Test 4 crashes inexplicably if the program is run outside of Valgrind.
+	>> 40 undergrad points (35 grad)
+
+Memory leaks have been patched in some of the test cases (#12).  This has no effect on the outcome of the test cases, but saves ~3MB and decreases runtime.
 
 How it works:
 	The model we used involves the concept of pipelining.  Each iterator takes an iterator as input, and then it is input into another iterator.  Each iterator performs tasks on the data (projection/selection/join) like people in an assembly line, so once all the iterators have touched the data, the data has the result of all of the operations.
 
+Unused Code
 ------------------------------------------------------------------------------------------------------------
     //Depending on the implementation of NLJoin being used...
 	//Won't be called, since METHOD = 1 now, don't comment out 

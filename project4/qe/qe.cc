@@ -1,9 +1,10 @@
 #include "qe.h"
+#include <fstream>
 
 /**
  * QE = Query Engine
  *
- *
+ * Tools::println()		--	print output to a file
  *
  *
  *
@@ -14,6 +15,15 @@
  *
  *
  */
+
+void
+Tools::println(string s) {
+	ofstream outfile;
+	outfile.open("record.dump", ofstream::out | ofstream::app);
+	outfile << s << endl;
+	outfile.close();
+}
+
 
 int 
 Tools::setConditionToValue(void* data, vector<Attribute> &attributes, const Condition &old_condition, Condition &new_condition){
@@ -293,9 +303,11 @@ Project::~Project() {
 int
 Project::getNextTuple(void *data) {
 	void* holder = malloc(PAGE_SIZE);
+	Tools::println("Project::getNextTuple");
 
 	// Fetch next tuple
 	if (projIter->getNextTuple(holder) == QE_EOF){
+		Tools::println("end of input--project");
 		free(holder);
 		return QE_EOF;
 	}
@@ -380,12 +392,14 @@ NLJoin::~NLJoin() {
 
 int
 NLJoin::getNextTuple(void *data) {
+	Tools::println("NLJoin::getNextTuple");
 	int tempRetVal = -2;
     void* holder_right = malloc(PAGE_SIZE);
 
     // Fetch next left tuple if neccessary 
     if (getNextLeft){
 	    if (left->getNextTuple(holder_left) == QE_EOF){
+			Tools::println("end of input--NLJoin");
             free(holder_right);
 		    return QE_EOF;
 	    }

@@ -53,6 +53,8 @@ public:
 	static bool compareValues(float dataFloat, CompOp compOp, const void * value);
 	static bool compareValues(const char * dataString, CompOp compOp, const char * value);
 	static bool checkCondition(vector<Attribute>* attributes, void* data, const Condition &condition);
+
+	static void println(string s);
 };
 
 // All the relational operators and access methods are iterators.

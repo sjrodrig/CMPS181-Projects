@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <vector>
-
+#include <sstream>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -979,7 +979,8 @@ int testCase_9_Undergrad() {
 	// 3. INLJoin(Grad)/NLJoin(Undergrad)
 
 	cout << "****In Test Case 9_Undergrad****" << endl;
-
+Tools::println("****In Test Case 9_Undergrad****");
+	ostringstream os; //for debugging
 	// Create Filter
 	IndexScan *leftIn = new IndexScan(*rm, "left", "B");
 
@@ -1020,10 +1021,13 @@ int testCase_9_Undergrad() {
 	int actualResultCnt = 0;
 	float valueC = 0;
 
+Tools::println("--Starting loop test 9u--");
+	int iterations = 0;
 	// Go over the data through iterator
 	void *data = malloc(bufSize);
 	while (join->getNextTuple(data) != QE_EOF) {
 		int offset = 0;
+		iterations++;
 
 		// Print left.A
 		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
@@ -1042,6 +1046,8 @@ int testCase_9_Undergrad() {
 		// cout << "right.C " << valueC << endl;
 		offset += sizeof(float);
 		if (valueC < 50.0 || valueC > 114.0) {
+			cout << "failing on loop #" << iterations << endl;
+Tools::println("failing on loop #" + iterations);
 			rc = fail;
 			goto clean_up;
 		}
@@ -1053,9 +1059,15 @@ int testCase_9_Undergrad() {
 		memset(data, 0, bufSize);
 		++actualResultCnt;
 	}
+	cout << "looped: " << iterations << " times" << endl;
+
+
+os << iterations;
+Tools::println("looped: " + os.str() + " times");
 
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-9-ugrad-fail" << endl;
+		cout << "actualResultCnt: " << actualResultCnt << endl;
 		rc = fail;
 	} else {
 		cout << "test-9-ugrad-success" << endl;
@@ -1255,6 +1267,7 @@ int testCase_12() {
 		offset += 4;
 		// cout << "rightvarchar.B.length " << length << endl;
 
+		free(b); //PATCHED LEAK
 		b = (char *) malloc(100);
 		memcpy(b, (char *) data + offset, length);
 		b[length] = '\0';
@@ -1265,6 +1278,8 @@ int testCase_12() {
 		// cout << "rightvarchar.C " << *(float *) ((char *) data + offset)
 				// << endl;
 		offset += sizeof(float);
+
+		free(b); //PATCHED LEAK
 
 		memset(data, 0, bufSize);
 		++actualResultCnt;
@@ -1532,10 +1547,10 @@ int main() {
 		g_nUndergradPoint += 5;
 	}
 
-	// if (testCase_4() == success) {
-	// 	g_nGradPoint += 5;
-	// 	g_nUndergradPoint += 5;
-	// }
+	if (testCase_4() == success) {
+	 	g_nGradPoint += 5;
+	 	g_nUndergradPoint += 5;
+	}
 
 	if (testCase_5() == success) {
 		g_nGradPoint += 3;
