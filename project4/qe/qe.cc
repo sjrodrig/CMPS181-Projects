@@ -361,23 +361,22 @@ NLJoin::NLJoin(Iterator *leftIn, TableScan *rightIn, const Condition &condition,
     right->getAttributes(right_attrs);
 	joinCondition = condition;
 	pages = numPages;
+	holder_left = malloc(PAGE_SIZE);
     getNextLeft = true;
 }
 
 NLJoin::~NLJoin() {
-	// free(leftData);
+	free(holder_left);
 }
 
 int
 NLJoin::getNextTuple(void *data) {
 	int tempRetVal = -2;
-    void* holder_left = malloc(PAGE_SIZE);
     void* holder_right = malloc(PAGE_SIZE);
 
     // Fetch next left tuple if neccessary 
     if (getNextLeft){
 	    if (left->getNextTuple(holder_left) == QE_EOF){
-		    free(holder_left);
             free(holder_right);
 		    return QE_EOF;
 	    }
@@ -389,16 +388,14 @@ NLJoin::getNextTuple(void *data) {
         right->setIterator(); 
         getNextLeft = true;
 		tempRetVal = this->getNextTuple(data);
-   		free(holder_left);
     	free(holder_right);
         return tempRetVal;
     }   
     
     // Make custom condition using value for the desired attribute in the right tuple
     Condition new_condition;
-    if (this->joinCondition.bRhsIsAttr){
+    if (this->joinCondition.bRhsIsAttr) {
         if (Tools::setConditionToValue(holder_right, this->right_attrs, this->joinCondition, new_condition) != SUCCESS) {
-   			free(holder_left);
     		free(holder_right);
             return -1;
         }
@@ -409,7 +406,6 @@ NLJoin::getNextTuple(void *data) {
     // Evaluate the custom condition
     if(!Tools::checkCondition(&left_attrs, holder_left, new_condition)){
 		tempRetVal = this->getNextTuple(data);
-   		free(holder_left);
     	free(holder_right);
         return tempRetVal;
     }
@@ -419,7 +415,6 @@ NLJoin::getNextTuple(void *data) {
     memcpy(data, holder_left, left_size);
     memcpy((char*) data + left_size, holder_right, right_size);
 
-    free(holder_left);
     free(holder_right);
 	return SUCCESS;
 }

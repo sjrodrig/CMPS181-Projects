@@ -238,12 +238,8 @@ private:
     bool getNextLeft;
     vector<Attribute> left_attrs;
     vector<Attribute> right_attrs;
-
-	//Special Fields for Benjy's implementation of getNextTuple()
-	// vector<void*> rightVect;
-	// void* leftData;
-	// int rvIndex;
-	// bool justStarted;
+	//Tutor suggestion
+	void* holder_left;
 public:
 	/**
 	 * Iterator of input R
