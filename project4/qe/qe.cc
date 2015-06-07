@@ -228,11 +228,7 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 			result = compareValues(lhsValue_real, condition.op, rhsValue);
 			break;
 		case TypeVarChar:
-			unsigned lhsValue_string_length = 0;
-			string lhsValue_string;
-			memcpy(&lhsValue_string_length, lhsValue, VARCHAR_LENGTH_SIZE);
-			memcpy(&lhsValue_string, (char*) lhsValue + VARCHAR_LENGTH_SIZE, lhsValue_string_length);
-			result = compareValues(lhsValue_string.c_str(), condition.op, (char*) rhsValue + VARCHAR_LENGTH_SIZE);
+			result = compareValues((char*) lhsValue + VARCHAR_LENGTH_SIZE, condition.op, (char*) rhsValue + VARCHAR_LENGTH_SIZE);
 			break;
 	}
 

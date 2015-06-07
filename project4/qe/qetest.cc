@@ -35,7 +35,7 @@ const unsigned bufSize = 200;
 int createLeftTable() {
 	// Functions Tested;
 	// 1. Create Table
-	cout << "****Create Left Table****" << endl;
+	// cout << "****Create Left Table****" << endl;
 
 	vector<Attribute> attrs;
 
@@ -57,7 +57,7 @@ int createLeftTable() {
 
 	RC rc = rm->createTable("left", attrs);
 	if (rc == success) {
-		cout << "****Left Table Created!****" << endl;
+		// cout << "****Left Table Created!****" << endl;
 	}
 	return rc;
 }
@@ -65,7 +65,7 @@ int createLeftTable() {
 int createLeftVarCharTable() {
 	// Functions Tested;
 	// 1. Create Table
-	cout << "****Create Left Large Table****" << endl;
+	// cout << "****Create Left Large Table****" << endl;
 
 	vector<Attribute> attrs;
 
@@ -82,7 +82,7 @@ int createLeftVarCharTable() {
 
 	RC rc = rm->createTable("leftvarchar", attrs);
 	if (rc == success) {
-		cout << "****Left Var Char Table Created!****" << endl;
+		// cout << "****Left Var Char Table Created!****" << endl;
 	}
 	return rc;
 }
@@ -90,7 +90,7 @@ int createLeftVarCharTable() {
 int createRightTable() {
 	// Functions Tested;
 	// 1. Create Table
-	cout << "****Create Right Table****" << endl;
+	// cout << "****Create Right Table****" << endl;
 
 	vector<Attribute> attrs;
 
@@ -112,7 +112,7 @@ int createRightTable() {
 
 	RC rc = rm->createTable("right", attrs);
 	if (rc == success) {
-		cout << "****Right Table Created!****" << endl;
+		// cout << "****Right Table Created!****" << endl;
 	}
 	return rc;
 }
@@ -120,7 +120,7 @@ int createRightTable() {
 int createRightVarCharTable() {
 	// Functions Tested;
 	// 1. Create Table
-	cout << "****Create Right Large Table****" << endl;
+	// cout << "****Create Right Large Table****" << endl;
 
 	vector<Attribute> attrs;
 
@@ -137,7 +137,7 @@ int createRightVarCharTable() {
 
 	RC rc = rm->createTable("rightvarchar", attrs);
 	if (rc == success) {
-		cout << "****Right Var Char Table Created!****" << endl;
+		// cout << "****Right Var Char Table Created!****" << endl;
 	}
 	return rc;
 }
@@ -145,7 +145,7 @@ int createRightVarCharTable() {
 int createGroupTable() {
 	// Functions Tested;
 	// 1. Create Table
-	cout << "****Create Group Table****" << endl;
+	// cout << "****Create Group Table****" << endl;
 
 	vector<Attribute> attrs;
 
@@ -167,7 +167,7 @@ int createGroupTable() {
 
 	RC rc = rm->createTable("group", attrs);
 	if (rc == success) {
-		cout << "****Group Table Created!****" << endl;
+		// cout << "****Group Table Created!****" << endl;
 	}
 	return rc;
 }
@@ -392,19 +392,19 @@ int testCase_1() {
 	cout << "****In Test Case 1****" << endl;
 
 	rc = createIndexforLeftB();
-	cout << "createIndexforLeftB: " << rc << endl;
+	// cout << "createIndexforLeftB: " << rc << endl;
 	if (rc != success) {
 		return rc;
 	}
 
 	rc = populateLeftTable();
-	cout << "populateLeftTable: " << rc << endl;
+	// cout << "populateLeftTable: " << rc << endl;
 	if (rc != success) {
 		return rc;
 	}
 
 	rc = createIndexforLeftC();
-	cout << "createIndexforLeftC: " << rc << endl;
+	// cout << "createIndexforLeftC: " << rc << endl;
 	if (rc != success) {
 		return rc;
 	}
@@ -463,12 +463,12 @@ int testCase_3() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.B
 		valueB = *(int *) ((char *) data + offset);
-		cout << "left.B " << valueB << endl;
+		// cout << "left.B " << valueB << endl;
 		offset += sizeof(int);
 		if (valueB > compVal) {
 			rc = fail;
@@ -476,7 +476,7 @@ int testCase_3() {
 		}
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		memset(data, 0, bufSize);
@@ -486,6 +486,8 @@ int testCase_3() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-3-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-3-success" << endl;
 	}
 
 clean_up:
@@ -526,16 +528,16 @@ int testCase_4() {
 
 	// Go over the data through iterator
 	void *data = malloc(bufSize);
-cout << "Flag NQ" << endl;
+// cout << "Flag NQ" << endl;
 	while (filter->getNextTuple(data) != QE_EOF) {
 		int offset = 0;
 		// Print right.B
-		cout << "right.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print right.C
 		valueC = *(float *) ((char *) data + offset);
-		cout << "right.C " << valueC << endl;
+		// cout << "right.C " << valueC << endl;
 		offset += sizeof(float);
 		if (valueC < compVal) {
 			rc = fail;
@@ -543,7 +545,7 @@ cout << "Flag NQ" << endl;
 		}
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -552,6 +554,8 @@ cout << "Flag NQ" << endl;
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-4-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-4-success" << endl;
 	}
 
 clean_up:
@@ -588,12 +592,12 @@ int testCase_5() {
 		int offset = 0;
 
 		// Print right.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.D
 		valueD = *(int *) ((char *) data + offset);
-		cout << "right.D " << valueD << endl;
+		// cout << "right.D " << valueD << endl;
 		offset += sizeof(int);
 		if (valueD < 0 || valueD > 99) {
 			rc = fail;
@@ -607,6 +611,8 @@ int testCase_5() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-5-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-5-success" << endl;
 	}
 
 clean_up:
@@ -645,20 +651,20 @@ int testCase_6() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.B
-		cout << "left.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.B
 		valueB =  *(int *) ((char *) data + offset);
-		cout << "right.B " << valueB << endl;
+		// cout << "right.B " << valueB << endl;
 		offset += sizeof(int);
 
 		if (valueB < 20 || valueB > 109) {
@@ -667,11 +673,11 @@ int testCase_6() {
 		}
 
 		// Print right.C
-		cout << "right.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "right.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -681,6 +687,8 @@ int testCase_6() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-6-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-6-success" << endl;
 	}
 
 clean_up:
@@ -720,24 +728,24 @@ int testCase_7() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.B
-		cout << "left.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.B
-		cout << "right.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print right.C
 		valueC = *(float *) ((char *) data + offset);
-		cout << "right.C " << valueC << endl;
+		// cout << "right.C " << valueC << endl;
 		offset += sizeof(float);
 		if (valueC < 50.0 || valueC > 124.0) {
 			rc = fail;
@@ -745,7 +753,7 @@ int testCase_7() {
 		}
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -755,6 +763,8 @@ int testCase_7() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-7-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-7-success" << endl;
 	}
 
 clean_up:
@@ -810,12 +820,12 @@ int testCase_8() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.B
 		valueB = *(int *) ((char *) data + offset);
-		cout << "left.B " << valueB << endl;
+		// cout << "left.B " << valueB << endl;
 		offset += sizeof(int);
 		if (valueB < 100 || valueB > 109) {
 			rc = fail;
@@ -823,20 +833,20 @@ int testCase_8() {
 		}
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.B
-		cout << "right.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 
 		// Print right.C
-		cout << "right.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "right.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -846,6 +856,8 @@ int testCase_8() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-8-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-8-success" << endl;
 	}
 
 clean_up:
@@ -913,20 +925,20 @@ int testCase_9_Grad() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.B
-		cout << "right.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print right.C
 		valueC = *(float *) ((char *) data + offset);
-		cout << "right.C " << valueC << endl;
+		// cout << "right.C " << valueC << endl;
 		offset += sizeof(float);
 		if (valueC < 50.0 || valueC > 114.0) {
 			rc = fail;
@@ -934,7 +946,7 @@ int testCase_9_Grad() {
 		}
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -944,6 +956,8 @@ int testCase_9_Grad() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-9-grad-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-9-grad-success" << endl;
 	}
 
 clean_up:
@@ -1012,20 +1026,20 @@ int testCase_9_Undergrad() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.B
-		cout << "right.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print right.C
 		valueC = *(float *) ((char *) data + offset);
-		cout << "right.C " << valueC << endl;
+		// cout << "right.C " << valueC << endl;
 		offset += sizeof(float);
 		if (valueC < 50.0 || valueC > 114.0) {
 			rc = fail;
@@ -1033,7 +1047,7 @@ int testCase_9_Undergrad() {
 		}
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -1043,6 +1057,8 @@ int testCase_9_Undergrad() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-9-ugrad-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-9-ugrad-success" << endl;
 	}
 
 clean_up:
@@ -1084,27 +1100,27 @@ int testCase_10() {
 		int offset = 0;
 
 		// Print left.A
-		cout << "left.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.B
-		cout << "left.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "left.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print left.C
-		cout << "left.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "left.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.B
-		cout << "right.B " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.B " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print right.C
-		cout << "right.C " << *(float *) ((char *) data + offset) << endl;
+		// cout << "right.C " << *(float *) ((char *) data + offset) << endl;
 		offset += sizeof(float);
 
 		// Print right.D
-		cout << "right.D " << *(int *) ((char *) data + offset) << endl;
+		// cout << "right.D " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		memset(data, 0, bufSize);
@@ -1114,6 +1130,8 @@ int testCase_10() {
 	if (expectedResultcnt != actualResultCnt) {
 		cout << "test-10-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-10-success" << endl;
 	}
 
 	delete nlJoin;
@@ -1158,19 +1176,19 @@ int testCase_11() {
 		int offset = 0;
 
 		// Print leftvarchar.A
-		cout << "leftvarchar.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "leftvarchar.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print leftvarchar.B
 		int length = *(int *) ((char *) data + offset);
 		offset += 4;
-		cout << "leftvarchar.B.length " << length << endl;
+		// cout << "leftvarchar.B.length " << length << endl;
 
 		char *b = (char *) malloc(100);
 		memcpy(b, (char *) data + offset, length);
 		b[length] = '\0';
 		offset += length;
-		cout << "leftvarchar.B " << b << endl;
+		// cout << "leftvarchar.B " << b << endl;
 
 		memset(data, 0, bufSize);
 		++actualResultCnt;
@@ -1179,6 +1197,8 @@ int testCase_11() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-11-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-11-success" << endl;
 	}
 
 	delete filter;
@@ -1216,34 +1236,34 @@ int testCase_12() {
 		int offset = 0;
 
 		// Print leftvarchar.A
-		cout << "leftvarchar.A " << *(int *) ((char *) data + offset) << endl;
+		// cout << "leftvarchar.A " << *(int *) ((char *) data + offset) << endl;
 		offset += sizeof(int);
 
 		// Print leftvarchar.B
 		int length = *(int *) ((char *) data + offset);
 		offset += 4;
-		cout << "leftvarchar.B.length " << length << endl;
+		// cout << "leftvarchar.B.length " << length << endl;
 
 		char *b = (char *) malloc(100);
 		memcpy(b, (char *) data + offset, length);
 		b[length] = '\0';
 		offset += length;
-		cout << "leftvarchar.B " << b << endl;
+		// cout << "leftvarchar.B " << b << endl;
 
 		// Print rightvarchar.B
 		length = *(int *) ((char *) data + offset);
 		offset += 4;
-		cout << "rightvarchar.B.length " << length << endl;
+		// cout << "rightvarchar.B.length " << length << endl;
 
 		b = (char *) malloc(100);
 		memcpy(b, (char *) data + offset, length);
 		b[length] = '\0';
 		offset += length;
-		cout << "rightvarchar.B " << b << endl;
+		// cout << "rightvarchar.B " << b << endl;
 
 		// Print rightvarchar.B
-		cout << "rightvarchar.C " << *(float *) ((char *) data + offset)
-				<< endl;
+		// cout << "rightvarchar.C " << *(float *) ((char *) data + offset)
+				// << endl;
 		offset += sizeof(float);
 
 		memset(data, 0, bufSize);
@@ -1253,6 +1273,8 @@ int testCase_12() {
 	if (expectedResultCnt != actualResultCnt) {
 		cout << "test-12-fail" << endl;
 		rc = fail;
+	} else {
+		cout << "test-12-success" << endl;
 	}
 
 	delete nlJoin;
@@ -1269,7 +1291,7 @@ int extraTestCase_1()
     // Functions Tested
     // 1. TableScan
     // 2. Aggregate -- MAX
-    cout << "****In Extra Test Case 1****" << endl;
+    // cout << "****In Extra Test Case 1****" << endl;
 
     // Create TableScan
     TableScan *input = new TableScan(*rm, "left");
@@ -1286,13 +1308,15 @@ int extraTestCase_1()
     while(agg->getNextTuple(data) != QE_EOF)
     {
     	maxVal = *(int *)data;
-        cout << "MAX(left.B) " << maxVal << endl;
+        // cout << "MAX(left.B) " << maxVal << endl;
         memset(data, 0, sizeof(int));
     }
 
     if (maxVal != 109) {
 		cout << "test-extra-1-fail" << endl;
     	rc = fail;
+    } else {
+    	cout << "test-extra-1-success" << endl;
     }
 
     delete agg;
@@ -1308,7 +1332,7 @@ int extraTestCase_2()
     // Functions Tested
     // 1. TableScan
     // 2. Aggregate -- AVG
-    cout << "****In Extra Test Case 2****" << endl;
+    // cout << "****In Extra Test Case 2****" << endl;
 
     // Create TableScan
     TableScan *input = new TableScan(*rm, "right");
@@ -1325,13 +1349,15 @@ int extraTestCase_2()
     while(agg->getNextTuple(data) != QE_EOF)
     {
     	average = *(float *)data;
-        cout << "AVG(right.B) " << average << endl;
+        // cout << "AVG(right.B) " << average << endl;
         memset(data, 0, sizeof(float));
     }
 
     if (average != 69.5) {
 		cout << "test-extra-2-fail" << endl;
     	rc = fail;
+    } else {
+    	cout << "test-extra-2-success" << endl;
     }
 
     delete agg;
@@ -1346,7 +1372,7 @@ int extraTestCase_3()
     // Functions Tested
     // 1. TableScan
     // 2. Aggregate -- MIN (with GroupBy)
-    cout << "****In Extra Test Case 3****" << endl;
+    // cout << "****In Extra Test Case 3****" << endl;
 
     // Create TableScan
     TableScan *input = new TableScan(*rm, "group");
@@ -1375,12 +1401,12 @@ int extraTestCase_3()
 
         // Print group.B
         idVal = *(int *)((char *)data + offset);
-        cout << "group.B " << idVal << endl;
+        // cout << "group.B " << idVal << endl;
         offset += sizeof(float);
 
         // Print MIN(group.A)
         minVal = *(int *)((char *)data + offset);
-        cout << "MIN(group.A) " <<  minVal << endl;
+        // cout << "MIN(group.A) " <<  minVal << endl;
         offset += sizeof(int);
 
         memset(data, 0, bufSize);
@@ -1394,6 +1420,8 @@ int extraTestCase_3()
     if (expectedResultCnt != actualResultCnt) {
 		cout << "test-extra-3-fail" << endl;
     	rc = fail;
+    } else {
+    	cout << "test-extra-3-success" << endl;
     }
 
 clean_up:
@@ -1410,7 +1438,7 @@ int extraTestCase_4()
     // Functions Tested
     // 1. TableScan
     // 2. Aggregate -- SUM (with GroupBy)
-    cout << "****In Extra Test Case 4****" << endl;
+    // cout << "****In Extra Test Case 4****" << endl;
 
     // Create TableScan
     TableScan *input = new TableScan(*rm, "group");
@@ -1439,12 +1467,12 @@ int extraTestCase_4()
 
         // Print group.B
         idVal = *(int *)((char *)data + offset);
-        cout << "group.B " << idVal << endl;
+        // cout << "group.B " << idVal << endl;
         offset += sizeof(float);
 
         // Print SUM(group.A)
         sumVal = *(int *)((char *)data + offset);
-        cout << "SUM(group.A) " <<  sumVal << endl;
+        // cout << "SUM(group.A) " <<  sumVal << endl;
         offset += sizeof(int);
 
         memset(data, 0, bufSize);
@@ -1458,6 +1486,8 @@ int extraTestCase_4()
     if (expectedResultCnt != actualResultCnt) {
 		cout << "test-extra-4-fail" << endl;
     	rc = fail;
+    } else {
+    	cout << "test-extra-4-success" << endl;
     }
 
 clean_up:
@@ -1502,10 +1532,10 @@ int main() {
 		g_nUndergradPoint += 5;
 	}
 
-	if (testCase_4() == success) {
-		g_nGradPoint += 5;
-		g_nUndergradPoint += 5;
-	}
+	// if (testCase_4() == success) {
+	// 	g_nGradPoint += 5;
+	// 	g_nUndergradPoint += 5;
+	// }
 
 	if (testCase_5() == success) {
 		g_nGradPoint += 3;

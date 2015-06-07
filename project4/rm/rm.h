@@ -48,7 +48,7 @@ public:
 		return rbfm_SI.getNextRecord(rid, data);
 	}
 	int close() {
-		cout << "***" << endl;
+		// cout << "***" << endl;
 		return rbfm_SI.close();
 	}
 };

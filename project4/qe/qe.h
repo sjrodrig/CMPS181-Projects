@@ -104,7 +104,7 @@ public:
     }
 
     int getNextTuple(void *data) {
-cout << "TableScan::getNextTuple" << endl;
+// cout << "TableScan::getNextTuple" << endl;
         return iter->getNextTuple(rid, data);
     }
 
@@ -166,9 +166,9 @@ public:
     }
 
 	int getNextTuple(void *data) {
-cout << "IndexScan::getNextTuple" << endl;
+// cout << "IndexScan::getNextTuple" << endl;
 		int rc = iter->getNextEntry(rid, key);
-cout << "getNextEntry success" << endl;
+// cout << "getNextEntry success" << endl;
         if(rc == 0) {
             rc = rm.readTuple(tableName.c_str(), rid, data);
         }
