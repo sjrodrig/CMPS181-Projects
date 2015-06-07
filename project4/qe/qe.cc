@@ -228,7 +228,20 @@ Tools::checkCondition(vector<Attribute>* attributes, void* data, const Condition
 			result = compareValues(lhsValue_real, condition.op, rhsValue);
 			break;
 		case TypeVarChar:
-			result = compareValues((char*) lhsValue + VARCHAR_LENGTH_SIZE, condition.op, (char*) rhsValue + VARCHAR_LENGTH_SIZE);
+			// Get left-hand side string
+			unsigned lhsValue_string_length = getStringLength(lhsValue);
+			char* lhsValue_string = (char*) malloc(lhsValue_string_length + 1);
+			memcpy(lhsValue_string, (char*) lhsValue + VARCHAR_LENGTH_SIZE, lhsValue_string_length);
+			lhsValue_string[lhsValue_string_length] = '\0';
+			// Get right-hand side string
+			unsigned rhsValue_string_length = getStringLength(rhsValue);
+			char* rhsValue_string = (char*) malloc(rhsValue_string_length + 1);
+			memcpy(rhsValue_string, (char*) rhsValue + VARCHAR_LENGTH_SIZE, rhsValue_string_length);
+			rhsValue_string[rhsValue_string_length] = '\0';
+			
+			result = compareValues(lhsValue_string, condition.op, rhsValue_string);
+			free(lhsValue_string);
+			free(rhsValue_string);
 			break;
 	}
 
